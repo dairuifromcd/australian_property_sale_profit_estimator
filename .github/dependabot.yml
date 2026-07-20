@@ -10,10 +10,34 @@ updates:
       timezone: Australia/Brisbane
     open-pull-requests-limit: 5
     groups:
+      react-runtime:
+        patterns:
+          - react
+          - react-dom
+          - react-server-dom-webpack
+        update-types:
+          - minor
+          - patch
       production-dependencies:
         dependency-type: production
+        update-types:
+          - minor
+          - patch
       development-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # Major toolchain upgrades need an explicit compatibility review.
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+      # vinext is pre-1.0, so even minor releases can contain breaking changes.
+      - dependency-name: vinext
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
