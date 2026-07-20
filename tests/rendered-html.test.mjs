@@ -38,6 +38,8 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Know what you could really make when you sell\./);
   assert.match(html, /Start with four numbers/);
   assert.match(html, /Expected sale price/);
+  assert.match(html, /Eligible selling costs/);
+  assert.match(html, /Sale preparation costs/);
   assert.match(html, /Estimate CGT/);
   assert.match(html, /Calculations stay on this device/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);

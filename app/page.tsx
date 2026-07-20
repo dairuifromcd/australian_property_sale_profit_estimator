@@ -13,6 +13,7 @@ type InputState = Omit<
   | "purchasePrice"
   | "commissionRate"
   | "otherSellingCosts"
+  | "salePreparationCosts"
   | "purchaseCosts"
   | "capitalImprovements"
   | "ownershipShare"
@@ -25,6 +26,7 @@ type InputState = Omit<
   purchasePrice: string;
   commissionRate: string;
   otherSellingCosts: string;
+  salePreparationCosts: string;
   purchaseCosts: string;
   capitalImprovements: string;
   ownershipShare: string;
@@ -39,10 +41,12 @@ const INITIAL_INPUTS: InputState = {
   purchasePrice: "",
   commissionRate: "",
   otherSellingCosts: "",
+  salePreparationCosts: "",
   purchaseCosts: "",
   capitalImprovements: "",
   estimateTax: false,
   propertyUse: "main-residence",
+  mainResidenceExemptionConfirmed: false,
   purchaseDate: "",
   saleDate: "",
   ownershipShare: "100",
@@ -70,6 +74,7 @@ function AmountField({
   onChange,
   placeholder,
   help,
+  error,
   required = false,
 }: {
   id: string;
@@ -78,9 +83,12 @@ function AmountField({
   onChange: (value: string) => void;
   placeholder: string;
   help?: React.ReactNode;
+  error?: string;
   required?: boolean;
 }) {
   const helpId = help ? `${id}-help` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [helpId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <label className="field" htmlFor={id}>
@@ -88,7 +96,7 @@ function AmountField({
         {label}
         {required ? <span className="required">Required</span> : null}
       </span>
-      <span className="money-input">
+      <span className={`money-input ${error ? "field-control-error" : ""}`}>
         <span aria-hidden="true">$</span>
         <input
           id={id}
@@ -99,7 +107,8 @@ function AmountField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          aria-describedby={helpId}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
           required={required}
         />
         <span className="currency" aria-hidden="true">
@@ -109,6 +118,11 @@ function AmountField({
       {help ? (
         <span className="field-help" id={helpId}>
           {help}
+        </span>
+      ) : null}
+      {error ? (
+        <span className="field-error" id={errorId}>
+          {error}
         </span>
       ) : null}
     </label>
@@ -122,6 +136,8 @@ function PercentageField({
   onChange,
   placeholder,
   help,
+  error,
+  max = 100,
 }: {
   id: string;
   label: string;
@@ -129,30 +145,40 @@ function PercentageField({
   onChange: (value: string) => void;
   placeholder: string;
   help?: string;
+  error?: string;
+  max?: number;
 }) {
   const helpId = help ? `${id}-help` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [helpId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <label className="field" htmlFor={id}>
       <span className="field-label">{label}</span>
-      <span className="percent-input">
+      <span className={`percent-input ${error ? "field-control-error" : ""}`}>
         <input
           id={id}
           type="number"
           min="0"
-          max="100"
+          max={max}
           step="0.1"
           inputMode="decimal"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          aria-describedby={helpId}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
         />
         <span aria-hidden="true">%</span>
       </span>
       {help ? (
         <span className="field-help" id={helpId}>
           {help}
+        </span>
+      ) : null}
+      {error ? (
+        <span className="field-error" id={errorId}>
+          {error}
         </span>
       ) : null}
     </label>
@@ -197,6 +223,7 @@ export default function Home() {
         purchasePrice: numberFrom(inputs.purchasePrice),
         commissionRate: numberFrom(inputs.commissionRate),
         otherSellingCosts: numberFrom(inputs.otherSellingCosts),
+        salePreparationCosts: numberFrom(inputs.salePreparationCosts),
         purchaseCosts: numberFrom(inputs.purchaseCosts),
         capitalImprovements: numberFrom(inputs.capitalImprovements),
         ownershipShare: numberFrom(inputs.ownershipShare),
@@ -214,6 +241,10 @@ export default function Home() {
       ? "Adjusted estimate"
       : "Quick estimate";
   const profitTone = result.preTaxPropertyProfit < 0 ? "loss" : "gain";
+  const errorFor = (field: keyof CalculatorInput) =>
+    result.validationErrors.find((error) => error.field === field)?.message;
+  const canShowEstimate =
+    result.hasCoreInputs && !result.hasCalculationErrors;
 
   return (
     <main>
@@ -266,6 +297,7 @@ export default function Home() {
               value={inputs.salePrice}
               onChange={(value) => update("salePrice", value)}
               placeholder="1,050,000"
+              error={errorFor("salePrice")}
               required
               help={
                 <>
@@ -295,6 +327,7 @@ export default function Home() {
               value={inputs.purchasePrice}
               onChange={(value) => update("purchasePrice", value)}
               placeholder="650,000"
+              error={errorFor("purchasePrice")}
               required
             />
             <PercentageField
@@ -303,15 +336,18 @@ export default function Home() {
               value={inputs.commissionRate}
               onChange={(value) => update("commissionRate", value)}
               placeholder="2.2"
+              max={99.9}
+              error={errorFor("commissionRate")}
               help="Use the GST-inclusive rate from your agent quote."
             />
             <AmountField
               id="other-selling-costs"
-              label="Other selling costs"
+              label="Eligible selling costs"
               value={inputs.otherSellingCosts}
               onChange={(value) => update("otherSellingCosts", value)}
               placeholder="8,500"
-              help="Marketing, conveyancing, styling and other sale costs."
+              error={errorFor("otherSellingCosts")}
+              help="Advertising, conveyancing, legal and other sale costs you expect to include in the CGT cost base."
             />
           </div>
 
@@ -319,17 +355,27 @@ export default function Home() {
             <summary>
               <span>
                 <strong>Improve this estimate</strong>
-                <small>Add buying costs and capital improvements</small>
+                <small>Add sale preparation, buying costs and improvements</small>
               </span>
               <span className="summary-action">Add detail</span>
             </summary>
             <div className="details-content field-grid">
+              <AmountField
+                id="sale-preparation-costs"
+                label="Sale preparation costs"
+                value={inputs.salePreparationCosts}
+                onChange={(value) => update("salePreparationCosts", value)}
+                placeholder="4,000"
+                error={errorFor("salePreparationCosts")}
+                help="Styling, cleaning and non-capital repairs. Included in cash profit, not the derived CGT cost base."
+              />
               <AmountField
                 id="purchase-costs"
                 label="Purchase costs"
                 value={inputs.purchaseCosts}
                 onChange={(value) => update("purchaseCosts", value)}
                 placeholder="32,000"
+                error={errorFor("purchaseCosts")}
                 help="Stamp duty, conveyancing and eligible acquisition costs."
               />
               <AmountField
@@ -338,6 +384,7 @@ export default function Home() {
                 value={inputs.capitalImprovements}
                 onChange={(value) => update("capitalImprovements", value)}
                 placeholder="25,000"
+                error={errorFor("capitalImprovements")}
                 help="Renovations or improvements, excluding routine repairs."
               />
             </div>
@@ -376,12 +423,17 @@ export default function Home() {
                     <select
                       id="property-use"
                       value={inputs.propertyUse}
-                      onChange={(event) =>
-                        update("propertyUse", event.target.value as PropertyUse)
-                      }
+                      onChange={(event) => {
+                        const propertyUse = event.target.value as PropertyUse;
+                        setInputs((current) => ({
+                          ...current,
+                          propertyUse,
+                          mainResidenceExemptionConfirmed: false,
+                        }));
+                      }}
                     >
                       <option value="main-residence">
-                        Main residence — assuming full exemption
+                        Main residence — check full exemption
                       </option>
                       <option value="investment">Investment property</option>
                       <option value="mixed">Mixed use / partial exemption</option>
@@ -395,10 +447,23 @@ export default function Home() {
                         id="purchase-date"
                         type="date"
                         value={inputs.purchaseDate}
+                        aria-describedby={
+                          errorFor("purchaseDate")
+                            ? "purchase-date-error"
+                            : undefined
+                        }
+                        aria-invalid={
+                          errorFor("purchaseDate") ? true : undefined
+                        }
                         onChange={(event) =>
                           update("purchaseDate", event.target.value)
                         }
                       />
+                      {errorFor("purchaseDate") ? (
+                        <span className="field-error" id="purchase-date-error">
+                          {errorFor("purchaseDate")}
+                        </span>
+                      ) : null}
                     </label>
                     <label className="field" htmlFor="sale-date">
                       <span className="field-label">Expected sale contract date</span>
@@ -407,10 +472,19 @@ export default function Home() {
                         type="date"
                         value={inputs.saleDate}
                         min={inputs.purchaseDate || undefined}
+                        aria-describedby={
+                          errorFor("saleDate") ? "sale-date-error" : undefined
+                        }
+                        aria-invalid={errorFor("saleDate") ? true : undefined}
                         onChange={(event) =>
                           update("saleDate", event.target.value)
                         }
                       />
+                      {errorFor("saleDate") ? (
+                        <span className="field-error" id="sale-date-error">
+                          {errorFor("saleDate")}
+                        </span>
+                      ) : null}
                     </label>
                     <PercentageField
                       id="ownership-share"
@@ -418,6 +492,7 @@ export default function Home() {
                       value={inputs.ownershipShare}
                       onChange={(value) => update("ownershipShare", value)}
                       placeholder="100"
+                      error={errorFor("ownershipShare")}
                     />
                     {inputs.propertyUse !== "main-residence" ? (
                       <PercentageField
@@ -426,6 +501,7 @@ export default function Home() {
                         value={inputs.marginalTaxRate}
                         onChange={(value) => update("marginalTaxRate", value)}
                         placeholder="37"
+                        error={errorFor("marginalTaxRate")}
                         help="Include Medicare levy if it applies to you."
                       />
                     ) : null}
@@ -438,10 +514,54 @@ export default function Home() {
                           update("mixedTaxablePercentage", value)
                         }
                         placeholder="40"
+                        max={99.9}
+                        error={errorFor("mixedTaxablePercentage")}
                         help="Use a proportion reviewed by your tax adviser."
                       />
                     ) : null}
                   </div>
+
+                  {inputs.propertyUse === "main-residence" ? (
+                    <div className="eligibility-confirmation">
+                      <label
+                        className="check-row"
+                        htmlFor="main-residence-confirmed"
+                      >
+                        <input
+                          id="main-residence-confirmed"
+                          type="checkbox"
+                          checked={inputs.mainResidenceExemptionConfirmed}
+                          onChange={(event) =>
+                            update(
+                              "mainResidenceExemptionConfirmed",
+                              event.target.checked,
+                            )
+                          }
+                        />
+                        <span>
+                          <strong>
+                            I believe the full main residence exemption applies
+                          </strong>
+                          <small>
+                            Confirm only after checking residence periods,
+                            income-producing use, absence choices and your tax
+                            residency at sale.
+                          </small>
+                        </span>
+                      </label>
+                      <p>
+                        Unsure? Leave this unchecked and review the{" "}
+                        <a
+                          href="https://www.ato.gov.au/individuals-and-families/investments-and-assets/capital-gains-tax/property-and-capital-gains-tax/your-main-residence---home"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          ATO main residence guidance
+                        </a>
+                        .
+                      </p>
+                    </div>
+                  ) : null}
 
                   <details className="advanced-tax">
                     <summary>Advanced tax details</summary>
@@ -454,6 +574,7 @@ export default function Home() {
                           update("capitalWorksDeductions", value)
                         }
                         placeholder="0"
+                        error={errorFor("capitalWorksDeductions")}
                         help="Deductions claimed or claimable that reduce cost base."
                       />
                       <AmountField
@@ -464,6 +585,7 @@ export default function Home() {
                           update("atoCostBaseOverride", value)
                         }
                         placeholder={Math.round(result.derivedCostBase).toString()}
+                        error={errorFor("atoCostBaseOverride")}
                         help="Use a reviewed figure for mixed-use or special cases."
                       />
                     </div>
@@ -486,6 +608,12 @@ export default function Home() {
               <h2>Your estimate will appear here</h2>
               <p>Add an expected sale price and original purchase price.</p>
             </div>
+          ) : result.hasCalculationErrors ? (
+            <div className="empty-result invalid-result">
+              <span className="empty-number">!</span>
+              <h2>Check the highlighted fields</h2>
+              <p>Fix the entered values before using this estimate.</p>
+            </div>
           ) : (
             <>
               <div className={`primary-result ${profitTone}`}>
@@ -507,10 +635,17 @@ export default function Home() {
                   subtract
                 />
                 <ResultRow
-                  label="Other selling costs"
+                  label="Eligible selling costs"
                   value={numberFrom(inputs.otherSellingCosts)}
                   subtract
                 />
+                {numberFrom(inputs.salePreparationCosts) > 0 ? (
+                  <ResultRow
+                    label="Sale preparation costs"
+                    value={numberFrom(inputs.salePreparationCosts)}
+                    subtract
+                  />
+                ) : null}
                 <div className="result-divider" />
                 <ResultRow
                   label="Sale proceeds after selling costs"
@@ -554,7 +689,7 @@ export default function Home() {
             className="print-button no-print"
             type="button"
             onClick={() => window.print()}
-            disabled={!result.hasCoreInputs}
+            disabled={!canShowEstimate}
           >
             Print or save as PDF
           </button>
@@ -654,11 +789,32 @@ function TaxResult({
     );
   }
 
+  if (status === "invalid-input") {
+    return (
+      <div className="tax-message warning">
+        <strong>Tax estimate needs correction</strong>
+        <p>Fix the highlighted tax fields before using this scenario.</p>
+      </div>
+    );
+  }
+
+  if (status === "main-residence-unconfirmed") {
+    return (
+      <div className="tax-message warning">
+        <strong>Full exemption not confirmed</strong>
+        <p>
+          No $0 CGT estimate is shown until you confirm that the full main
+          residence exemption applies.
+        </p>
+      </div>
+    );
+  }
+
   if (status === "assumed-exempt") {
     return (
       <div className="tax-message success">
         <strong>Estimated CGT: {aud.format(0)}</strong>
-        <p>Based on your selection of a fully exempt main residence.</p>
+        <p>Based on your confirmation of a fully exempt main residence.</p>
       </div>
     );
   }

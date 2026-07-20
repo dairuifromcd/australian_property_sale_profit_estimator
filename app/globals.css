@@ -288,6 +288,14 @@ main {
   box-shadow: 0 0 0 3px rgba(47, 120, 104, 0.13);
 }
 
+.money-input.field-control-error,
+.percent-input.field-control-error,
+.field > input[aria-invalid="true"],
+.field select[aria-invalid="true"] {
+  border-color: var(--loss);
+  box-shadow: 0 0 0 3px rgba(164, 63, 53, 0.1);
+}
+
 .money-input input,
 .percent-input input {
   width: 100%;
@@ -336,6 +344,13 @@ main {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.field-error {
+  color: var(--loss);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
 }
 
 .details-block {
@@ -417,6 +432,16 @@ main {
   margin-top: 22px;
 }
 
+.eligibility-confirmation {
+  margin-top: 22px;
+}
+
+.eligibility-confirmation > p {
+  margin: 9px 4px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .advanced-tax {
   margin-top: 24px;
   padding-top: 18px;
@@ -488,6 +513,11 @@ main {
 
 .empty-result p {
   margin: 0;
+}
+
+.invalid-result .empty-number,
+.invalid-result h2 {
+  color: #ffb8ae;
 }
 
 .primary-result {

@@ -11,19 +11,21 @@ scenario.
 ## Why this exists
 
 Sale price minus purchase price is not the same as profit. Agent commission,
-other selling costs, buying costs, capital improvements, property use, and tax
-treatment can materially change the result. SaleProfit AU makes those moving
-parts visible while keeping the first estimate to four inputs.
+CGT-eligible selling costs, sale preparation, buying costs, capital
+improvements, property use, and tax treatment can materially change the result.
+SaleProfit AU makes those moving parts visible while keeping the first estimate
+to four inputs.
 
 ## Current features
 
 - Live estimate from expected sale price, purchase price, agent commission, and
-  other selling costs
-- Optional purchase costs and capital improvements
+  CGT-eligible selling costs
+- Optional sale preparation costs, purchase costs, and capital improvements
 - Net sale proceeds, pre-tax economic profit, return on cost, and break-even
   sale price
 - Optional simplified CGT scenario for Australian resident individuals
 - Main-residence, investment, and mixed-use scenarios
+- Explicit main-residence exemption confirmation and invalid-input feedback
 - Print or save the result as a PDF
 - Responsive, accessible single-page interface
 - No account, database, analytics, or server-side storage of calculator inputs
@@ -33,13 +35,27 @@ parts visible while keeping the first estimate to four inputs.
 At a high level:
 
 ```text
-net sale proceeds = sale price - agent commission - other selling costs
+net sale proceeds = sale price
+                  - agent commission
+                  - CGT-eligible selling costs
+                  - sale preparation costs
 
 pre-tax profit = net sale proceeds
                - purchase price
                - purchase costs
                - capital improvements
+
+derived CGT cost base = purchase price
+                      + purchase costs
+                      + capital improvements
+                      + agent commission
+                      + CGT-eligible selling costs
+                      - capital works deductions
 ```
+
+Sale preparation costs such as styling, cleaning, and non-capital repairs affect
+the cash-profit estimate but are not automatically included in the derived CGT
+cost base. A reviewed ATO cost base can be supplied for special cases.
 
 The calculator intentionally separates economic profit from settlement cash.
 Mortgage balances, loan interest, rates, insurance, maintenance, rental income,
@@ -47,7 +63,11 @@ depreciation, and other holding cash flows are not included in this version.
 
 The optional tax result is indicative only. It is not a tax return calculation
 and does not cover companies, trusts, SMSFs, foreign-residency rules, capital
-losses, complex cost-base adjustments, or tax calculations from 1 July 2027.
+losses, complex cost-base adjustments, or tax calculations from 1 July 2027. A
+$0 main-residence estimate is shown only after the user confirms that they have
+checked the full-exemption conditions. The 12-month discount starts on the day
+after the acquisition-date anniversary, consistent with the ATO rule that both
+the acquisition date and CGT event date are excluded.
 
 ## Privacy
 
