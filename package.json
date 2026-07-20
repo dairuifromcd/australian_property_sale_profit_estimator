@@ -1,7 +1,16 @@
 {
   "name": "saleprofit-au",
   "version": "0.1.0",
+  "description": "An Australia-focused property sale profit estimator.",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dairuifromcd/australian_property_sale_profit_estimator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dairuifromcd/australian_property_sale_profit_estimator/issues"
+  },
+  "homepage": "https://github.com/dairuifromcd/australian_property_sale_profit_estimator#readme",
   "engines": {
     "node": ">=22.13.0"
   },
