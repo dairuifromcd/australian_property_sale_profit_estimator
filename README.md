@@ -87,6 +87,7 @@ sites remain ordinary outbound links.
 - Cloudflare Workers-compatible build output
 - Node.js 22.13 or newer
 - Node's built-in test runner
+- Playwright browser tests
 
 ## Run locally
 
@@ -104,11 +105,14 @@ Open `http://localhost:3000`.
 ```bash
 npm run lint
 npm test
+npm run test:e2e
 ```
 
 `npm test` creates a production build and then runs the calculation and rendered
-HTML tests. GitHub Actions runs the same checks for pushes and pull requests to
-`main`.
+HTML tests. `npm run test:e2e` starts the application and runs the critical form,
+tax, loss-state, reset, and mobile-overflow scenarios in Chromium. Install the
+browser once with `npx playwright install chromium`. GitHub Actions runs all of
+these checks for pushes and pull requests to `main`.
 
 ## Deploy to Cloudflare Workers
 
@@ -146,6 +150,8 @@ app/calculator.ts          pure calculation logic
 app/globals.css            responsive visual design
 tests/calculator.test.ts   calculation scenarios
 tests/rendered-html.test.mjs
+tests/e2e/                 Playwright browser scenarios
+playwright.config.ts       browser test configuration
 public/                    social and README images
 wrangler.jsonc             Cloudflare Worker and Preview URL configuration
 ```

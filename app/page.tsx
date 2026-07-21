@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculateEstimate,
   type CalculatorInput,
@@ -211,6 +211,14 @@ function ResultRow({
 
 export default function Home() {
   const [inputs, setInputs] = useState<InputState>(INITIAL_INPUTS);
+
+  useEffect(() => {
+    document.documentElement.dataset.clientReady = "true";
+
+    return () => {
+      delete document.documentElement.dataset.clientReady;
+    };
+  }, []);
 
   const update = <Key extends keyof InputState>(
     key: Key,
