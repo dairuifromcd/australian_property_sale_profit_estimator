@@ -650,7 +650,16 @@ export default function Home() {
           ) : (
             <>
               <div className={`primary-result ${profitTone}`}>
-                <span>Whole-property pre-tax profit</span>
+                <div className="primary-result-heading">
+                  <span>
+                    {profitTone === "loss"
+                      ? "Whole-property pre-tax loss"
+                      : "Whole-property pre-tax profit"}
+                  </span>
+                  <span className={`outcome-status ${profitTone}`}>
+                    {profitTone === "loss" ? "LOSS" : "PROFIT"}
+                  </span>
+                </div>
                 <strong>{aud.format(result.preTaxPropertyProfit)}</strong>
                 <small>
                   Before ownership split. Excludes loan balance and historical
@@ -852,7 +861,7 @@ function TaxResult({
   if (status === "assumed-exempt") {
     return (
       <div className="tax-message success">
-        <strong>Indicative tax on the gain: {aud.format(0)}</strong>
+        <strong>Indicative tax under this exemption: {aud.format(0)}</strong>
         <p>Based on your confirmation of a fully exempt main residence.</p>
         {afterTaxProfit !== null ? (
           <AfterTaxResult value={afterTaxProfit} />
@@ -886,7 +895,14 @@ function TaxResult({
           ? "Held beyond the 12-month threshold — 50% CGT discount applied"
           : "12-month holding threshold not met — no 50% CGT discount applied"}
       </div>
-      <ResultRow label="Your share of pre-tax profit" value={preTaxProfit} />
+      <ResultRow
+        label={
+          preTaxProfit < 0
+            ? "Your share of pre-tax loss"
+            : "Your share of pre-tax profit"
+        }
+        value={preTaxProfit}
+      />
       <ResultRow
         label="Estimated taxable capital gain"
         value={taxableCapitalGain ?? 0}
@@ -902,9 +918,20 @@ function TaxResult({
 }
 
 function AfterTaxResult({ value }: { value: number }) {
+  const outcome = value < 0 ? "loss" : "gain";
+
   return (
-    <div className={`after-tax-result ${value < 0 ? "loss" : ""}`}>
-      <span>Your share after indicative tax</span>
+    <div className={`after-tax-result ${outcome}`}>
+      <div className="after-tax-heading">
+        <span>
+          {outcome === "loss"
+            ? "Your estimated after-tax loss"
+            : "Your estimated after-tax profit"}
+        </span>
+        <span className={`outcome-status ${outcome}`}>
+          {outcome === "loss" ? "LOSS" : "PROFIT"}
+        </span>
+      </div>
       <strong>{aud.format(value)}</strong>
     </div>
   );

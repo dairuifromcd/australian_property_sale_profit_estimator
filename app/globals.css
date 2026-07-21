@@ -526,10 +526,41 @@ main {
   gap: 7px;
 }
 
-.primary-result > span {
+.primary-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.primary-result-heading > span:first-child {
   color: #c3d4ce;
   font-size: 13px;
   font-weight: 700;
+}
+
+.outcome-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: #f5faf8;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1;
+}
+
+.outcome-status.loss {
+  background: rgba(255, 184, 174, 0.12);
+}
+
+.outcome-status.gain {
+  background: rgba(169, 222, 201, 0.12);
 }
 
 .primary-result > strong {
@@ -649,7 +680,14 @@ main {
   border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.after-tax-result span {
+.after-tax-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.after-tax-heading > span:first-child {
   color: #b7cac3;
   font-size: 12px;
 }
