@@ -106,6 +106,34 @@ npm test
 HTML tests. GitHub Actions runs the same checks for pushes and pull requests to
 `main`.
 
+## Deploy to Cloudflare Workers
+
+The repository is configured for a Worker named `property-profit-au`. Connect
+this GitHub repository with Cloudflare Workers Builds and use the following
+settings:
+
+| Setting | Value |
+| --- | --- |
+| Worker name | `property-profit-au` |
+| Production branch | `main` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Non-production branch deploy command | `npx wrangler versions upload` |
+| Root directory | Repository root (leave blank) |
+
+Under **Settings > Build > Branch control**, enable builds for non-production
+branches. A push to `main` then updates the production Worker at
+`property-profit-au.<your-subdomain>.workers.dev`. A push to any other branch
+uploads a new Worker version with a public Preview URL without promoting it to
+production.
+
+Preview URLs and the `workers.dev` route are explicitly enabled in
+`wrangler.jsonc`. No Cloudflare password, API token, account ID, or GitHub token
+belongs in the repository; Workers Builds creates and manages its deployment
+token when the repository is connected. For an optional manual deployment,
+authenticate locally with `npx wrangler login`, then run `npm run build` and
+`npm run deploy`.
+
 ## Project structure
 
 ```text
@@ -115,7 +143,7 @@ app/globals.css            responsive visual design
 tests/calculator.test.ts   calculation scenarios
 tests/rendered-html.test.mjs
 public/                    social and README images
-worker/                    Cloudflare-compatible entry point
+wrangler.jsonc             Cloudflare Worker and Preview URL configuration
 ```
 
 ## Contributing
