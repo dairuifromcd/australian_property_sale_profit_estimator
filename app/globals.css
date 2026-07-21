@@ -623,9 +623,22 @@ main {
 }
 
 .tax-discount {
-  margin-bottom: 14px;
-  padding-left: 0;
-  color: #9fcabb;
+  margin-bottom: 16px;
+  padding: 9px 11px;
+  border: 1px solid rgba(96, 184, 151, 0.24);
+  border-radius: 10px;
+  background: rgba(96, 184, 151, 0.14);
+  color: #c8f0df;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.tax-discount.warning {
+  border-color: rgba(245, 178, 95, 0.24);
+  background: rgba(245, 178, 95, 0.14);
+  color: #ffe1b5;
 }
 
 .after-tax-result {

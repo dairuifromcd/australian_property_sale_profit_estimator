@@ -4,6 +4,10 @@ import {
   calculateEstimate,
   type CalculatorInput,
 } from "../app/calculator.ts";
+import {
+  formatAmountInput,
+  numberFromInput,
+} from "../app/input-format.ts";
 
 function input(overrides: Partial<CalculatorInput> = {}): CalculatorInput {
   return {
@@ -27,6 +31,15 @@ function input(overrides: Partial<CalculatorInput> = {}): CalculatorInput {
     ...overrides,
   };
 }
+
+test("formats monetary input with grouping separators", () => {
+  assert.equal(formatAmountInput("650000"), "650,000");
+  assert.equal(formatAmountInput("1,234,567.89"), "1,234,567.89");
+  assert.equal(formatAmountInput("$ 004200"), "4,200");
+  assert.equal(formatAmountInput("-1200"), "-1,200");
+  assert.equal(numberFromInput("650,000"), 650_000);
+  assert.equal(numberFromInput("-1,200.50"), -1_200.5);
+});
 
 test("calculates quick and adjusted property profit", () => {
   const result = calculateEstimate(input());

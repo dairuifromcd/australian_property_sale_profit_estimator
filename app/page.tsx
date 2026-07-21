@@ -6,6 +6,7 @@ import {
   type CalculatorInput,
   type PropertyUse,
 } from "./calculator";
+import { formatAmountInput, numberFromInput } from "./input-format";
 
 type InputState = Omit<
   CalculatorInput,
@@ -63,8 +64,7 @@ const aud = new Intl.NumberFormat("en-AU", {
 });
 
 function numberFrom(value: string): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return numberFromInput(value);
 }
 
 function AmountField({
@@ -100,12 +100,10 @@ function AmountField({
         <span aria-hidden="true">$</span>
         <input
           id={id}
-          type="number"
-          min="0"
-          step="100"
+          type="text"
           inputMode="decimal"
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => onChange(formatAmountInput(event.target.value))}
           placeholder={placeholder}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
@@ -879,10 +877,14 @@ function TaxResult({
 
   return (
     <div className="tax-result">
-      <div className="tax-discount">
+      <div
+        className={`tax-discount ${
+          heldAtLeastTwelveMonths ? "success" : "warning"
+        }`}
+      >
         {heldAtLeastTwelveMonths
-          ? "50% CGT discount applied"
-          : "No 12-month CGT discount applied"}
+          ? "Held beyond the 12-month threshold — 50% CGT discount applied"
+          : "12-month holding threshold not met — no 50% CGT discount applied"}
       </div>
       <ResultRow label="Your share of pre-tax profit" value={preTaxProfit} />
       <ResultRow

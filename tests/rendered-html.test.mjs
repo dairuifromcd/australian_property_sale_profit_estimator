@@ -48,6 +48,7 @@ test("server-renders the property sale calculator", async () => {
   );
   assert.match(html, /id="commission-rate"[^>]*required/);
   assert.match(html, /id="other-selling-costs"[^>]*required/);
+  assert.match(html, /id="sale-price"[^>]*type="text"/);
   assert.match(html, /Calculations stay on this device/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
@@ -60,6 +61,7 @@ test("removes disposable starter preview code and metadata", async () => {
   ]);
 
   assert.doesNotMatch(page, /SkeletonPreview|codex-preview/);
+  assert.match(page, /Held beyond the 12-month threshold/);
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
