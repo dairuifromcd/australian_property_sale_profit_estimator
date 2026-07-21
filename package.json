@@ -21,7 +21,7 @@
     "deploy": "wrangler deploy",
     "deploy:preview": "wrangler versions upload",
     "test": "npm run build && node --experimental-strip-types --test tests/calculator.test.ts tests/rendered-html.test.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build && playwright test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler",
     "db:generate": "drizzle-kit generate"
   },
