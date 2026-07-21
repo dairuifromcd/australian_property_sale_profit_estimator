@@ -40,7 +40,14 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Expected sale price/);
   assert.match(html, /Eligible selling costs/);
   assert.match(html, /Sale preparation costs/);
-  assert.match(html, /Estimate CGT/);
+  assert.match(html, /Estimate tax on the capital gain/);
+  assert.match(html, /Complete the four quick inputs/);
+  assert.match(
+    html,
+    /Enter 0 if commission or eligible selling costs do not apply\./,
+  );
+  assert.match(html, /id="commission-rate"[^>]*required/);
+  assert.match(html, /id="other-selling-costs"[^>]*required/);
   assert.match(html, /Calculations stay on this device/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

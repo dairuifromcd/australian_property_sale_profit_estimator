@@ -648,6 +648,10 @@ main {
   font-weight: 500;
 }
 
+.after-tax-result.loss strong {
+  color: #ffb8ae;
+}
+
 .print-button {
   width: 100%;
   min-height: 48px;

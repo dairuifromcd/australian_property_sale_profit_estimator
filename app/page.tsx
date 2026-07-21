@@ -138,6 +138,7 @@ function PercentageField({
   help,
   error,
   max = 100,
+  required = false,
 }: {
   id: string;
   label: string;
@@ -147,6 +148,7 @@ function PercentageField({
   help?: string;
   error?: string;
   max?: number;
+  required?: boolean;
 }) {
   const helpId = help ? `${id}-help` : undefined;
   const errorId = error ? `${id}-error` : undefined;
@@ -154,7 +156,10 @@ function PercentageField({
 
   return (
     <label className="field" htmlFor={id}>
-      <span className="field-label">{label}</span>
+      <span className="field-label">
+        {label}
+        {required ? <span className="required">Required</span> : null}
+      </span>
       <span className={`percent-input ${error ? "field-control-error" : ""}`}>
         <input
           id={id}
@@ -168,6 +173,7 @@ function PercentageField({
           placeholder={placeholder}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
+          required={required}
         />
         <span aria-hidden="true">%</span>
       </span>
@@ -241,10 +247,35 @@ export default function Home() {
       ? "Adjusted estimate"
       : "Quick estimate";
   const profitTone = result.preTaxPropertyProfit < 0 ? "loss" : "gain";
-  const errorFor = (field: keyof CalculatorInput) =>
-    result.validationErrors.find((error) => error.field === field)?.message;
+  const errorFor = (field: keyof CalculatorInput) => {
+    const validationError = result.validationErrors.find(
+      (error) => error.field === field,
+    )?.message;
+    if (validationError) return validationError;
+
+    if (
+      (field === "salePrice" &&
+        inputs.salePrice !== "" &&
+        numberFrom(inputs.salePrice) <= 0) ||
+      (field === "purchasePrice" &&
+        inputs.purchasePrice !== "" &&
+        numberFrom(inputs.purchasePrice) <= 0)
+    ) {
+      return "Enter an amount greater than zero.";
+    }
+
+    return undefined;
+  };
+  const hasAllQuickInputs =
+    inputs.salePrice !== "" &&
+    inputs.purchasePrice !== "" &&
+    inputs.commissionRate !== "" &&
+    inputs.otherSellingCosts !== "";
+  const hasQuickInputErrors =
+    result.hasCalculationErrors ||
+    (hasAllQuickInputs && !result.hasCoreInputs);
   const canShowEstimate =
-    result.hasCoreInputs && !result.hasCalculationErrors;
+    hasAllQuickInputs && !hasQuickInputErrors;
 
   return (
     <main>
@@ -338,7 +369,8 @@ export default function Home() {
               placeholder="2.2"
               max={99.9}
               error={errorFor("commissionRate")}
-              help="Use the GST-inclusive rate from your agent quote."
+              help="Use the GST-inclusive rate from your agent quote. Enter 0 only if no commission applies."
+              required
             />
             <AmountField
               id="other-selling-costs"
@@ -347,7 +379,8 @@ export default function Home() {
               onChange={(value) => update("otherSellingCosts", value)}
               placeholder="8,500"
               error={errorFor("otherSellingCosts")}
-              help="Advertising, conveyancing, legal and other sale costs you expect to include in the CGT cost base."
+              help="Advertising, conveyancing, legal and other sale costs you expect to include in the CGT cost base. Enter 0 if none apply."
+              required
             />
           </div>
 
@@ -393,7 +426,7 @@ export default function Home() {
           <details className="details-block tax-block">
             <summary>
               <span>
-                <strong>Estimate CGT</strong>
+                <strong>Estimate tax on the capital gain</strong>
                 <small>Optional scenario for Australian resident individuals</small>
               </span>
               <span className="summary-action">Tax scenario</span>
@@ -497,12 +530,12 @@ export default function Home() {
                     {inputs.propertyUse !== "main-residence" ? (
                       <PercentageField
                         id="marginal-tax-rate"
-                        label="Estimated marginal tax rate"
+                        label="Assumed tax rate on the taxable gain"
                         value={inputs.marginalTaxRate}
                         onChange={(value) => update("marginalTaxRate", value)}
                         placeholder="37"
                         error={errorFor("marginalTaxRate")}
-                        help="Include Medicare levy if it applies to you."
+                        help="Capital gains form part of your income tax. Use an approximate rate including Medicare levy if applicable; this does not model tax brackets or offsets."
                       />
                     ) : null}
                     {inputs.propertyUse === "mixed" ? (
@@ -602,13 +635,15 @@ export default function Home() {
             <span className="result-privacy">On-device</span>
           </div>
 
-          {!result.hasCoreInputs ? (
+          {!hasAllQuickInputs ? (
             <div className="empty-result">
               <span className="empty-number">$—</span>
-              <h2>Your estimate will appear here</h2>
-              <p>Add an expected sale price and original purchase price.</p>
+              <h2>Complete the four quick inputs</h2>
+              <p>
+                Enter 0 if commission or eligible selling costs do not apply.
+              </p>
             </div>
-          ) : result.hasCalculationErrors ? (
+          ) : hasQuickInputErrors ? (
             <div className="empty-result invalid-result">
               <span className="empty-number">!</span>
               <h2>Check the highlighted fields</h2>
@@ -617,10 +652,11 @@ export default function Home() {
           ) : (
             <>
               <div className={`primary-result ${profitTone}`}>
-                <span>Preliminary pre-tax profit</span>
+                <span>Whole-property pre-tax profit</span>
                 <strong>{aud.format(result.preTaxPropertyProfit)}</strong>
                 <small>
-                  Excludes loan balance and historical holding cash flows.
+                  Before ownership split. Excludes loan balance and historical
+                  holding cash flows.
                 </small>
               </div>
 
@@ -678,6 +714,7 @@ export default function Home() {
                   status={result.taxStatus}
                   taxableCapitalGain={result.taxableCapitalGain}
                   estimatedCgt={result.estimatedCgt}
+                  preTaxProfit={result.userPreTaxProfit}
                   afterTaxProfit={result.userAfterTaxProfit}
                   heldAtLeastTwelveMonths={result.heldAtLeastTwelveMonths}
                 />
@@ -735,13 +772,15 @@ export default function Home() {
         <div>
           <strong>Important limitations</strong>
           <p>
-            For Australian resident individuals only. Special CGT rules,
-            capital losses, foreign residency, trusts, companies, SMSFs and
-            post-1 July 2027 tax calculations are outside this first version.
+            For Australian resident individuals only. The tax figure applies
+            one assumed rate and does not calculate tax brackets or total
+            income tax. Special CGT rules, capital losses, foreign residency,
+            trusts, companies, SMSFs and post-1 July 2027 tax calculations are
+            outside this first version.
           </p>
         </div>
         <div className="footer-meta">
-          <span>Tax rules reviewed 18 July 2026</span>
+          <span>Tax rules reviewed 21 July 2026</span>
           <a
             href="https://www.ato.gov.au/individuals-and-families/investments-and-assets/capital-gains-tax/property-and-capital-gains-tax"
             target="_blank"
@@ -759,12 +798,14 @@ function TaxResult({
   status,
   taxableCapitalGain,
   estimatedCgt,
+  preTaxProfit,
   afterTaxProfit,
   heldAtLeastTwelveMonths,
 }: {
   status: ReturnType<typeof calculateEstimate>["taxStatus"];
   taxableCapitalGain: number | null;
   estimatedCgt: number | null;
+  preTaxProfit: number;
   afterTaxProfit: number | null;
   heldAtLeastTwelveMonths: boolean;
 }) {
@@ -784,7 +825,7 @@ function TaxResult({
     return (
       <div className="tax-message">
         <strong>Complete the tax scenario</strong>
-        <p>Add both contract dates and, when relevant, a marginal tax rate.</p>
+        <p>Add both contract dates and, when relevant, an assumed tax rate.</p>
       </div>
     );
   }
@@ -813,8 +854,11 @@ function TaxResult({
   if (status === "assumed-exempt") {
     return (
       <div className="tax-message success">
-        <strong>Estimated CGT: {aud.format(0)}</strong>
+        <strong>Indicative tax on the gain: {aud.format(0)}</strong>
         <p>Based on your confirmation of a fully exempt main residence.</p>
+        {afterTaxProfit !== null ? (
+          <AfterTaxResult value={afterTaxProfit} />
+        ) : null}
       </div>
     );
   }
@@ -822,8 +866,11 @@ function TaxResult({
   if (status === "capital-loss") {
     return (
       <div className="tax-message">
-        <strong>No CGT estimated on this property</strong>
+        <strong>No positive capital gain estimated</strong>
         <p>The entered tax cost base is greater than the expected sale price.</p>
+        {afterTaxProfit !== null ? (
+          <AfterTaxResult value={afterTaxProfit} />
+        ) : null}
       </div>
     );
   }
@@ -837,15 +884,26 @@ function TaxResult({
           ? "50% CGT discount applied"
           : "No 12-month CGT discount applied"}
       </div>
+      <ResultRow label="Your share of pre-tax profit" value={preTaxProfit} />
       <ResultRow
         label="Estimated taxable capital gain"
         value={taxableCapitalGain ?? 0}
       />
-      <ResultRow label="Estimated CGT" value={estimatedCgt ?? 0} subtract />
-      <div className="after-tax-result">
-        <span>Your estimated profit after tax</span>
-        <strong>{aud.format(afterTaxProfit ?? 0)}</strong>
-      </div>
+      <ResultRow
+        label="Indicative tax on the capital gain"
+        value={estimatedCgt ?? 0}
+        subtract
+      />
+      <AfterTaxResult value={afterTaxProfit ?? 0} />
+    </div>
+  );
+}
+
+function AfterTaxResult({ value }: { value: number }) {
+  return (
+    <div className={`after-tax-result ${value < 0 ? "loss" : ""}`}>
+      <span>Your share after indicative tax</span>
+      <strong>{aud.format(value)}</strong>
     </div>
   );
 }

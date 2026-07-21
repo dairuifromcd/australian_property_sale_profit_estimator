@@ -23,7 +23,8 @@ to four inputs.
 - Optional sale preparation costs, purchase costs, and capital improvements
 - Net sale proceeds, pre-tax economic profit, return on cost, and break-even
   sale price
-- Optional simplified CGT scenario for Australian resident individuals
+- Optional single-rate tax scenario for the capital gain of an Australian
+  resident individual
 - Main-residence, investment, and mixed-use scenarios
 - Explicit main-residence exemption confirmation and invalid-input feedback
 - Print or save the result as a PDF
@@ -61,13 +62,16 @@ The calculator intentionally separates economic profit from settlement cash.
 Mortgage balances, loan interest, rates, insurance, maintenance, rental income,
 depreciation, and other holding cash flows are not included in this version.
 
-The optional tax result is indicative only. It is not a tax return calculation
-and does not cover companies, trusts, SMSFs, foreign-residency rules, capital
-losses, complex cost-base adjustments, or tax calculations from 1 July 2027. A
-$0 main-residence estimate is shown only after the user confirms that they have
-checked the full-exemption conditions. The 12-month discount starts on the day
-after the acquisition-date anniversary, consistent with the ATO rule that both
-the acquisition date and CGT event date are excluded.
+The optional tax result is indicative only. Capital gains form part of income
+tax rather than a separate tax, and this calculator applies one assumed rate to
+the estimated taxable gain instead of modelling tax brackets, offsets or the
+user's full tax return. It does not cover companies, trusts, SMSFs,
+foreign-residency rules, capital losses, complex cost-base adjustments, or tax
+calculations from 1 July 2027. A $0 main-residence estimate is shown only after
+the user confirms that they have checked the full-exemption conditions. The
+12-month discount starts on the day after the acquisition-date anniversary,
+consistent with the ATO rule that both the acquisition date and CGT event date
+are excluded.
 
 ## Privacy
 

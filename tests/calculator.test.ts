@@ -63,6 +63,8 @@ test("applies ownership and mixed-use percentages", () => {
 
   assert.equal(result.taxableCapitalGain, 32_000);
   assert.equal(result.estimatedCgt, 11_840);
+  assert.equal(result.preTaxPropertyProfit, 320_000);
+  assert.equal(result.userPreTaxProfit, 160_000);
   assert.equal(result.userAfterTaxProfit, 148_160);
 });
 
