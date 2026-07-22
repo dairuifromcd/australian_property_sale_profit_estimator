@@ -1,4 +1,4 @@
-# SaleProfit AU
+# Property Sale Profit
 
 [![CI](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/workflows/ci.yml/badge.svg)](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/workflows/ci.yml)
 
@@ -9,15 +9,15 @@ scenario.
 The hosted site is currently a public beta. Search indexing is disabled while
 the calculator, model documentation, and compliance material are being reviewed.
 
-![SaleProfit AU calculator preview](public/readme-screenshot.jpg)
+![Property Sale Profit calculator preview](public/readme-screenshot.jpg)
 
 ## Why this exists
 
 Sale price minus purchase price is not the same as profit. Agent commission,
 CGT-eligible selling costs, sale preparation, buying costs, capital
 improvements, property use, and tax treatment can materially change the result.
-SaleProfit AU makes those moving parts visible while keeping the first estimate
-to four inputs.
+Property Sale Profit makes those moving parts visible while keeping the first
+estimate to four inputs.
 
 ## Current features
 
@@ -176,7 +176,7 @@ short-lived branch such as `feat/settlement-cash` for each change. See
 
 ## Disclaimer
 
-SaleProfit AU provides indicative estimates for exploration and education. It
+Property Sale Profit provides indicative estimates for exploration and education. It
 does not provide financial, legal, property valuation, settlement, or tax
 advice. Confirm material decisions with appropriately qualified Australian
 professionals.

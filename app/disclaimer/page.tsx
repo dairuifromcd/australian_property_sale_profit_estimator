@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Important Information | SaleProfit AU",
-  description: "Important limitations of the SaleProfit AU calculator.",
+  title: "Important Information | Property Sale Profit",
+  description: "Important limitations of the Property Sale Profit calculator.",
 };
 
 export default function DisclaimerPage() {
@@ -11,11 +11,15 @@ export default function DisclaimerPage() {
         <span>This calculator is under active development.</span>
       </aside>
       <header className="site-header">
-        <Link className="brand" href="/" aria-label="SaleProfit AU home">
+        <Link
+          className="brand"
+          href="/"
+          aria-label="Property Sale Profit home"
+        >
           <span className="brand-mark" aria-hidden="true">
-            S
+            P
           </span>
-          <span>SaleProfit AU</span>
+          <span>Property Sale Profit</span>
         </Link>
         <nav className="header-nav" aria-label="Privacy and legal information">
           <Link className="header-link" href="/privacy">
@@ -28,7 +32,7 @@ export default function DisclaimerPage() {
         <span className="eyebrow">Important information</span>
         <h1>Use this estimate as a starting point only</h1>
         <p className="legal-intro">
-          SaleProfit AU is a free, general information tool. It is not a
+          Property Sale Profit is a free, general information tool. It is not a
           substitute for advice that considers your circumstances.
         </p>
 

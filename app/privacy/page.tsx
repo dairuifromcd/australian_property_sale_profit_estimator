@@ -1,6 +1,7 @@
 export const metadata = {
-  title: "Privacy | SaleProfit AU",
-  description: "How SaleProfit AU handles calculator inputs and technical data.",
+  title: "Privacy | Property Sale Profit",
+  description:
+    "How Property Sale Profit handles calculator inputs and technical data.",
 };
 
 export default function PrivacyPage() {
@@ -11,11 +12,15 @@ export default function PrivacyPage() {
         <span>This privacy notice applies to the current beta release.</span>
       </aside>
       <header className="site-header">
-        <Link className="brand" href="/" aria-label="SaleProfit AU home">
+        <Link
+          className="brand"
+          href="/"
+          aria-label="Property Sale Profit home"
+        >
           <span className="brand-mark" aria-hidden="true">
-            S
+            P
           </span>
-          <span>SaleProfit AU</span>
+          <span>Property Sale Profit</span>
         </Link>
         <nav className="header-nav" aria-label="Privacy and legal information">
           <Link className="header-link" href="/disclaimer">

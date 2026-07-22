@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve SaleProfit AU. Changes should keep the calculator
+Thanks for helping improve Property Sale Profit. Changes should keep the calculator
 easy to understand, privacy-preserving, and explicit about uncertainty.
 
 ## Workflow

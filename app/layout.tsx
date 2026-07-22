@@ -3,10 +3,10 @@ import { headers } from "next/headers";
 import "./globals.css";
 
 const baseMetadata: Metadata = {
-  title: "SaleProfit AU | Australian Property Sale Profit Estimator",
+  title: "Property Sale Profit | Australian Property Sale Profit Estimator",
   description:
     "Estimate your Australian property sale proceeds, selling costs, pre-tax profit and an optional indicative CGT scenario—privately in your browser.",
-  applicationName: "SaleProfit AU",
+  applicationName: "Property Sale Profit",
   keywords: [
     "Australian property sale profit calculator",
     "property selling costs Australia",
@@ -21,7 +21,7 @@ const baseMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SaleProfit AU",
+    title: "Property Sale Profit",
     description:
       "Estimate sale proceeds and property profit with only the detail you need.",
   },

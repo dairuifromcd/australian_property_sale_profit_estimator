@@ -4,6 +4,12 @@ test("labels the site as a beta and avoids certainty claims", async ({ page }) =
   await page.goto("/");
 
   await expect(
+    page.getByRole("link", { name: "Property Sale Profit home" }),
+  ).toBeVisible();
+  await expect(page).toHaveTitle(
+    "Property Sale Profit | Australian Property Sale Profit Estimator",
+  );
+  await expect(
     page.getByLabel("Public beta notice").getByText("Public beta", {
       exact: true,
     }),
@@ -118,6 +124,9 @@ test("legal pages remain readable without horizontal overflow on mobile", async 
 
   for (const path of ["/privacy", "/disclaimer"]) {
     await page.goto(path);
+    await expect(
+      page.getByRole("link", { name: "Property Sale Profit home" }),
+    ).toBeVisible();
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
     );

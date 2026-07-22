@@ -33,7 +33,7 @@ test("server-renders the property sale calculator", async () => {
   const html = await response.text();
   assert.match(
     html,
-    /<title>SaleProfit AU \| Australian Property Sale Profit Estimator<\/title>/i,
+    /<title>Property Sale Profit \| Australian Property Sale Profit Estimator<\/title>/i,
   );
   assert.match(html, /Estimate what you might make when you sell\./);
   assert.doesNotMatch(html, /Know what you could really make/i);

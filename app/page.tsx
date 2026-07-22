@@ -296,11 +296,11 @@ export default function Home() {
       </aside>
 
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="SaleProfit AU home">
+        <a className="brand" href="#top" aria-label="Property Sale Profit home">
           <span className="brand-mark" aria-hidden="true">
-            S
+            P
           </span>
-          <span>SaleProfit AU</span>
+          <span>Property Sale Profit</span>
         </a>
         <nav className="header-nav" aria-label="Privacy and legal information">
           <Link className="header-link" href="/privacy">
