@@ -24,8 +24,7 @@ estimate to four inputs.
 - Live estimate from expected sale price, purchase price, agent commission, and
   CGT-eligible selling costs
 - Optional sale preparation costs, purchase costs, and capital improvements
-- Net sale proceeds, pre-tax economic profit, return on cost, and break-even
-  sale price
+- Net sale proceeds, pre-tax economic profit, and break-even sale price
 - Optional single-rate tax scenario for the capital gain of an Australian
   resident individual
 - Main-residence, investment, and mixed-use scenarios
@@ -66,6 +65,10 @@ cost base. A reviewed ATO cost base can be supplied for special cases.
 The calculator intentionally separates economic profit from settlement cash.
 Mortgage balances, loan interest, rates, insurance, maintenance, rental income,
 depreciation, and other holding cash flows are not included in this version.
+
+See the [calculation scenario coverage matrix](docs/calculation-scenarios.md) for
+the supported scenarios, formulas, automated test mappings, and explicit model
+boundaries.
 
 The optional tax result is indicative only. Capital gains form part of income
 tax rather than a separate tax, and this calculator applies one assumed rate to
