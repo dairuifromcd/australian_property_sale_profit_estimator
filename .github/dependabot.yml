@@ -20,11 +20,16 @@ updates:
           - patch
       production-dependencies:
         dependency-type: production
+        exclude-patterns:
+          - react
+          - react-dom
         update-types:
           - minor
           - patch
       development-dependencies:
         dependency-type: development
+        exclude-patterns:
+          - react-server-dom-webpack
         update-types:
           - minor
           - patch
