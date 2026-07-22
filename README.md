@@ -6,6 +6,9 @@ An Australia-focused, browser-only calculator for estimating property sale
 proceeds, pre-tax profit, break-even price, and a deliberately simplified CGT
 scenario.
 
+The hosted site is currently a public beta. Search indexing is disabled while
+the calculator, model documentation, and compliance material are being reviewed.
+
 ![SaleProfit AU calculator preview](public/readme-screenshot.jpg)
 
 ## Why this exists
@@ -28,8 +31,10 @@ to four inputs.
 - Main-residence, investment, and mixed-use scenarios
 - Explicit main-residence exemption confirmation and invalid-input feedback
 - Print or save the result as a PDF
-- Responsive, accessible single-page interface
+- Responsive, accessible single-page calculator interface
 - No account, database, analytics, or server-side storage of calculator inputs
+- Public beta notice, privacy notice, material limitations, and government
+  non-affiliation disclosure
 
 ## Calculation model
 
@@ -77,7 +82,10 @@ are excluded.
 
 Calculator inputs stay in the browser. The application does not currently send
 them to a database or external valuation service. Links to third-party property
-sites remain ordinary outbound links.
+sites remain ordinary outbound links. Cloudflare may process ordinary technical
+request metadata such as IP addresses, browser information, requested URLs, and
+security signals to host and protect the site; calculator entries are not placed
+in those URLs. See the in-app privacy notice for the full current disclosure.
 
 ## Technology
 
@@ -110,9 +118,10 @@ npm run test:e2e
 
 `npm test` creates a production build and then runs the calculation and rendered
 HTML tests. `npm run test:e2e` starts the application and runs the critical form,
-tax, loss-state, reset, and mobile-overflow scenarios in Chromium. Install the
-browser once with `npx playwright install chromium`. GitHub Actions runs all of
-these checks for pushes and pull requests to `main`.
+tax, loss-state, reset, compliance disclosure, input-privacy, and mobile-overflow
+scenarios in Chromium. Install the browser once with
+`npx playwright install chromium`. GitHub Actions runs all of these checks for
+pushes and pull requests to `main`.
 
 ## Deploy to Cloudflare Workers
 
@@ -131,16 +140,17 @@ settings:
 
 Under **Settings > Build > Branch control**, enable builds for non-production
 branches. A push to `main` then updates the production Worker at
-`property-profit-au.<your-subdomain>.workers.dev`. A push to any other branch
-uploads a new Worker version with a public Preview URL without promoting it to
-production.
+`property-profit-au.<your-subdomain>.workers.dev` and the custom production
+domain at `https://propertysaleprofit.au`. A push to any other branch uploads a
+new Worker version with a Preview URL without promoting it to production.
 
 Preview URLs and the `workers.dev` route are explicitly enabled in
-`wrangler.jsonc`. No Cloudflare password, API token, account ID, or GitHub token
-belongs in the repository; Workers Builds creates and manages its deployment
-token when the repository is connected. For an optional manual deployment,
-authenticate locally with `npx wrangler login`, then run `npm run build` and
-`npm run deploy`.
+`wrangler.jsonc`. During development, protect Preview URLs with Cloudflare
+Access and keep search indexing disabled. No Cloudflare password, API token,
+account ID, or GitHub token belongs in the repository; Workers Builds creates
+and manages its deployment token when the repository is connected. For an
+optional manual deployment, authenticate locally with `npx wrangler login`,
+then run `npm run build` and `npm run deploy`.
 
 ## Project structure
 
@@ -148,6 +158,8 @@ authenticate locally with `npx wrangler login`, then run `npm run build` and
 app/page.tsx               calculator interface
 app/calculator.ts          pure calculation logic
 app/globals.css            responsive visual design
+app/privacy/               privacy notice
+app/disclaimer/            scope, limitations, and non-affiliation notice
 tests/calculator.test.ts   calculation scenarios
 tests/rendered-html.test.mjs
 tests/e2e/                 Playwright browser scenarios

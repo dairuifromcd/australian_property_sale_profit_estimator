@@ -13,7 +13,7 @@ const baseMetadata: Metadata = {
     "capital gains tax estimate property",
   ],
   openGraph: {
-    title: "Know what you could really make when you sell.",
+    title: "Estimate what you might make when you sell.",
     description:
       "A private, Australia-focused property sale profit estimator.",
     type: "website",
@@ -24,6 +24,10 @@ const baseMetadata: Metadata = {
     title: "SaleProfit AU",
     description:
       "Estimate sale proceeds and property profit with only the detail you need.",
+  },
+  robots: {
+    index: false,
+    follow: false,
   },
 };
 

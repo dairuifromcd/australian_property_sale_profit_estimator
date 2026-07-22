@@ -35,7 +35,14 @@ test("server-renders the property sale calculator", async () => {
     html,
     /<title>SaleProfit AU \| Australian Property Sale Profit Estimator<\/title>/i,
   );
-  assert.match(html, /Know what you could really make when you sell\./);
+  assert.match(html, /Estimate what you might make when you sell\./);
+  assert.doesNotMatch(html, /Know what you could really make/i);
+  assert.match(html, /Public beta/);
+  assert.match(html, /under active development/i);
+  assert.match(
+    html,
+    /<meta[^>]+name="robots"[^>]+content="noindex, nofollow"/i,
+  );
   assert.match(html, /Start with four numbers/);
   assert.match(html, /Expected sale price/);
   assert.match(html, /Eligible selling costs/);
@@ -50,6 +57,9 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /id="other-selling-costs"[^>]*required/);
   assert.match(html, /id="sale-price"[^>]*type="text"/);
   assert.match(html, /Calculations stay on this device/);
+  assert.match(html, /href="\/privacy"/);
+  assert.match(html, /href="\/disclaimer"/);
+  assert.match(html, /not affiliated with or endorsed by the ATO/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 

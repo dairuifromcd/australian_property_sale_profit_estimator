@@ -71,6 +71,31 @@ main {
   min-height: 100vh;
 }
 
+.beta-banner {
+  min-height: 42px;
+  padding: 10px max(24px, calc((100% - 1180px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e5c28e;
+  background: var(--amber-soft);
+  color: #6f3a0c;
+  font-size: 13px;
+  text-align: center;
+}
+
+.beta-banner strong {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.beta-banner a {
+  color: inherit;
+  font-weight: 750;
+}
+
 .site-header {
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
@@ -108,6 +133,13 @@ main {
   color: var(--ink-soft);
   font-size: 14px;
   font-weight: 650;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
 }
 
 .hero {
@@ -804,6 +836,69 @@ footer p {
   font-size: 11px;
 }
 
+.footer-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legal-page {
+  width: min(820px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 72px 0 96px;
+}
+
+.legal-page h1 {
+  margin: 12px 0 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.legal-intro {
+  max-width: 720px;
+  margin: 0 0 44px;
+  color: var(--ink-soft);
+  font-size: 18px;
+}
+
+.legal-section {
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+}
+
+.legal-section h2 {
+  margin: 0 0 10px;
+  font-size: 21px;
+}
+
+.legal-section p,
+.legal-section li {
+  color: var(--ink-soft);
+}
+
+.legal-section p {
+  margin: 10px 0 0;
+}
+
+.legal-section ul {
+  margin: 12px 0 0;
+  padding-left: 22px;
+}
+
+.legal-section li + li {
+  margin-top: 8px;
+}
+
+.legal-updated {
+  margin-top: 34px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 @media (max-width: 920px) {
   .calculator-shell {
     grid-template-columns: 1fr;
@@ -833,6 +928,11 @@ footer p {
 
   .header-link {
     font-size: 12px;
+  }
+
+  .header-nav {
+    gap: 10px;
+    text-align: right;
   }
 
   .hero {
@@ -888,6 +988,15 @@ footer p {
     grid-column: auto;
     flex-direction: column;
   }
+
+  .footer-links {
+    justify-content: flex-start;
+  }
+
+  .legal-page {
+    width: min(100% - 28px, 820px);
+    padding: 54px 0 72px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -909,6 +1018,7 @@ footer p {
   }
 
   .site-header,
+  .beta-banner,
   .hero,
   .form-panel,
   .explanation,

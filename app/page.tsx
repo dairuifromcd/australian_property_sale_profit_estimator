@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   calculateEstimate,
   type CalculatorInput,
@@ -285,6 +286,15 @@ export default function Home() {
 
   return (
     <main>
+      <aside className="beta-banner" aria-label="Public beta notice">
+        <strong>Public beta</strong>
+        <span>
+          This calculator is under active development. Use its estimates for
+          exploration only.
+        </span>
+        <Link href="/disclaimer">Read important information</Link>
+      </aside>
+
       <header className="site-header">
         <a className="brand" href="#top" aria-label="SaleProfit AU home">
           <span className="brand-mark" aria-hidden="true">
@@ -292,14 +302,19 @@ export default function Home() {
           </span>
           <span>SaleProfit AU</span>
         </a>
-        <a className="header-link" href="#privacy">
-          How your data is handled
-        </a>
+        <nav className="header-nav" aria-label="Privacy and legal information">
+          <Link className="header-link" href="/privacy">
+            Privacy
+          </Link>
+          <Link className="header-link" href="/disclaimer">
+            Important information
+          </Link>
+        </nav>
       </header>
 
       <section className="hero" id="top">
         <div className="eyebrow">Australian property sale calculator</div>
-        <h1>Know what you could really make when you sell.</h1>
+        <h1>Estimate what you might make when you sell.</h1>
         <p className="hero-copy">
           Start with four numbers. See your estimated sale proceeds and
           pre-tax profit, then add detail only when you need it.
@@ -450,7 +465,8 @@ export default function Home() {
                 <span>
                   <strong>Include an indicative CGT estimate</strong>
                   <small>
-                    This is a simplified scenario, not personal tax advice.
+                    This is a general, simplified scenario—not individual tax
+                    advice or a tax return calculation.
                   </small>
                 </span>
               </label>
@@ -746,8 +762,9 @@ export default function Home() {
             Print or save as PDF
           </button>
           <p className="result-note">
-            Indicative estimate only. Confirm selling costs and tax treatment
-            with qualified professionals before making a decision.
+            Indicative estimate only. Do not rely on it alone. Confirm selling
+            costs and tax treatment with qualified professionals before making
+            a decision.
           </p>
         </aside>
       </section>
@@ -780,8 +797,9 @@ export default function Home() {
         <div>
           <strong>Private by design</strong>
           <p>
-            Your figures are calculated in this browser. They are not saved,
-            attached to the external valuation links or included in analytics.
+            Your figures are calculated in this browser and are not sent to or
+            saved by this application. Cloudflare may process ordinary request
+            metadata needed to deliver and protect the site.
           </p>
         </div>
         <div>
@@ -795,14 +813,21 @@ export default function Home() {
           </p>
         </div>
         <div className="footer-meta">
-          <span>Tax rules reviewed 21 July 2026</span>
-          <a
-            href="https://www.ato.gov.au/individuals-and-families/investments-and-assets/capital-gains-tax/property-and-capital-gains-tax"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Review ATO guidance
-          </a>
+          <span>
+            Independent public beta · Not affiliated with or endorsed by the
+            ATO or another government agency
+          </span>
+          <span className="footer-links">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/disclaimer">Disclaimer</Link>
+            <a
+              href="https://www.ato.gov.au/individuals-and-families/investments-and-assets/capital-gains-tax/property-and-capital-gains-tax"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Review ATO guidance
+            </a>
+          </span>
         </div>
       </footer>
     </main>
