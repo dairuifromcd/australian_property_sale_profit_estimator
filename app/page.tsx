@@ -907,7 +907,11 @@ function TaxResult({
     return (
       <div className="tax-message">
         <strong>No positive capital gain estimated</strong>
-        <p>The entered tax cost base is greater than the expected sale price.</p>
+        <p>
+          The entered tax cost base is greater than the expected sale price.
+          This calculator does not apply the loss against other capital gains
+          or carry it forward.
+        </p>
         {afterTaxProfit !== null ? (
           <AfterTaxResult value={afterTaxProfit} />
         ) : null}

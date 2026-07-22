@@ -53,17 +53,30 @@ export default function DisclaimerPage() {
           <ul>
             <li>Results depend entirely on the figures and assumptions entered.</li>
             <li>
-              Profit excludes loan balances and historical holding cash flows
-              unless they are expressly represented by an input.
+              Sale proceeds are not an estimate of cash received at settlement.
+              They exclude mortgage balances, loan discharge amounts and other
+              settlement adjustments.
+            </li>
+            <li>
+              Profit excludes historical holding cash flows such as interest,
+              rates, insurance, maintenance, rent and depreciation.
             </li>
             <li>
               The optional tax scenario uses one assumed tax rate; it does not
-              model tax brackets, offsets or a complete income tax return.
+              model tax brackets, offsets, the Medicare levy, other income,
+              other capital gains, prior capital losses or a complete income
+              tax return.
             </li>
             <li>
               Foreign residency, trusts, companies, SMSFs, capital losses,
               complex exemptions and special cost-base rules are outside its
               supported scope.
+            </li>
+            <li>
+              Mixed-use and partial-exemption scenarios rely on a percentage or
+              cost base entered by the user. The calculator does not determine
+              residence periods, income-producing use, absence choices or
+              valuations.
             </li>
             <li>
               Tax estimates for contracts on or after 1 July 2027 are paused

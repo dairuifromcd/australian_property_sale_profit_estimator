@@ -21,6 +21,7 @@
     "deploy": "wrangler deploy",
     "deploy:preview": "wrangler versions upload",
     "test": "npm run build && node --experimental-strip-types --test tests/calculator.test.ts tests/rendered-html.test.mjs",
+    "test:coverage": "node --experimental-strip-types --experimental-test-coverage --test-coverage-include=app/calculator.ts --test-coverage-include=app/input-format.ts --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 --test tests/calculator.test.ts",
     "test:e2e": "npm run build && playwright test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler",
     "db:generate": "drizzle-kit generate"
