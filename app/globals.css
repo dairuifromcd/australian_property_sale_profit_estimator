@@ -71,7 +71,7 @@ main {
   min-height: 100vh;
 }
 
-.beta-banner {
+.scope-banner {
   min-height: 42px;
   padding: 10px max(24px, calc((100% - 1180px) / 2));
   display: flex;
@@ -86,12 +86,12 @@ main {
   text-align: center;
 }
 
-.beta-banner strong {
+.scope-banner strong {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.beta-banner a {
+.scope-banner a {
   color: inherit;
   font-weight: 750;
 }
@@ -890,7 +890,7 @@ footer p {
   }
 
   .site-header,
-  .beta-banner,
+  .scope-banner,
   .hero,
   .form-panel,
   .explanation,

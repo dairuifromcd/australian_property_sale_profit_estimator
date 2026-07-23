@@ -38,8 +38,12 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Estimate your sale proceeds and transaction result\./);
   assert.doesNotMatch(html, /Important information\s+Important information/);
   assert.doesNotMatch(html, /Know what you could really make/i);
-  assert.match(html, /Public beta/);
-  assert.match(html, /under active development/i);
+  assert.match(html, /Indicative estimate/);
+  assert.match(
+    html,
+    /Based only on the costs you enter\. Excludes holding costs, debt and tax\./,
+  );
+  assert.doesNotMatch(html, /Public beta|under active development/i);
   assert.match(
     html,
     /<meta[^>]+name="robots"[^>]+content="noindex, nofollow"/i,

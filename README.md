@@ -6,8 +6,8 @@ An Australia-focused, browser-only calculator for estimating property selling
 costs, proceeds before debt and tax, transaction profit before holding costs,
 debt and tax, and a break-even sale price for the transaction costs entered.
 
-The hosted site is currently a public beta. Search indexing is disabled while
-the calculator, model documentation and compliance material are reviewed.
+The hosted site is the first public MVP. Search indexing remains disabled
+during the initial production rollout.
 
 ## Why this exists
 
@@ -28,7 +28,7 @@ the first estimate to four inputs.
 - Print or save the result as a PDF
 - Responsive, accessible single-page calculator interface
 - No account, database, advertising analytics or server-side storage of inputs
-- Public beta notice, privacy notice, material limitations and government
+- Persistent estimate-scope notice, privacy notice, material limitations and government
   non-affiliation disclosure
 
 The public calculator does not calculate capital gains tax, income tax, taxable

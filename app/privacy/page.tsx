@@ -9,9 +9,12 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <main>
-      <aside className="beta-banner" aria-label="Public beta notice">
-        <strong>Public beta</strong>
-        <span>This privacy notice applies to the current beta release.</span>
+      <aside className="scope-banner" aria-label="Estimate scope notice">
+        <strong>Indicative estimate</strong>
+        <span>
+          Based only on the costs you enter. Excludes holding costs, debt and
+          tax.
+        </span>
       </aside>
       <header className="site-header">
         <Link

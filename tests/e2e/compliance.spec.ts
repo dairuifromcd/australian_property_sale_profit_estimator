@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("labels the site as a beta and avoids certainty claims", async ({ page }) => {
+test("labels the estimate scope and avoids certainty claims", async ({ page }) => {
   await page.goto("/");
 
   await expect(
@@ -10,9 +10,15 @@ test("labels the site as a beta and avoids certainty claims", async ({ page }) =
     "Property Sale Profit | Australian Property Sale Profit Estimator",
   );
   await expect(
-    page.getByLabel("Public beta notice").getByText("Public beta", {
+    page.getByLabel("Estimate scope notice").getByText("Indicative estimate", {
       exact: true,
     }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Estimate scope notice").getByText(
+      "Based only on the costs you enter. Excludes holding costs, debt and tax.",
+      { exact: true },
+    ),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {

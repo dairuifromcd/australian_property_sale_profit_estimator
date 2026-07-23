@@ -236,11 +236,11 @@ export default function Home() {
 
   return (
     <main>
-      <aside className="beta-banner" aria-label="Public beta notice">
-        <strong>Public beta</strong>
+      <aside className="scope-banner" aria-label="Estimate scope notice">
+        <strong>Indicative estimate</strong>
         <span>
-          This calculator is under active development. Use its estimates for
-          exploration only.
+          Based only on the costs you enter. Excludes holding costs, debt and
+          tax.
         </span>
         <Link href="/disclaimer">Read important information</Link>
       </aside>
@@ -554,8 +554,8 @@ export default function Home() {
         </div>
         <div className="footer-meta">
           <span>
-            Independent public beta · Not affiliated with or endorsed by the
-            ATO or another government agency
+            Independent calculator · Not affiliated with or endorsed by the ATO
+            or another government agency
           </span>
           <span className="footer-links">
             <Link href="/privacy">Privacy</Link>
