@@ -421,13 +421,16 @@ main {
   font-weight: 760;
 }
 
-.details-block[open] .summary-action {
-  font-size: 0;
+.summary-action-open {
+  display: none;
 }
 
-.details-block[open] .summary-action::after {
-  font-size: 12px;
-  content: "Hide";
+.details-block[open] .summary-action-closed {
+  display: none;
+}
+
+.details-block[open] .summary-action-open {
+  display: inline;
 }
 
 .details-content {
@@ -631,8 +634,8 @@ main {
 
 .result-note {
   margin: 14px 0 0;
-  font-size: 10.5px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .explanation {
@@ -834,6 +837,10 @@ footer p {
 
   .details-block > summary {
     align-items: flex-start;
+  }
+
+  .empty-result {
+    min-height: 280px;
   }
 
   .explanation {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { calculateEstimate, type CalculatorInput } from "./calculator";
 import { formatAmountInput, numberFromInput } from "./input-format";
@@ -179,6 +179,7 @@ function ResultRow({
 
 export default function Home() {
   const [inputs, setInputs] = useState<InputState>(INITIAL_INPUTS);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     document.documentElement.dataset.clientReady = "true";
@@ -193,6 +194,11 @@ export default function Home() {
     value: InputState[Key],
   ) => {
     setInputs((current) => ({ ...current, [key]: value }));
+  };
+
+  const resetCalculator = () => {
+    setInputs(INITIAL_INPUTS);
+    detailsRef.current?.removeAttribute("open");
   };
 
   const result = useMemo(
@@ -287,7 +293,7 @@ export default function Home() {
             <button
               className="text-button no-print"
               type="button"
-              onClick={() => setInputs(INITIAL_INPUTS)}
+              onClick={resetCalculator}
             >
               Reset
             </button>
@@ -356,13 +362,16 @@ export default function Home() {
             />
           </div>
 
-          <details className="details-block">
+          <details className="details-block" ref={detailsRef}>
             <summary>
               <span>
                 <strong>Improve this estimate</strong>
                 <small>Add sale preparation, buying costs and improvements</small>
               </span>
-              <span className="summary-action">Add detail</span>
+              <span className="summary-action">
+                <span className="summary-action-closed">Add details</span>
+                <span className="summary-action-open">Hide details</span>
+              </span>
             </summary>
             <div className="details-content field-grid">
               <AmountField

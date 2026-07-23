@@ -156,6 +156,26 @@ test("applies optional costs to transaction profit and entered-cost break-even",
   await expect(results).toContainText("$688,776");
 });
 
+test("supports keyboard access to optional details with clear state text", async ({
+  page,
+}) => {
+  const details = page.locator(".details-block");
+  const summary = details.locator("summary");
+
+  await summary.focus();
+  await page.keyboard.press("Enter");
+
+  await expect(details).toHaveAttribute("open", "");
+  await expect(page.getByText("Hide details", { exact: true })).toBeVisible();
+  await expect(page.locator("#purchase-costs")).toBeVisible();
+
+  await page.keyboard.press("Enter");
+
+  await expect(details).not.toHaveAttribute("open", "");
+  await expect(page.getByText("Add details", { exact: true })).toBeVisible();
+  await expect(page.locator("#purchase-costs")).not.toBeVisible();
+});
+
 test("does not expose a tax calculation path", async ({ page }) => {
   await expect(page.getByText(/estimate tax/i)).toHaveCount(0);
   await expect(page.getByText(/tax scenario/i)).toHaveCount(0);
@@ -183,12 +203,18 @@ test("resets the calculator and avoids horizontal overflow on mobile", async ({
     ),
   ).toBe(false);
 
+  await page.getByText("Improve this estimate", { exact: true }).click();
+  await expect(page.getByText("Hide details", { exact: true })).toBeVisible();
+  await page.locator("#purchase-costs").fill("30000");
+
   await page.getByRole("button", { name: "Reset" }).click();
 
   await expect(page.locator("#sale-price")).toHaveValue("");
   await expect(page.locator("#purchase-price")).toHaveValue("");
   await expect(page.locator("#commission-rate")).toHaveValue("");
   await expect(page.locator("#other-selling-costs")).toHaveValue("");
+  await expect(page.locator("#purchase-costs")).not.toBeVisible();
+  await expect(page.getByText("Add details", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Complete the four quick inputs" }),
   ).toBeVisible();
