@@ -156,6 +156,52 @@ test("applies optional costs to transaction profit and entered-cost break-even",
   await expect(results).toContainText("$688,776");
 });
 
+test("shows sale-price sensitivity and recalculates commission", async ({
+  page,
+}) => {
+  const results = page.locator(".results-panel");
+
+  await expect(
+    results.getByRole("region", { name: "Sale price sensitivity" }),
+  ).toHaveCount(0);
+
+  await fillQuickInputs(page, {
+    salePrice: "625000",
+    purchasePrice: "600000",
+    commissionRate: "2",
+    sellingCosts: "10000",
+  });
+
+  const sensitivity = results.getByRole("region", {
+    name: "Sale price sensitivity",
+  });
+  await expect(sensitivity).toBeVisible();
+  await expect(sensitivity.getByRole("row", { name: /−5%/ })).toContainText(
+    "$593,750",
+  );
+  await expect(sensitivity.getByRole("row", { name: /−5%/ })).toContainText(
+    "-$28,125",
+  );
+  await expect(sensitivity.getByRole("row", { name: /−5%/ })).toContainText(
+    "Loss",
+  );
+  await expect(
+    sensitivity.getByRole("row", { name: /Current/ }),
+  ).toContainText("$625,000");
+  await expect(
+    sensitivity.getByRole("row", { name: /Current/ }),
+  ).toContainText("$2,500");
+  await expect(sensitivity.getByRole("row", { name: /\+5%/ })).toContainText(
+    "$656,250",
+  );
+  await expect(sensitivity.getByRole("row", { name: /\+5%/ })).toContainText(
+    "$33,125",
+  );
+  await expect(sensitivity.getByRole("row", { name: /\+5%/ })).toContainText(
+    "Profit",
+  );
+});
+
 test("supports keyboard access to optional details with clear state text", async ({
   page,
 }) => {
@@ -174,6 +220,30 @@ test("supports keyboard access to optional details with clear state text", async
   await expect(details).not.toHaveAttribute("open", "");
   await expect(page.getByText("Add details", { exact: true })).toBeVisible();
   await expect(page.locator("#purchase-costs")).not.toBeVisible();
+});
+
+test("includes sale-price sensitivity in the printable result", async ({
+  page,
+}) => {
+  await fillQuickInputs(page, {
+    salePrice: "1000000",
+    purchasePrice: "600000",
+    commissionRate: "2",
+    sellingCosts: "10000",
+  });
+
+  const sensitivity = page.getByRole("region", {
+    name: "Sale price sensitivity",
+  });
+  await expect(sensitivity).toBeVisible();
+
+  await page.emulateMedia({ media: "print" });
+
+  await expect(sensitivity).toBeVisible();
+  await expect(page.locator(".form-panel")).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Print or save as PDF" }),
+  ).not.toBeVisible();
 });
 
 test("does not expose a tax calculation path", async ({ page }) => {
@@ -215,6 +285,9 @@ test("resets the calculator and avoids horizontal overflow on mobile", async ({
   await expect(page.locator("#other-selling-costs")).toHaveValue("");
   await expect(page.locator("#purchase-costs")).not.toBeVisible();
   await expect(page.getByText("Add details", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Sale price sensitivity" }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Complete the four quick inputs" }),
   ).toBeVisible();

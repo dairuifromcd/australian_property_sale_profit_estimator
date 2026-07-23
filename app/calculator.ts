@@ -13,6 +13,12 @@ export interface CalculatorInput {
   renovationsAndImprovements: number;
 }
 
+export interface SalePriceSensitivityScenario {
+  changePercent: -5 | 0 | 5;
+  salePrice: number;
+  transactionProfit: number;
+}
+
 export interface CalculatorResult {
   hasCoreInputs: boolean;
   hasAdjustedInputs: boolean;
@@ -21,6 +27,7 @@ export interface CalculatorResult {
   netSaleProceeds: number;
   transactionProfit: number;
   breakEvenSalePrice: number;
+  salePriceSensitivity: SalePriceSensitivityScenario[];
   validationErrors: CalculatorValidationError[];
   hasCalculationErrors: boolean;
 }
@@ -92,14 +99,30 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     purchasePrice -
     purchaseCosts -
     renovationsAndImprovements;
+  const fixedTransactionCosts =
+    purchasePrice +
+    purchaseCosts +
+    renovationsAndImprovements +
+    otherSellingCosts +
+    salePreparationCosts;
   const breakEvenSalePrice = hasCalculationErrors
     ? 0
-    : (purchasePrice +
-        purchaseCosts +
-        renovationsAndImprovements +
-        otherSellingCosts +
-        salePreparationCosts) /
-      (1 - commissionRate);
+    : fixedTransactionCosts / (1 - commissionRate);
+  const salePriceSensitivity: SalePriceSensitivityScenario[] =
+    hasCalculationErrors
+      ? []
+      : ([-5, 0, 5] as const).map((changePercent) => {
+          const scenarioSalePrice = salePrice * (1 + changePercent / 100);
+          return {
+            changePercent,
+            salePrice: scenarioSalePrice,
+            transactionProfit:
+              changePercent === 0
+                ? transactionProfit
+                : scenarioSalePrice * (1 - commissionRate) -
+                  fixedTransactionCosts,
+          };
+        });
 
   return {
     hasCoreInputs: salePrice > 0 && purchasePrice > 0,
@@ -112,6 +135,7 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     netSaleProceeds,
     transactionProfit,
     breakEvenSalePrice,
+    salePriceSensitivity,
     validationErrors,
     hasCalculationErrors,
   };

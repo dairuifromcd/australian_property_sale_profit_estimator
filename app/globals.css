@@ -610,6 +610,102 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
+.sale-sensitivity {
+  margin-top: 26px;
+}
+
+.sale-sensitivity-heading h3 {
+  margin: 0;
+  color: #f4f7f5;
+  font-size: 15px;
+}
+
+.sale-sensitivity-heading p {
+  margin: 6px 0 0;
+  color: #93aaa3;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.sale-sensitivity table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.sale-sensitivity th,
+.sale-sensitivity td {
+  overflow-wrap: anywhere;
+}
+
+.sale-sensitivity thead th {
+  padding: 0 7px 7px;
+  color: #8fa69f;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.sale-sensitivity thead th:first-child {
+  width: 24%;
+  padding-left: 0;
+  text-align: left;
+}
+
+.sale-sensitivity tbody tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sale-sensitivity tbody tr.current-scenario {
+  background: rgba(169, 222, 201, 0.08);
+  box-shadow: inset 2px 0 #a9dec9;
+}
+
+.sale-sensitivity tbody th,
+.sale-sensitivity tbody td {
+  padding: 10px 7px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.sale-sensitivity tbody th {
+  padding-left: 7px;
+  color: #d5e1dd;
+  font-weight: 760;
+  text-align: left;
+}
+
+.sale-sensitivity tbody td {
+  color: #f4f7f5;
+}
+
+.sale-sensitivity tbody td:last-child {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.sale-sensitivity tbody td strong.gain {
+  color: #a9dec9;
+}
+
+.sale-sensitivity tbody td strong.loss {
+  color: #ffb8ae;
+}
+
+.sale-sensitivity tbody td small {
+  color: #8fa69f;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .print-button {
   width: 100%;
   min-height: 48px;

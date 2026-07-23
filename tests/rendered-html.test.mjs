@@ -81,6 +81,7 @@ test("removes disposable starter preview code and metadata", async () => {
   assert.doesNotMatch(page, /SkeletonPreview|codex-preview/);
   assert.match(page, /Whole-property transaction loss/);
   assert.match(page, /Before holding costs, debt and tax/);
+  assert.match(page, /Sale price sensitivity/);
   assert.match(page, /"LOSS"/);
   assert.doesNotMatch(
     `${page}\n${calculator}\n${layout}`,

@@ -56,6 +56,28 @@ test("calculates the four-input transaction estimate", () => {
   assert.equal(result.hasCalculationErrors, false);
 });
 
+test("calculates sale-price sensitivity with scenario commission", () => {
+  const result = calculateEstimate(input());
+
+  assert.deepEqual(result.salePriceSensitivity, [
+    {
+      changePercent: -5,
+      salePrice: 950_000,
+      transactionProfit: 321_000,
+    },
+    {
+      changePercent: 0,
+      salePrice: 1_000_000,
+      transactionProfit: 370_000,
+    },
+    {
+      changePercent: 5,
+      salePrice: 1_050_000,
+      transactionProfit: 419_000,
+    },
+  ]);
+});
+
 test("applies every optional transaction cost to the correct result", () => {
   const result = calculateEstimate(
     input({
@@ -129,6 +151,7 @@ test("rejects invalid commission rates", () => {
       true,
     );
     assert.equal(result.breakEvenSalePrice, 0);
+    assert.deepEqual(result.salePriceSensitivity, []);
   }
 });
 

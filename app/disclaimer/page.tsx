@@ -71,6 +71,11 @@ export default function DisclaimerPage() {
               supplied by the user.
             </li>
             <li>
+              Sale-price sensitivity rows mechanically apply 5% below and
+              above the expected sale price entered. They are scenarios, not
+              forecasts, valuations or predictions of a future sale price.
+            </li>
+            <li>
               The calculator does not calculate capital gains tax, income tax,
               taxable capital gain, accounting profit or after-tax profit.
             </li>

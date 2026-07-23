@@ -67,6 +67,12 @@ test("publishes material limitations and government non-affiliation", async ({
     page.getByText(/break-even sale price covers only the transaction costs entered/i),
   ).toBeVisible();
   await expect(
+    page.getByText(/Sale-price sensitivity rows mechanically apply 5% below/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/not forecasts, valuations or predictions/i),
+  ).toBeVisible();
+  await expect(
     page.getByText(/does not calculate capital gains tax, income tax/i),
   ).toBeVisible();
   await expect(

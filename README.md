@@ -24,6 +24,8 @@ the first estimate to four inputs.
 - Sale proceeds after entered selling costs
 - Whole-property transaction profit or loss before holding costs, debt and tax
 - Break-even sale price for the transaction costs entered
+- Sale-price sensitivity at −5%, the entered price and +5%, with commission
+  recalculated for each scenario
 - Text as well as colour for profit and loss outcomes
 - Print or save the result as a PDF
 - Responsive, accessible single-page calculator interface
@@ -57,6 +59,14 @@ entered-cost break-even sale price =
    + other selling costs
    + sale preparation costs)
   ÷ (1 − commission rate)
+
+sale-price sensitivity transaction profit =
+  scenario sale price × (1 − commission rate)
+  − purchase price
+  − purchase costs
+  − renovations and improvements
+  − other selling costs
+  − sale preparation costs
 ```
 
 “Transaction profit” is deliberately narrower than complete economic,

@@ -407,14 +407,14 @@ export default function Home() {
           </details>
         </div>
 
-        <aside className="results-panel" aria-live="polite" aria-atomic="true">
+        <aside className="results-panel">
           <div className="result-topline">
             <span className="estimate-level">{estimateLevel}</span>
             <span className="result-privacy">On-device</span>
           </div>
 
           {!hasAllQuickInputs ? (
-            <div className="empty-result">
+            <div className="empty-result" role="status" aria-atomic="true">
               <span className="empty-number">$—</span>
               <h2>Complete the four quick inputs</h2>
               <p>
@@ -422,14 +422,22 @@ export default function Home() {
               </p>
             </div>
           ) : hasQuickInputErrors ? (
-            <div className="empty-result invalid-result">
+            <div
+              className="empty-result invalid-result"
+              role="status"
+              aria-atomic="true"
+            >
               <span className="empty-number">!</span>
               <h2>Check the highlighted fields</h2>
               <p>Fix the entered values before using this estimate.</p>
             </div>
           ) : (
             <>
-              <div className={`primary-result ${profitTone}`}>
+              <div
+                className={`primary-result ${profitTone}`}
+                role="status"
+                aria-atomic="true"
+              >
                 <div className="primary-result-heading">
                   <span>
                     {profitTone === "loss"
@@ -495,6 +503,63 @@ export default function Home() {
                 <span>Break-even sale price for entered transaction costs</span>
                 <strong>{aud.format(result.breakEvenSalePrice)}</strong>
               </div>
+
+              <section
+                className="sale-sensitivity"
+                aria-labelledby="sale-sensitivity-title"
+              >
+                <div className="sale-sensitivity-heading">
+                  <h3 id="sale-sensitivity-title">Sale price sensitivity</h3>
+                  <p>
+                    Illustrative scenarios 5% below and above your entered sale
+                    price—not a price prediction. Commission is recalculated;
+                    other entered costs stay fixed.
+                  </p>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Scenario</th>
+                      <th scope="col">Sale price</th>
+                      <th scope="col">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.salePriceSensitivity.map((scenario) => {
+                      const scenarioTone =
+                        scenario.transactionProfit < 0 ? "loss" : "gain";
+                      const scenarioLabel =
+                        scenario.changePercent === 0
+                          ? "Current"
+                          : scenario.changePercent > 0
+                            ? `+${scenario.changePercent}%`
+                            : `−${Math.abs(scenario.changePercent)}%`;
+
+                      return (
+                        <tr
+                          className={
+                            scenario.changePercent === 0
+                              ? "current-scenario"
+                              : undefined
+                          }
+                          key={scenario.changePercent}
+                        >
+                          <th scope="row">{scenarioLabel}</th>
+                          <td>{aud.format(scenario.salePrice)}</td>
+                          <td>
+                            <strong className={scenarioTone}>
+                              {aud.format(scenario.transactionProfit)}
+                            </strong>
+                            <small>
+                              {scenarioTone === "loss" ? "Loss" : "Profit"}
+                            </small>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </section>
             </>
           )}
 
