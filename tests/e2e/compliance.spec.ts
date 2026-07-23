@@ -16,8 +16,11 @@ test("labels the site as a beta and avoids certainty claims", async ({ page }) =
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Estimate what you might make when you sell.",
+      name: "Estimate your sale proceeds and transaction result.",
     }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Important information", exact: true }),
   ).toBeVisible();
   await expect(page.getByText(/Know what you could really make/i)).toHaveCount(
     0,
@@ -41,7 +44,9 @@ test("publishes material limitations and government non-affiliation", async ({
   await expect(page.getByText("Not professional advice")).toBeVisible();
   await expect(page.getByText("Material limitations")).toBeVisible();
   await expect(page.getByText("No government affiliation")).toBeVisible();
-  await expect(page.getByText(/does not prepare or lodge a tax return/i)).toBeVisible();
+  await expect(
+    page.getByText(/does not predict a sale price, calculate a tax liability/i),
+  ).toBeVisible();
   await expect(page.getByText(/Nothing here excludes rights or remedies/i)).toBeVisible();
   await expect(
     page.getByText(/Sale proceeds are not an estimate of cash received at settlement/i),
@@ -53,13 +58,13 @@ test("publishes material limitations and government non-affiliation", async ({
     page.getByText(/historical holding cash flows such as interest/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/tax brackets, offsets, the Medicare levy, other income/i),
+    page.getByText(/break-even sale price covers only the transaction costs entered/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/Foreign residency, trusts, companies, SMSFs/i),
+    page.getByText(/does not calculate capital gains tax, income tax/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/does not determine residence periods, income-producing use/i),
+    page.getByText(/does not decide their accounting or tax treatment/i),
   ).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
     "content",

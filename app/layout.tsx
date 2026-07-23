@@ -5,17 +5,18 @@ import "./globals.css";
 const baseMetadata: Metadata = {
   title: "Property Sale Profit | Australian Property Sale Profit Estimator",
   description:
-    "Estimate your Australian property sale proceeds, selling costs, pre-tax profit and an optional indicative CGT scenario—privately in your browser.",
+    "Estimate Australian property selling costs, proceeds before debt and tax, transaction profit before holding costs, debt and tax, and an entered-cost break-even sale price.",
   applicationName: "Property Sale Profit",
   keywords: [
     "Australian property sale profit calculator",
     "property selling costs Australia",
-    "capital gains tax estimate property",
+    "property sale proceeds calculator",
+    "property break-even sale price",
   ],
   openGraph: {
-    title: "Estimate what you might make when you sell.",
+    title: "Estimate your sale proceeds and transaction result.",
     description:
-      "A private, Australia-focused property sale profit estimator.",
+      "Estimate selling costs, proceeds and an entered-cost transaction result privately in your browser.",
     type: "website",
     locale: "en_AU",
   },
@@ -23,7 +24,7 @@ const baseMetadata: Metadata = {
     card: "summary_large_image",
     title: "Property Sale Profit",
     description:
-      "Estimate sale proceeds and property profit with only the detail you need.",
+      "Estimate sale proceeds and transaction profit before holding costs, debt and tax.",
   },
   robots: {
     index: false,
@@ -38,19 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const socialImage = new URL("/og.png", origin).toString();
 
   return {
     ...baseMetadata,
     metadataBase: new URL(origin),
-    openGraph: {
-      ...baseMetadata.openGraph,
-      images: [{ url: socialImage, width: 1200, height: 630 }],
-    },
-    twitter: {
-      ...baseMetadata.twitter,
-      images: [socialImage],
-    },
   };
 }
 

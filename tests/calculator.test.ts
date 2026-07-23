@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import {
   calculateEstimate,
   type CalculatorInput,
@@ -9,467 +10,172 @@ import {
   numberFromInput,
 } from "../app/input-format.ts";
 
-function input(overrides: Partial<CalculatorInput> = {}): CalculatorInput {
+function input(
+  overrides: Partial<CalculatorInput> = {},
+): CalculatorInput {
   return {
     salePrice: 1_000_000,
     purchasePrice: 600_000,
     commissionRate: 2,
     otherSellingCosts: 10_000,
     salePreparationCosts: 0,
-    purchaseCosts: 30_000,
-    capitalImprovements: 20_000,
-    estimateTax: false,
-    propertyUse: "investment",
-    mainResidenceExemptionConfirmed: false,
-    purchaseDate: "2020-01-01",
-    saleDate: "2026-06-01",
-    ownershipShare: 100,
-    marginalTaxRate: 37,
-    mixedTaxablePercentage: 0,
-    capitalWorksDeductions: 0,
-    atoCostBaseOverride: 0,
+    purchaseCosts: 0,
+    renovationsAndImprovements: 0,
     ...overrides,
   };
 }
 
 test("formats monetary input with grouping separators", () => {
   assert.equal(formatAmountInput("650000"), "650,000");
-  assert.equal(formatAmountInput("1,234,567.89"), "1,234,567.89");
-  assert.equal(formatAmountInput("$ 004200"), "4,200");
-  assert.equal(formatAmountInput("-1200"), "-1,200");
-  assert.equal(numberFromInput("650,000"), 650_000);
-  assert.equal(numberFromInput("-1,200.50"), -1_200.5);
+  assert.equal(formatAmountInput("$ 1,250,000.50"), "1,250,000.50");
+  assert.equal(formatAmountInput("-12000"), "-12,000");
+  assert.equal(numberFromInput("1,250,000.50"), 1_250_000.5);
 });
 
 test("normalises partial and malformed monetary text safely", () => {
   assert.equal(formatAmountInput(""), "");
-  assert.equal(formatAmountInput("abc"), "");
-  assert.equal(formatAmountInput("  -"), "-");
+  assert.equal(formatAmountInput("-"), "-");
   assert.equal(formatAmountInput(".5"), "0.5");
-  assert.equal(formatAmountInput("001.239"), "1.23");
-  assert.equal(formatAmountInput("1.2.3"), "1.23");
-  assert.equal(numberFromInput("not-a-number"), 0);
+  assert.equal(formatAmountInput("12..34"), "12.34");
+  assert.equal(formatAmountInput("abc"), "");
+  assert.equal(numberFromInput(""), 0);
+  assert.equal(numberFromInput("-"), 0);
 });
 
-test("calculates quick and adjusted property profit", () => {
+test("calculates the four-input transaction estimate", () => {
   const result = calculateEstimate(input());
 
+  assert.equal(result.hasCoreInputs, true);
+  assert.equal(result.hasAdjustedInputs, false);
   assert.equal(result.agentCommission, 20_000);
   assert.equal(result.totalSellingCosts, 30_000);
   assert.equal(result.netSaleProceeds, 970_000);
-  assert.equal(result.preTaxPropertyProfit, 320_000);
-  assert.equal(result.breakEvenSalePrice, 660_000 / 0.98);
-  assert.equal(result.taxStatus, "not-requested");
+  assert.equal(result.transactionProfit, 370_000);
+  assert.equal(Math.round(result.breakEvenSalePrice), 622_449);
+  assert.deepEqual(result.validationErrors, []);
+  assert.equal(result.hasCalculationErrors, false);
 });
 
-test("accepts explicit zero quick costs and treats a zero result as non-loss", () => {
+test("applies every optional transaction cost to the correct result", () => {
   const result = calculateEstimate(
     input({
-      salePrice: 600_000,
-      purchasePrice: 600_000,
-      commissionRate: 0,
-      otherSellingCosts: 0,
-      purchaseCosts: 0,
-      capitalImprovements: 0,
+      salePreparationCosts: 5_000,
+      purchaseCosts: 30_000,
+      renovationsAndImprovements: 50_000,
     }),
   );
 
-  assert.equal(result.hasCalculationErrors, false);
-  assert.equal(result.agentCommission, 0);
-  assert.equal(result.preTaxPropertyProfit, 0);
-  assert.equal(result.breakEvenSalePrice, 600_000);
+  assert.equal(result.hasAdjustedInputs, true);
+  assert.equal(result.totalSellingCosts, 35_000);
+  assert.equal(result.netSaleProceeds, 965_000);
+  assert.equal(result.transactionProfit, 285_000);
+  assert.equal(Math.round(result.breakEvenSalePrice), 709_184);
 });
 
-test("calculates an economic loss without changing its sign", () => {
+test("treats explicit zero commission and selling costs as valid", () => {
+  const result = calculateEstimate(
+    input({
+      purchasePrice: 1_000_000,
+      commissionRate: 0,
+      otherSellingCosts: 0,
+    }),
+  );
+
+  assert.equal(result.agentCommission, 0);
+  assert.equal(result.totalSellingCosts, 0);
+  assert.equal(result.transactionProfit, 0);
+  assert.equal(result.breakEvenSalePrice, 1_000_000);
+  assert.equal(result.hasCalculationErrors, false);
+});
+
+test("preserves an entered-cost transaction loss", () => {
   const result = calculateEstimate(
     input({
       salePrice: 600_000,
       purchasePrice: 650_000,
-      commissionRate: 2,
       otherSellingCosts: 10_000,
-      purchaseCosts: 0,
-      capitalImprovements: 0,
     }),
   );
 
   assert.equal(result.netSaleProceeds, 578_000);
-  assert.equal(result.preTaxPropertyProfit, -72_000);
+  assert.equal(result.transactionProfit, -72_000);
 });
 
-test("estimates pre-July-2027 investment CGT with the 12-month discount", () => {
-  const result = calculateEstimate(input({ estimateTax: true }));
+test("requires positive sale and purchase prices", () => {
+  for (const field of ["salePrice", "purchasePrice"] as const) {
+    const result = calculateEstimate(input({ [field]: 0 }));
 
-  assert.equal(result.derivedCostBase, 680_000);
-  assert.equal(result.rawCapitalGain, 320_000);
-  assert.equal(result.heldAtLeastTwelveMonths, true);
-  assert.equal(result.taxableCapitalGain, 160_000);
-  assert.equal(result.estimatedCgt, 59_200);
-  assert.equal(result.userAfterTaxProfit, 260_800);
-  assert.equal(result.taxStatus, "estimated");
-});
-
-test("applies ownership and mixed-use percentages", () => {
-  const result = calculateEstimate(
-    input({
-      estimateTax: true,
-      propertyUse: "mixed",
-      ownershipShare: 50,
-      mixedTaxablePercentage: 40,
-    }),
-  );
-
-  assert.equal(result.taxableCapitalGain, 32_000);
-  assert.equal(result.estimatedCgt, 11_840);
-  assert.equal(result.preTaxPropertyProfit, 320_000);
-  assert.equal(result.userPreTaxProfit, 160_000);
-  assert.equal(result.userAfterTaxProfit, 148_160);
-});
-
-test("keeps capital works adjustments out of economic profit", () => {
-  const result = calculateEstimate(
-    input({ estimateTax: true, capitalWorksDeductions: 10_000 }),
-  );
-
-  assert.equal(result.preTaxPropertyProfit, 320_000);
-  assert.equal(result.derivedCostBase, 670_000);
-  assert.equal(result.estimatedCgt, 61_050);
-});
-
-test("uses a positive reviewed ATO cost base instead of the derived amount", () => {
-  const result = calculateEstimate(
-    input({ estimateTax: true, atoCostBaseOverride: 750_000 }),
-  );
-
-  assert.equal(result.derivedCostBase, 680_000);
-  assert.equal(result.atoCostBase, 750_000);
-  assert.equal(result.rawCapitalGain, 250_000);
-  assert.equal(result.taxableCapitalGain, 125_000);
-  assert.equal(result.estimatedCgt, 46_250);
-  assert.equal(result.preTaxPropertyProfit, 320_000);
-  assert.equal(result.userAfterTaxProfit, 273_750);
-});
-
-test("reports a capital loss without applying it to economic profit or other gains", () => {
-  const result = calculateEstimate(
-    input({ estimateTax: true, atoCostBaseOverride: 1_100_000 }),
-  );
-
-  assert.equal(result.taxStatus, "capital-loss");
-  assert.equal(result.rawCapitalGain, 0);
-  assert.equal(result.capitalLoss, 100_000);
-  assert.equal(result.taxableCapitalGain, 0);
-  assert.equal(result.estimatedCgt, 0);
-  assert.equal(result.preTaxPropertyProfit, 320_000);
-  assert.equal(result.userAfterTaxProfit, 320_000);
-});
-
-test("separates CGT-eligible selling costs from cash-only sale preparation", () => {
-  const result = calculateEstimate(
-    input({ estimateTax: true, salePreparationCosts: 15_000 }),
-  );
-
-  assert.equal(result.totalSellingCosts, 45_000);
-  assert.equal(result.preTaxPropertyProfit, 305_000);
-  assert.equal(result.breakEvenSalePrice, 675_000 / 0.98);
-  assert.equal(result.derivedCostBase, 680_000);
-  assert.equal(result.estimatedCgt, 59_200);
-});
-
-test("does not apply the CGT discount on the calendar anniversary", () => {
-  const anniversary = calculateEstimate(
-    input({
-      estimateTax: true,
-      purchaseDate: "2024-02-02",
-      saleDate: "2025-02-02",
-    }),
-  );
-  const followingDay = calculateEstimate(
-    input({
-      estimateTax: true,
-      purchaseDate: "2024-02-02",
-      saleDate: "2025-02-03",
-    }),
-  );
-
-  assert.equal(anniversary.heldAtLeastTwelveMonths, false);
-  assert.equal(anniversary.taxableCapitalGain, 320_000);
-  assert.equal(followingDay.heldAtLeastTwelveMonths, true);
-  assert.equal(followingDay.taxableCapitalGain, 160_000);
-});
-
-test("handles the 12-month threshold for a leap-day acquisition", () => {
-  const dayBefore = calculateEstimate(
-    input({
-      estimateTax: true,
-      purchaseDate: "2024-02-29",
-      saleDate: "2025-02-28",
-    }),
-  );
-  const qualifyingDay = calculateEstimate(
-    input({
-      estimateTax: true,
-      purchaseDate: "2024-02-29",
-      saleDate: "2025-03-01",
-    }),
-  );
-
-  assert.equal(dayBefore.heldAtLeastTwelveMonths, false);
-  assert.equal(qualifyingDay.heldAtLeastTwelveMonths, true);
-});
-
-test("does not return a numeric tax estimate for post-reform sale dates", () => {
-  const precedingDay = calculateEstimate(
-    input({ estimateTax: true, saleDate: "2027-06-30" }),
-  );
-  const boundary = calculateEstimate(
-    input({ estimateTax: true, saleDate: "2027-07-01" }),
-  );
-
-  assert.equal(precedingDay.taxStatus, "estimated");
-  assert.equal(precedingDay.estimatedCgt, 59_200);
-  assert.equal(boundary.taxStatus, "post-2027-unsupported");
-  assert.equal(boundary.estimatedCgt, null);
-  assert.equal(boundary.userAfterTaxProfit, null);
-  assert.equal(boundary.preTaxPropertyProfit, 320_000);
-});
-
-test("keeps the pre-tax result while required tax inputs are incomplete", () => {
-  const missingPurchaseDate = calculateEstimate(
-    input({ estimateTax: true, purchaseDate: "" }),
-  );
-  const missingSaleDate = calculateEstimate(
-    input({ estimateTax: true, saleDate: "" }),
-  );
-  const missingTaxRate = calculateEstimate(
-    input({ estimateTax: true, marginalTaxRate: 0 }),
-  );
-
-  for (const result of [
-    missingPurchaseDate,
-    missingSaleDate,
-    missingTaxRate,
-  ]) {
-    assert.equal(result.taxStatus, "insufficient-input");
-    assert.equal(result.taxableCapitalGain, null);
-    assert.equal(result.estimatedCgt, null);
-    assert.equal(result.userAfterTaxProfit, null);
-    assert.equal(result.preTaxPropertyProfit, 320_000);
+    assert.equal(result.hasCoreInputs, false);
+    assert.equal(result.hasCalculationErrors, true);
+    assert.deepEqual(result.validationErrors, [
+      {
+        field,
+        message: "Enter an amount greater than zero.",
+      },
+    ]);
+    assert.equal(result.breakEvenSalePrice, 0);
   }
 });
 
-test("does not require an assumed tax rate for a confirmed main residence", () => {
-  const result = calculateEstimate(
-    input({
-      estimateTax: true,
-      propertyUse: "main-residence",
-      mainResidenceExemptionConfirmed: true,
-      marginalTaxRate: 0,
-    }),
-  );
+test("rejects invalid commission rates", () => {
+  for (const commissionRate of [-1, 100, Number.NaN]) {
+    const result = calculateEstimate(input({ commissionRate }));
 
-  assert.equal(result.taxStatus, "assumed-exempt");
-  assert.equal(result.estimatedCgt, 0);
-});
-
-test("assumes a selected fully exempt main residence has no CGT", () => {
-  const result = calculateEstimate(
-    input({
-      estimateTax: true,
-      propertyUse: "main-residence",
-      mainResidenceExemptionConfirmed: true,
-    }),
-  );
-
-  assert.equal(result.taxStatus, "assumed-exempt");
-  assert.equal(result.estimatedCgt, 0);
-  assert.equal(result.userAfterTaxProfit, 320_000);
-});
-
-test("does not show zero CGT until the main residence exemption is confirmed", () => {
-  const result = calculateEstimate(
-    input({ estimateTax: true, propertyUse: "main-residence" }),
-  );
-
-  assert.equal(result.taxStatus, "main-residence-unconfirmed");
-  assert.equal(result.estimatedCgt, null);
-  assert.equal(result.userAfterTaxProfit, null);
-});
-
-test("rejects a sale date that is not after the purchase date", () => {
-  const result = calculateEstimate(
-    input({
-      estimateTax: true,
-      purchaseDate: "2026-01-02",
-      saleDate: "2026-01-01",
-    }),
-  );
-
-  assert.equal(result.taxStatus, "invalid-input");
-  assert.equal(result.hasTaxErrors, true);
-  assert.deepEqual(
-    result.validationErrors.map((error) => error.field),
-    ["saleDate"],
-  );
-});
-
-test("rejects malformed calendar dates", () => {
-  const invalidPurchase = calculateEstimate(
-    input({ estimateTax: true, purchaseDate: "2025-02-30" }),
-  );
-  const invalidSale = calculateEstimate(
-    input({ estimateTax: true, saleDate: "not-a-date" }),
-  );
-
-  assert.equal(invalidPurchase.taxStatus, "invalid-input");
-  assert.deepEqual(
-    invalidPurchase.validationErrors.map((error) => error.field),
-    ["purchaseDate"],
-  );
-  assert.equal(invalidSale.taxStatus, "invalid-input");
-  assert.deepEqual(
-    invalidSale.validationErrors.map((error) => error.field),
-    ["saleDate"],
-  );
-});
-
-test("rejects impossible percentages instead of silently clamping them", () => {
-  const cases: Array<{
-    overrides: Partial<CalculatorInput>;
-    field: keyof CalculatorInput;
-    calculationError?: boolean;
-  }> = [
-    { overrides: { commissionRate: -0.1 }, field: "commissionRate", calculationError: true },
-    { overrides: { commissionRate: 100 }, field: "commissionRate", calculationError: true },
-    { overrides: { ownershipShare: 0 }, field: "ownershipShare" },
-    { overrides: { ownershipShare: 100.1 }, field: "ownershipShare" },
-    {
-      overrides: { propertyUse: "mixed", mixedTaxablePercentage: 0 },
-      field: "mixedTaxablePercentage",
-    },
-    {
-      overrides: { propertyUse: "mixed", mixedTaxablePercentage: 100 },
-      field: "mixedTaxablePercentage",
-    },
-  ];
-
-  for (const { overrides, field, calculationError = false } of cases) {
-    const result = calculateEstimate(input({ estimateTax: true, ...overrides }));
-    assert.equal(result.taxStatus, "invalid-input");
-    assert.equal(result.hasCalculationErrors, calculationError);
-    assert.deepEqual(
-      result.validationErrors.map((error) => error.field),
-      [field],
+    assert.equal(result.hasCalculationErrors, true);
+    assert.equal(
+      result.validationErrors.some(
+        (error) => error.field === "commissionRate",
+      ),
+      true,
     );
-    if (calculationError) assert.equal(result.breakEvenSalePrice, 0);
+    assert.equal(result.breakEvenSalePrice, 0);
   }
 });
 
-test("distinguishes a missing tax rate from invalid tax rates", () => {
-  const missing = calculateEstimate(
-    input({ estimateTax: true, marginalTaxRate: 0 }),
-  );
-  const negative = calculateEstimate(
-    input({ estimateTax: true, marginalTaxRate: -0.1 }),
-  );
-  const aboveMaximum = calculateEstimate(
-    input({ estimateTax: true, marginalTaxRate: 100.1 }),
-  );
+test("rejects negative optional transaction costs", () => {
+  for (const field of [
+    "otherSellingCosts",
+    "salePreparationCosts",
+    "purchaseCosts",
+    "renovationsAndImprovements",
+  ] as const) {
+    const result = calculateEstimate(input({ [field]: -1 }));
 
-  assert.equal(missing.taxStatus, "insufficient-input");
-  assert.equal(missing.hasTaxErrors, false);
-  for (const result of [negative, aboveMaximum]) {
-    assert.equal(result.taxStatus, "invalid-input");
-    assert.equal(result.hasTaxErrors, true);
-    assert.equal(result.estimatedCgt, null);
-    assert.deepEqual(
-      result.validationErrors.map((error) => error.field),
-      ["marginalTaxRate"],
+    assert.equal(result.hasCalculationErrors, true);
+    assert.equal(
+      result.validationErrors.some((error) => error.field === field),
+      true,
     );
+    assert.equal(result.breakEvenSalePrice, 0);
   }
 });
 
-test("rejects negative cash costs instead of converting them to zero", () => {
-  const fields = [
+test("rejects non-finite monetary values", () => {
+  for (const field of [
     "salePrice",
     "purchasePrice",
     "otherSellingCosts",
     "salePreparationCosts",
     "purchaseCosts",
-    "capitalImprovements",
-  ] as const;
-
-  for (const field of fields) {
-    const result = calculateEstimate(
-      input({ estimateTax: true, [field]: -1 }),
-    );
-    assert.equal(result.hasCalculationErrors, true);
-    assert.equal(result.taxStatus, "invalid-input");
-    assert.deepEqual(
-      result.validationErrors.map((error) => error.field),
-      [field],
-    );
-  }
-});
-
-test("rejects negative advanced tax amounts", () => {
-  const capitalWorks = calculateEstimate(
-    input({ estimateTax: true, capitalWorksDeductions: -1 }),
-  );
-  const costBaseOverride = calculateEstimate(
-    input({ estimateTax: true, atoCostBaseOverride: -1 }),
-  );
-
-  for (const [result, field] of [
-    [capitalWorks, "capitalWorksDeductions"],
-    [costBaseOverride, "atoCostBaseOverride"],
+    "renovationsAndImprovements",
   ] as const) {
-    assert.equal(result.taxStatus, "invalid-input");
-    assert.equal(result.hasTaxErrors, true);
-    assert.equal(result.estimatedCgt, null);
-    assert.deepEqual(
-      result.validationErrors.map((error) => error.field),
-      [field],
+    const result = calculateEstimate(input({ [field]: Number.NaN }));
+
+    assert.equal(result.hasCalculationErrors, true);
+    assert.equal(
+      result.validationErrors.some((error) => error.field === field),
+      true,
     );
   }
 });
 
-test("rejects non-finite numeric inputs instead of calculating with them", () => {
-  const calculation = calculateEstimate(
-    input({ estimateTax: true, salePrice: Number.POSITIVE_INFINITY }),
-  );
-  const tax = calculateEstimate(
-    input({ estimateTax: true, capitalWorksDeductions: Number.NaN }),
-  );
-
-  assert.equal(calculation.hasCalculationErrors, true);
-  assert.equal(calculation.taxStatus, "invalid-input");
-  assert.deepEqual(
-    calculation.validationErrors.map((error) => error.field),
-    ["salePrice"],
-  );
-  assert.equal(tax.hasTaxErrors, true);
-  assert.equal(tax.taxStatus, "invalid-input");
-  assert.deepEqual(
-    tax.validationErrors.map((error) => error.field),
-    ["capitalWorksDeductions"],
-  );
-});
-
-test("ignores incomplete optional tax fields when tax estimation is off", () => {
-  const result = calculateEstimate(
-    input({
-      estimateTax: false,
-      ownershipShare: 0,
-      marginalTaxRate: -1,
-      mixedTaxablePercentage: 100,
-      capitalWorksDeductions: -1,
-      atoCostBaseOverride: -1,
-      purchaseDate: "not-a-date",
-      saleDate: "also-not-a-date",
-    }),
-  );
-
-  assert.equal(result.taxStatus, "not-requested");
-  assert.equal(result.validationErrors.length, 0);
-  assert.equal(result.preTaxPropertyProfit, 320_000);
+test("marks each optional detail as an adjusted estimate", () => {
+  for (const field of [
+    "salePreparationCosts",
+    "purchaseCosts",
+    "renovationsAndImprovements",
+  ] as const) {
+    const result = calculateEstimate(input({ [field]: 1 }));
+    assert.equal(result.hasAdjustedInputs, true);
+  }
 });

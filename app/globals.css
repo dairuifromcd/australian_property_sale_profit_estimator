@@ -277,10 +277,6 @@ main {
   gap: 8px;
 }
 
-.field-wide {
-  margin-bottom: 20px;
-}
-
 .field-label {
   min-height: 22px;
   display: flex;
@@ -413,8 +409,7 @@ main {
   font-size: 15px;
 }
 
-.details-block > summary small,
-.check-row small {
+.details-block > summary small {
   color: var(--muted);
   font-size: 12px;
 }
@@ -439,57 +434,8 @@ main {
   padding: 4px 0 12px;
 }
 
-.check-row {
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  border-radius: 14px;
-  background: var(--eucalyptus-soft);
-}
-
-.check-row input {
-  width: 18px;
-  height: 18px;
-  margin: 2px 0 0;
-  accent-color: var(--eucalyptus-dark);
-}
-
-.check-row span {
-  display: grid;
-  gap: 2px;
-}
-
-.tax-fields {
-  margin-top: 22px;
-}
-
-.eligibility-confirmation {
-  margin-top: 22px;
-}
-
-.eligibility-confirmation > p {
-  margin: 9px 4px 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.advanced-tax {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--line-strong);
-}
-
-.advanced-tax > summary {
-  margin-bottom: 18px;
-  color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 720;
-}
-
 .estimate-level,
-.result-privacy,
-.tax-discount {
+.result-privacy {
   display: inline-flex;
   align-items: center;
   min-height: 26px;
@@ -659,80 +605,6 @@ main {
   color: #f4f7f5;
   font-size: 15px;
   font-variant-numeric: tabular-nums;
-}
-
-.tax-result,
-.tax-message {
-  margin-top: 20px;
-  padding: 18px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.tax-message.warning {
-  background: rgba(245, 178, 95, 0.14);
-  color: #ffe1b5;
-}
-
-.tax-message.success {
-  background: rgba(96, 184, 151, 0.14);
-  color: #c8f0df;
-}
-
-.tax-message p {
-  margin: 6px 0 0;
-  color: #b7cac3;
-  font-size: 12px;
-}
-
-.tax-discount {
-  margin-bottom: 16px;
-  padding: 9px 11px;
-  border: 1px solid rgba(96, 184, 151, 0.24);
-  border-radius: 10px;
-  background: rgba(96, 184, 151, 0.14);
-  color: #c8f0df;
-  font-size: 12px;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.tax-discount.warning {
-  border-color: rgba(245, 178, 95, 0.24);
-  background: rgba(245, 178, 95, 0.14);
-  color: #ffe1b5;
-}
-
-.after-tax-result {
-  margin-top: 16px;
-  padding-top: 16px;
-  display: grid;
-  gap: 3px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.after-tax-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.after-tax-heading > span:first-child {
-  color: #b7cac3;
-  font-size: 12px;
-}
-
-.after-tax-result strong {
-  color: #a9dec9;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 28px;
-  font-weight: 500;
-}
-
-.after-tax-result.loss strong {
-  color: #ffb8ae;
 }
 
 .print-button {

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Important Information | Property Sale Profit",
   description: "Important limitations of the Property Sale Profit calculator.",
@@ -40,11 +42,10 @@ export default function DisclaimerPage() {
           <h2>Not professional advice</h2>
           <p>
             The calculator does not provide tax, financial, legal, property
-            valuation, conveyancing, credit or settlement advice. It does not
-            prepare or lodge a tax return, determine an official tax liability,
-            or represent you in dealings with the Australian Taxation Office.
-            Do not rely on an estimate alone to sell, buy, borrow, invest or
-            make a tax decision.
+            valuation, conveyancing, credit, accounting or settlement advice.
+            It does not predict a sale price, calculate a tax liability or
+            determine the amount you will receive at settlement. Do not rely on
+            an estimate alone to sell, buy, borrow or invest.
           </p>
         </section>
 
@@ -58,29 +59,22 @@ export default function DisclaimerPage() {
               settlement adjustments.
             </li>
             <li>
-              Profit excludes historical holding cash flows such as interest,
-              rates, insurance, maintenance, rent and depreciation.
+              Transaction profit excludes historical holding cash flows such as
+              interest, rates, insurance, maintenance, rent and depreciation.
             </li>
             <li>
-              The optional tax scenario uses one assumed tax rate; it does not
-              model tax brackets, offsets, the Medicare levy, other income,
-              other capital gains, prior capital losses or a complete income
-              tax return.
+              The break-even sale price covers only the transaction costs
+              entered. It excludes holding costs, debt, tax and costs not
+              supplied by the user.
             </li>
             <li>
-              Foreign residency, trusts, companies, SMSFs, capital losses,
-              complex exemptions and special cost-base rules are outside its
-              supported scope.
+              The calculator does not calculate capital gains tax, income tax,
+              taxable capital gain, accounting profit or after-tax profit.
             </li>
             <li>
-              Mixed-use and partial-exemption scenarios rely on a percentage or
-              cost base entered by the user. The calculator does not determine
-              residence periods, income-producing use, absence choices or
-              valuations.
-            </li>
-            <li>
-              Tax estimates for contracts on or after 1 July 2027 are paused
-              until the required reform inputs are supported.
+              Renovation, improvement and other cost entries are user-selected
+              transaction assumptions. The calculator does not decide their
+              accounting or tax treatment.
             </li>
           </ul>
         </section>
@@ -91,39 +85,25 @@ export default function DisclaimerPage() {
             This is an independent project. It is not affiliated with,
             approved, certified or endorsed by the ATO, ASIC, the Tax
             Practitioners Board or another Australian government agency.
-            References to ATO guidance are provided so you can review the
-            official source.
           </p>
         </section>
 
         <section className="legal-section">
           <h2>Check before acting</h2>
           <p>
-            Tax rules, property circumstances and transaction costs can change
-            the outcome materially. Confirm important decisions with an
-            appropriately qualified Australian tax agent, accountant,
-            conveyancer, solicitor or financial adviser. Nothing here excludes
-            rights or remedies that cannot lawfully be excluded.
-          </p>
-          <p>
-            Review the{" "}
-            <a
-              href="https://www.ato.gov.au/individuals-and-families/investments-and-assets/capital-gains-tax/property-and-capital-gains-tax"
-              target="_blank"
-              rel="noreferrer"
-            >
-              ATO property and capital gains tax guidance
-            </a>
-            .
+            Property circumstances, transaction costs, debt and tax can change
+            the outcome materially. Confirm important figures and decisions
+            with appropriately qualified Australian professionals such as an
+            accountant, registered tax agent, conveyancer, solicitor or
+            financial adviser. Nothing here excludes rights or remedies that
+            cannot lawfully be excluded.
           </p>
         </section>
 
         <p className="legal-updated">
-          Model and tax rules last reviewed 21 July 2026. Notice last updated 22
-          July 2026.
+          Model scope and notice last reviewed 23 July 2026.
         </p>
       </article>
     </main>
   );
 }
-import Link from "next/link";

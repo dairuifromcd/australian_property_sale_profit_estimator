@@ -35,7 +35,8 @@ test("server-renders the property sale calculator", async () => {
     html,
     /<title>Property Sale Profit \| Australian Property Sale Profit Estimator<\/title>/i,
   );
-  assert.match(html, /Estimate what you might make when you sell\./);
+  assert.match(html, /Estimate your sale proceeds and transaction result\./);
+  assert.doesNotMatch(html, /Important information\s+Important information/);
   assert.doesNotMatch(html, /Know what you could really make/i);
   assert.match(html, /Public beta/);
   assert.match(html, /under active development/i);
@@ -45,13 +46,15 @@ test("server-renders the property sale calculator", async () => {
   );
   assert.match(html, /Start with four numbers/);
   assert.match(html, /Expected sale price/);
-  assert.match(html, /Eligible selling costs/);
+  assert.match(html, /Other selling costs/);
   assert.match(html, /Sale preparation costs/);
-  assert.match(html, /Estimate tax on the capital gain/);
+  assert.match(html, /Renovations and improvements/);
+  assert.doesNotMatch(html, /Estimate tax on the capital gain/);
+  assert.doesNotMatch(html, /Include an indicative CGT estimate/);
   assert.match(html, /Complete the four quick inputs/);
   assert.match(
     html,
-    /Enter 0 if commission or eligible selling costs do not apply\./,
+    /Enter 0 if commission or other selling costs do not apply\./,
   );
   assert.match(html, /id="commission-rate"[^>]*required/);
   assert.match(html, /id="other-selling-costs"[^>]*required/);
@@ -59,23 +62,28 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Calculations stay on this device/);
   assert.match(html, /href="\/privacy"/);
   assert.match(html, /href="\/disclaimer"/);
-  assert.match(html, /not affiliated with or endorsed by the ATO/i);
+  assert.match(html, /does not calculate settlement cash/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
 test("removes disposable starter preview code and metadata", async () => {
-  const [page, layout, packageJson] = await Promise.all([
+  const [page, calculator, layout, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/calculator.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(page, /SkeletonPreview|codex-preview/);
-  assert.match(page, /Held beyond the 12-month threshold/);
-  assert.match(page, /Whole-property pre-tax loss/);
-  assert.match(page, /Your estimated after-tax loss/);
+  assert.match(page, /Whole-property transaction loss/);
+  assert.match(page, /Before holding costs, debt and tax/);
   assert.match(page, /"LOSS"/);
+  assert.doesNotMatch(
+    `${page}\n${calculator}\n${layout}`,
+    /estimateTax|estimatedCgt|taxableCapitalGain|TaxResult|PropertyUse/,
+  );
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);
+  assert.doesNotMatch(layout, /capital gains tax estimate/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
   await assert.rejects(

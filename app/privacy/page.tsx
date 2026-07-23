@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Privacy | Property Sale Profit",
   description:
@@ -40,11 +42,11 @@ export default function PrivacyPage() {
         <section className="legal-section">
           <h2>Calculator entries</h2>
           <p>
-            Sale prices, purchase prices, costs, dates, ownership percentages
-            and tax assumptions are calculated on your device. The current
-            application code does not transmit or store those entries on a
-            server. Reloading the page resets them. Printing or saving a PDF is
-            an action performed by your browser and device.
+            Sale prices, purchase prices, commission rates and cost assumptions
+            are calculated on your device. The current application code does
+            not transmit or store those entries on a server. Reloading the page
+            resets them. Printing or saving a PDF is an action performed by your
+            browser and device.
           </p>
         </section>
 
@@ -83,7 +85,7 @@ export default function PrivacyPage() {
         <section className="legal-section">
           <h2>External websites</h2>
           <p>
-            Links to the ATO, realestate.com.au, Domain and other third-party
+            Links to realestate.com.au, Domain, GitHub and other third-party
             websites are governed by those websites&apos; own privacy practices.
             Calculator entries are not attached to those links.
           </p>
@@ -105,9 +107,8 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <p className="legal-updated">Last updated 22 July 2026.</p>
+        <p className="legal-updated">Last updated 23 July 2026.</p>
       </article>
     </main>
   );
 }
-import Link from "next/link";
