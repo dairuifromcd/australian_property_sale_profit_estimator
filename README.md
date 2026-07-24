@@ -25,6 +25,7 @@ the first estimate to four inputs.
 - Sale proceeds after entered selling costs
 - Whole-property transaction profit or loss before holding costs, debt and tax
 - Break-even sale price for the transaction costs entered
+- Sale price required to reach an entered target transaction profit
 - Sale-price sensitivity at −5%, the entered price and +5%, with commission
   recalculated for each scenario
 - Text as well as colour for profit and loss outcomes
@@ -60,6 +61,18 @@ entered-cost break-even sale price =
    + other selling costs
    + sale preparation costs)
   ÷ (1 − commission rate)
+
+sale price required for target transaction profit =
+  (purchase price
+   + purchase costs
+   + renovations and improvements
+   + other selling costs
+   + sale preparation costs
+   + target transaction profit)
+  ÷ (1 − commission rate)
+
+Required break-even and target sale prices are rounded up to the next whole
+Australian dollar so the displayed price does not fall short.
 
 sale-price sensitivity transaction profit =
   scenario sale price × (1 − commission rate)

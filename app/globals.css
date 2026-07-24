@@ -610,6 +610,81 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
+.target-sale-price {
+  margin-top: 26px;
+  padding: 18px;
+  border: 1px solid rgba(169, 222, 201, 0.2);
+  border-radius: 14px;
+  background: rgba(169, 222, 201, 0.08);
+}
+
+.target-sale-price-heading h3 {
+  margin: 0;
+  color: #f4f7f5;
+  font-size: 15px;
+}
+
+.target-sale-price-heading p {
+  margin: 6px 0 0;
+  color: #a9bbb5;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.target-profit-control {
+  margin-top: 16px;
+  display: grid;
+  gap: 7px;
+  color: #d5e1dd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.target-profit-control .money-input {
+  background: #f8fbf9;
+}
+
+.target-profit-control small {
+  color: #93aaa3;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.target-profit-control .field-error {
+  color: #ffb8ae;
+}
+
+.target-sale-price-result {
+  margin-top: 17px;
+  padding-top: 16px;
+  display: grid;
+  gap: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.target-sale-price-result > span {
+  color: #b7cac3;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.target-sale-price-result > strong {
+  color: #a9dec9;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.target-sale-price-result > small {
+  color: #a9bbb5;
+  font-size: 10px;
+}
+
 .sale-sensitivity {
   margin-top: 26px;
 }
@@ -1013,5 +1088,9 @@ footer p {
     border-radius: 0;
     box-shadow: none;
     print-color-adjust: exact;
+  }
+
+  .target-sale-price:not(.has-target) {
+    display: none;
   }
 }

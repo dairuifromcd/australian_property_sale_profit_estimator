@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   calculateEstimate,
+  calculateRequiredSalePrice,
   type CalculatorInput,
 } from "../app/calculator.ts";
 import {
@@ -76,6 +77,91 @@ test("calculates sale-price sensitivity with scenario commission", () => {
       transactionProfit: 419_000,
     },
   ]);
+});
+
+test("calculates the sale price required for a target transaction profit", () => {
+  const result = calculateRequiredSalePrice(input(), 100_000);
+
+  assert.equal(Math.round(result.requiredSalePrice ?? 0), 724_490);
+  assert.equal(
+    Math.round(result.differenceFromExpectedSalePrice ?? 0),
+    -275_510,
+  );
+  assert.equal(result.validationError, null);
+});
+
+test("applies every entered cost and commission to the target sale price", () => {
+  const result = calculateRequiredSalePrice(
+    input({
+      salePrice: 800_000,
+      salePreparationCosts: 5_000,
+      purchaseCosts: 30_000,
+      renovationsAndImprovements: 50_000,
+    }),
+    100_000,
+  );
+
+  assert.equal(result.requiredSalePrice, 811_225);
+  assert.equal(result.differenceFromExpectedSalePrice, 11_225);
+});
+
+test("treats a zero target profit as entered-cost break-even", () => {
+  const estimate = calculateEstimate(input());
+  const target = calculateRequiredSalePrice(input(), 0);
+
+  assert.equal(target.requiredSalePrice, estimate.breakEvenSalePrice);
+  assert.equal(
+    target.differenceFromExpectedSalePrice,
+    estimate.breakEvenSalePrice - input().salePrice,
+  );
+  assert.equal(target.validationError, null);
+});
+
+test("rounds required prices up so the displayed whole-dollar price meets the target", () => {
+  const estimateInput = input({
+    salePrice: 100,
+    purchasePrice: 100,
+    commissionRate: 3,
+    otherSellingCosts: 0,
+  });
+  const estimate = calculateEstimate(estimateInput);
+  const target = calculateRequiredSalePrice(estimateInput, 1);
+
+  assert.equal(estimate.breakEvenSalePrice, 104);
+  assert.equal(target.requiredSalePrice, 105);
+  assert.ok(
+    (target.requiredSalePrice ?? 0) * 0.97 - 100 >= 1,
+  );
+});
+
+test("keeps target-profit validation separate from the main estimate", () => {
+  for (const targetProfit of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    const result = calculateRequiredSalePrice(input(), targetProfit);
+
+    assert.deepEqual(result, {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "Enter a target profit of zero or more.",
+    });
+  }
+
+  assert.deepEqual(
+    calculateRequiredSalePrice(input({ salePrice: 0 }), 100_000),
+    {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "Complete a valid transaction estimate first.",
+    },
+  );
+
+  assert.deepEqual(
+    calculateRequiredSalePrice(input(), Number.MAX_VALUE),
+    {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "The entered target is too large to calculate.",
+    },
+  );
 });
 
 test("applies every optional transaction cost to the correct result", () => {

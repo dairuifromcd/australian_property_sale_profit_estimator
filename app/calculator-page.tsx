@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { calculateEstimate, type CalculatorInput } from "./calculator";
+import {
+  calculateEstimate,
+  calculateRequiredSalePrice,
+  type CalculatorInput,
+} from "./calculator";
 import { formatAmountInput, numberFromInput } from "./input-format";
 
 type InputState = {
@@ -179,6 +183,7 @@ function ResultRow({
 
 export default function Home() {
   const [inputs, setInputs] = useState<InputState>(INITIAL_INPUTS);
+  const [targetProfit, setTargetProfit] = useState("");
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
@@ -198,24 +203,35 @@ export default function Home() {
 
   const resetCalculator = () => {
     setInputs(INITIAL_INPUTS);
+    setTargetProfit("");
     detailsRef.current?.removeAttribute("open");
   };
 
-  const result = useMemo(
-    () =>
-      calculateEstimate({
-        ...inputs,
-        salePrice: numberFrom(inputs.salePrice),
-        purchasePrice: numberFrom(inputs.purchasePrice),
-        commissionRate: numberFrom(inputs.commissionRate),
-        otherSellingCosts: numberFrom(inputs.otherSellingCosts),
-        salePreparationCosts: numberFrom(inputs.salePreparationCosts),
-        purchaseCosts: numberFrom(inputs.purchaseCosts),
-        renovationsAndImprovements: numberFrom(
-          inputs.renovationsAndImprovements,
-        ),
-      }),
+  const calculatorInput = useMemo<CalculatorInput>(
+    () => ({
+      salePrice: numberFrom(inputs.salePrice),
+      purchasePrice: numberFrom(inputs.purchasePrice),
+      commissionRate: numberFrom(inputs.commissionRate),
+      otherSellingCosts: numberFrom(inputs.otherSellingCosts),
+      salePreparationCosts: numberFrom(inputs.salePreparationCosts),
+      purchaseCosts: numberFrom(inputs.purchaseCosts),
+      renovationsAndImprovements: numberFrom(
+        inputs.renovationsAndImprovements,
+      ),
+    }),
     [inputs],
+  );
+  const result = useMemo(
+    () => calculateEstimate(calculatorInput),
+    [calculatorInput],
+  );
+  const targetSalePrice = useMemo(
+    () =>
+      calculateRequiredSalePrice(
+        calculatorInput,
+        targetProfit === "-" ? Number.NaN : numberFrom(targetProfit),
+      ),
+    [calculatorInput, targetProfit],
   );
 
   const estimateLevel = result.hasAdjustedInputs
@@ -239,6 +255,21 @@ export default function Home() {
   const hasQuickInputErrors = result.hasCalculationErrors;
   const canShowEstimate =
     hasAllQuickInputs && !hasQuickInputErrors;
+  const targetProfitError =
+    targetProfit === "" ? undefined : targetSalePrice.validationError;
+  const hasTargetSalePrice =
+    targetProfit !== "" &&
+    targetSalePrice.requiredSalePrice !== null &&
+    targetSalePrice.differenceFromExpectedSalePrice !== null;
+  const roundedTargetDifference = Math.round(
+    targetSalePrice.differenceFromExpectedSalePrice ?? 0,
+  );
+  const targetDifferenceText =
+    roundedTargetDifference === 0
+      ? "Matches your expected sale price."
+      : `${aud.format(Math.abs(roundedTargetDifference))} ${
+          roundedTargetDifference > 0 ? "above" : "below"
+        } your expected sale price.`;
 
   return (
     <main>
@@ -505,6 +536,79 @@ export default function Home() {
               </div>
 
               <section
+                className={`target-sale-price ${
+                  hasTargetSalePrice ? "has-target" : ""
+                }`}
+                aria-labelledby="target-sale-price-title"
+              >
+                <div className="target-sale-price-heading">
+                  <h3 id="target-sale-price-title">
+                    Sale price for a target profit
+                  </h3>
+                  <p>
+                    Set a whole-property transaction profit before holding
+                    costs, debt and tax. Commission is recalculated at the
+                    required sale price, which is rounded up to the next dollar.
+                  </p>
+                </div>
+
+                <label
+                  className="target-profit-control no-print"
+                  htmlFor="target-profit"
+                >
+                  <span>Target transaction profit</span>
+                  <span
+                    className={`money-input ${
+                      targetProfitError ? "field-control-error" : ""
+                    }`}
+                  >
+                    <span aria-hidden="true">$</span>
+                    <input
+                      id="target-profit"
+                      type="text"
+                      inputMode="decimal"
+                      value={targetProfit}
+                      onChange={(event) =>
+                        setTargetProfit(formatAmountInput(event.target.value))
+                      }
+                      placeholder="100,000"
+                      aria-describedby={
+                        targetProfitError
+                          ? "target-profit-help target-profit-error"
+                          : "target-profit-help"
+                      }
+                      aria-invalid={targetProfitError ? true : undefined}
+                    />
+                    <span className="currency" aria-hidden="true">
+                      AUD
+                    </span>
+                  </span>
+                  <small id="target-profit-help">
+                    Enter 0 to reproduce the entered-cost break-even price.
+                  </small>
+                  {targetProfitError ? (
+                    <span className="field-error" id="target-profit-error">
+                      {targetProfitError}
+                    </span>
+                  ) : null}
+                </label>
+
+                {hasTargetSalePrice ? (
+                  <div
+                    className="target-sale-price-result"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <span>Sale price needed for this target</span>
+                    <strong>
+                      {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
+                    </strong>
+                    <small>{targetDifferenceText}</small>
+                  </div>
+                ) : null}
+              </section>
+
+              <section
                 className="sale-sensitivity"
                 aria-labelledby="sale-sensitivity-title"
               >
@@ -600,10 +704,11 @@ export default function Home() {
           </article>
           <article>
             <span>03</span>
-            <h3>Entered-cost break-even</h3>
+            <h3>Break-even and target sale price</h3>
             <p>
-              The sale price needed to cover the transaction costs you enter,
-              before holding costs, debt and tax.
+              See the sale price needed to cover the transaction costs you
+              enter or reach a target transaction profit—before holding costs,
+              debt and tax.
             </p>
           </article>
         </div>

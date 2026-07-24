@@ -202,6 +202,61 @@ test("shows sale-price sensitivity and recalculates commission", async ({
   );
 });
 
+test("calculates the sale price needed for a target transaction profit", async ({
+  page,
+}) => {
+  await expect(page.locator("#target-profit")).toHaveCount(0);
+
+  await fillQuickInputs(page, {
+    salePrice: "625000",
+    purchasePrice: "600000",
+    commissionRate: "2",
+    sellingCosts: "10000",
+  });
+
+  const targetPlanner = page.getByRole("region", {
+    name: "Sale price for a target profit",
+  });
+  await expect(targetPlanner).toBeVisible();
+
+  await page.locator("#target-profit").fill("100000");
+  await expect(page.locator("#target-profit")).toHaveValue("100,000");
+  await expect(targetPlanner).toContainText(
+    "Sale price needed for this target",
+  );
+  await expect(targetPlanner).toContainText("$724,490");
+  await expect(targetPlanner).toContainText(
+    "$99,490 above your expected sale price.",
+  );
+
+  await page.locator("#target-profit").fill("-1");
+  await expect(page.locator("#target-profit-error")).toHaveText(
+    "Enter a target profit of zero or more.",
+  );
+  await expect(targetPlanner).not.toContainText(
+    "Sale price needed for this target",
+  );
+  await expect(page.locator(".primary-result")).toContainText("$2,500");
+
+  await page.locator("#target-profit").fill("0");
+  await expect(targetPlanner).toContainText("$622,449");
+  await expect(targetPlanner).toContainText(
+    "$2,551 below your expected sale price.",
+  );
+
+  await page.getByRole("button", { name: "Reset" }).click();
+  await fillQuickInputs(page, {
+    salePrice: "625000",
+    purchasePrice: "600000",
+    commissionRate: "2",
+    sellingCosts: "10000",
+  });
+  await expect(page.locator("#target-profit")).toHaveValue("");
+  await expect(targetPlanner).not.toContainText(
+    "Sale price needed for this target",
+  );
+});
+
 test("supports keyboard access to optional details with clear state text", async ({
   page,
 }) => {
@@ -222,7 +277,7 @@ test("supports keyboard access to optional details with clear state text", async
   await expect(page.locator("#purchase-costs")).not.toBeVisible();
 });
 
-test("includes sale-price sensitivity in the printable result", async ({
+test("includes planning scenarios in the printable result", async ({
   page,
 }) => {
   await fillQuickInputs(page, {
@@ -236,10 +291,17 @@ test("includes sale-price sensitivity in the printable result", async ({
     name: "Sale price sensitivity",
   });
   await expect(sensitivity).toBeVisible();
+  await page.locator("#target-profit").fill("100000");
+  const targetPlanner = page.getByRole("region", {
+    name: "Sale price for a target profit",
+  });
+  await expect(targetPlanner).toContainText("$724,490");
 
   await page.emulateMedia({ media: "print" });
 
   await expect(sensitivity).toBeVisible();
+  await expect(targetPlanner).toContainText("$724,490");
+  await expect(page.locator("#target-profit")).not.toBeVisible();
   await expect(page.locator(".form-panel")).not.toBeVisible();
   await expect(
     page.getByRole("button", { name: "Print or save as PDF" }),

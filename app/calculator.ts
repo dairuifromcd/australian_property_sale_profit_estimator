@@ -19,6 +19,12 @@ export interface SalePriceSensitivityScenario {
   transactionProfit: number;
 }
 
+export interface RequiredSalePriceResult {
+  requiredSalePrice: number | null;
+  differenceFromExpectedSalePrice: number | null;
+  validationError: string | null;
+}
+
 export interface CalculatorResult {
   hasCoreInputs: boolean;
   hasAdjustedInputs: boolean;
@@ -38,6 +44,16 @@ function nonNegative(value: number): number {
 
 function percentage(value: number): number {
   return nonNegative(value) / 100;
+}
+
+function fixedTransactionCosts(input: CalculatorInput): number {
+  return (
+    nonNegative(input.purchasePrice) +
+    nonNegative(input.purchaseCosts) +
+    nonNegative(input.renovationsAndImprovements) +
+    nonNegative(input.otherSellingCosts) +
+    nonNegative(input.salePreparationCosts)
+  );
 }
 
 function validateInput(rawInput: CalculatorInput): CalculatorValidationError[] {
@@ -99,15 +115,10 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     purchasePrice -
     purchaseCosts -
     renovationsAndImprovements;
-  const fixedTransactionCosts =
-    purchasePrice +
-    purchaseCosts +
-    renovationsAndImprovements +
-    otherSellingCosts +
-    salePreparationCosts;
+  const enteredFixedTransactionCosts = fixedTransactionCosts(rawInput);
   const breakEvenSalePrice = hasCalculationErrors
     ? 0
-    : fixedTransactionCosts / (1 - commissionRate);
+    : Math.ceil(enteredFixedTransactionCosts / (1 - commissionRate));
   const salePriceSensitivity: SalePriceSensitivityScenario[] =
     hasCalculationErrors
       ? []
@@ -120,7 +131,7 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
               changePercent === 0
                 ? transactionProfit
                 : scenarioSalePrice * (1 - commissionRate) -
-                  fixedTransactionCosts,
+                  enteredFixedTransactionCosts,
           };
         });
 
@@ -138,5 +149,47 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     salePriceSensitivity,
     validationErrors,
     hasCalculationErrors,
+  };
+}
+
+export function calculateRequiredSalePrice(
+  rawInput: CalculatorInput,
+  targetProfit: number,
+): RequiredSalePriceResult {
+  if (validateInput(rawInput).length > 0) {
+    return {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "Complete a valid transaction estimate first.",
+    };
+  }
+
+  if (!Number.isFinite(targetProfit) || targetProfit < 0) {
+    return {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "Enter a target profit of zero or more.",
+    };
+  }
+
+  const exactRequiredSalePrice =
+    (fixedTransactionCosts(rawInput) + targetProfit) /
+    (1 - percentage(rawInput.commissionRate));
+
+  if (!Number.isFinite(exactRequiredSalePrice)) {
+    return {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "The entered target is too large to calculate.",
+    };
+  }
+
+  const requiredSalePrice = Math.ceil(exactRequiredSalePrice);
+
+  return {
+    requiredSalePrice,
+    differenceFromExpectedSalePrice:
+      requiredSalePrice - rawInput.salePrice,
+    validationError: null,
   };
 }

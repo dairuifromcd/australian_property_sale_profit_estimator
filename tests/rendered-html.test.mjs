@@ -83,6 +83,8 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Other selling costs/);
   assert.match(html, /Sale preparation costs/);
   assert.match(html, /Renovations and improvements/);
+  assert.match(html, /Break-even and target sale price/);
+  assert.match(html, /reach a target transaction profit/i);
   assert.doesNotMatch(html, /Estimate tax on the capital gain/);
   assert.doesNotMatch(html, /Include an indicative CGT estimate/);
   assert.match(html, /Complete the four quick inputs/);
