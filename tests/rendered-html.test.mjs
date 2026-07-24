@@ -289,15 +289,66 @@ test("keeps unknown production URLs out of the index", async () => {
 });
 
 test("removes disposable starter preview code and metadata", async () => {
-  const [page, calculatorPage, calculator, layout, packageJson] =
+  const [
+    page,
+    calculatorPage,
+    calculatorForm,
+    resultsPanel,
+    transactionResults,
+    planningResults,
+    resultPrimitives,
+    calculator,
+    layout,
+    packageJson,
+  ] =
     await Promise.all([
       readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
       readFile(new URL("../app/calculator-page.tsx", import.meta.url), "utf8"),
+      readFile(
+        new URL(
+          "../app/calculator-ui/calculator-form.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL("../app/calculator-ui/results-panel.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../app/calculator-ui/transaction-results.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../app/calculator-ui/planning-results.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../app/calculator-ui/result-primitives.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
       readFile(new URL("../app/calculator.ts", import.meta.url), "utf8"),
       readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
       readFile(new URL("../package.json", import.meta.url), "utf8"),
     ]);
-  const renderedPageSource = `${page}\n${calculatorPage}`;
+  const renderedPageSource = [
+    page,
+    calculatorPage,
+    calculatorForm,
+    resultsPanel,
+    transactionResults,
+    planningResults,
+    resultPrimitives,
+  ].join("\n");
 
   assert.doesNotMatch(renderedPageSource, /SkeletonPreview|codex-preview/);
   assert.match(renderedPageSource, /Whole-property transaction loss/);
@@ -319,5 +370,8 @@ test("removes disposable starter preview code and metadata", async () => {
 
   await assert.rejects(
     access(new URL("../app/_sites-preview/SkeletonPreview.tsx", templateRoot)),
+  );
+  await assert.rejects(
+    access(new URL("../app/chatgpt-auth.ts", templateRoot)),
   );
 });

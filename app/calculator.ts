@@ -19,6 +19,7 @@ export interface CalculatorInput {
 export interface SalePriceSensitivityScenario {
   changePercent: -5 | 0 | 5;
   salePrice: number;
+  agentCommission: number;
   transactionProfit: number;
 }
 
@@ -33,6 +34,7 @@ export interface CalculatorResult {
   hasAdjustedInputs: boolean;
   agentCommission: number;
   totalSellingCosts: number;
+  fixedTransactionCosts: number;
   amountAfterSellingCosts: number;
   transactionProfit: number;
   overallPreTaxPropertyResult: number;
@@ -178,13 +180,17 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
       ? []
       : ([-5, 0, 5] as const).map((changePercent) => {
           const scenarioSalePrice = salePrice * (1 + changePercent / 100);
+          const scenarioAgentCommission = scenarioSalePrice * commissionRate;
+
           return {
             changePercent,
             salePrice: scenarioSalePrice,
+            agentCommission: scenarioAgentCommission,
             transactionProfit:
               changePercent === 0
                 ? transactionProfit
-                : scenarioSalePrice * (1 - commissionRate) -
+                : scenarioSalePrice -
+                  scenarioAgentCommission -
                   enteredFixedTransactionCosts,
           };
         });
@@ -197,6 +203,7 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
       renovationsAndImprovements > 0,
     agentCommission,
     totalSellingCosts,
+    fixedTransactionCosts: enteredFixedTransactionCosts,
     amountAfterSellingCosts,
     transactionProfit,
     overallPreTaxPropertyResult,

@@ -1,0 +1,169 @@
+@media print {
+  :root {
+    --paper: #fff;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .site-header,
+  .scope-banner,
+  .hero,
+  .form-panel,
+  .explanation,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .calculator-shell {
+    width: 100%;
+    display: block;
+  }
+
+  .results-panel {
+    position: static;
+    padding: 18px 22px;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    color: #102a38;
+    box-shadow: none;
+    print-color-adjust: economy;
+  }
+
+  .target-sale-price:not(.has-target) {
+    display: none;
+  }
+
+  .result-topline,
+  .calculation-details,
+  .result-privacy {
+    display: none !important;
+  }
+
+  .primary-result {
+    margin: 0 0 14px;
+    gap: 3px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .primary-result-heading > span:first-child,
+  .primary-result small,
+  .result-row,
+  .secondary-metric,
+  .target-sale-price-heading p,
+  .target-sale-price-result > span,
+  .target-sale-price-result > small,
+  .sale-sensitivity-heading p,
+  .result-note,
+  .supplementary-result-heading > div > span,
+  .supplementary-total > span,
+  .supplementary-result > small {
+    color: #38515e;
+  }
+
+  .primary-result > strong,
+  .primary-result.gain > strong,
+  .primary-result.loss > strong,
+  .result-row strong,
+  .secondary-metric strong,
+  .target-sale-price-heading h3,
+  .sale-sensitivity-heading h3,
+  .sale-sensitivity tbody th,
+  .sale-sensitivity tbody td,
+  .supplementary-result-heading h3 {
+    color: #102a38;
+  }
+
+  .primary-result > strong {
+    font-size: 38px;
+  }
+
+  .outcome-status,
+  .outcome-status.gain,
+  .outcome-status.loss {
+    background: transparent;
+    color: #102a38;
+  }
+
+  .result-breakdown {
+    gap: 6px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .result-divider,
+  .supplementary-total {
+    border-color: #d8ddd8;
+  }
+
+  .secondary-metric,
+  .target-sale-price,
+  .supplementary-result {
+    margin-top: 14px;
+    padding: 12px 0;
+    border: 0;
+    border-top: 1px solid #d8ddd8;
+    border-bottom: 1px solid #d8ddd8;
+    border-radius: 0;
+    background: transparent;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .supplementary-total strong,
+  .supplementary-result.loss .supplementary-total strong,
+  .target-sale-price-result > strong {
+    color: #102a38;
+  }
+
+  .target-sale-price-result {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-color: #d8ddd8;
+  }
+
+  .sale-sensitivity {
+    margin-top: 14px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .sale-sensitivity table {
+    margin-top: 8px;
+  }
+
+  .sale-sensitivity thead th,
+  .sale-sensitivity tbody td small {
+    color: #6d7d83;
+  }
+
+  .sale-sensitivity tbody tr,
+  .sale-sensitivity tbody tr.current-scenario {
+    border-color: #d8ddd8;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sale-sensitivity tbody th,
+  .sale-sensitivity tbody td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .sale-sensitivity tbody td strong.gain,
+  .sale-sensitivity tbody td strong.loss {
+    color: #102a38;
+  }
+
+  .result-note {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #d8ddd8;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

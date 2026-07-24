@@ -53,6 +53,7 @@ test("calculates the four-input transaction estimate", () => {
   assert.equal(result.hasAdjustedInputs, false);
   assert.equal(result.agentCommission, 20_000);
   assert.equal(result.totalSellingCosts, 30_000);
+  assert.equal(result.fixedTransactionCosts, 610_000);
   assert.equal(result.amountAfterSellingCosts, 970_000);
   assert.equal(result.transactionProfit, 370_000);
   assert.equal(result.overallPreTaxPropertyResult, 370_000);
@@ -69,16 +70,19 @@ test("calculates sale-price sensitivity with scenario commission", () => {
     {
       changePercent: -5,
       salePrice: 950_000,
+      agentCommission: 19_000,
       transactionProfit: 321_000,
     },
     {
       changePercent: 0,
       salePrice: 1_000_000,
+      agentCommission: 20_000,
       transactionProfit: 370_000,
     },
     {
       changePercent: 5,
       salePrice: 1_050_000,
+      agentCommission: 21_000,
       transactionProfit: 419_000,
     },
   ]);
