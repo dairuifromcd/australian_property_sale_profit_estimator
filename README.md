@@ -3,8 +3,8 @@
 [![CI](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/workflows/ci.yml/badge.svg)](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/workflows/ci.yml)
 
 An Australia-focused, browser-only calculator for estimating property selling
-costs, proceeds before debt and tax, transaction profit before holding costs,
-debt and tax, and a break-even sale price for the transaction costs entered.
+costs, transaction profit, an optional overall pre-tax result, simplified cash
+after an entered loan payout, and planning sale prices.
 
 The hosted site is the first public MVP. Only the canonical production domain
 is eligible for search indexing; local, Workers and Preview hosts remain
@@ -22,8 +22,11 @@ the first estimate to four inputs.
 - Live estimate from expected sale price, purchase price, agent commission and
   other selling costs
 - Optional sale preparation costs, purchase costs, renovations and improvements
-- Sale proceeds after entered selling costs
-- Whole-property transaction profit or loss before holding costs, debt and tax
+- Amount remaining after entered selling costs
+- Whole-property transaction profit or loss before holding cash flows, loan
+  payout and tax
+- Optional overall pre-tax result from entered rental income and holding costs
+- Optional simplified cash estimate after an entered lender payout
 - Break-even sale price for the transaction costs entered
 - Sale price required to reach an entered target transaction profit
 - Sale-price sensitivity at −5%, the entered price and +5%, with commission
@@ -36,7 +39,8 @@ the first estimate to four inputs.
   non-affiliation disclosure
 
 The public calculator does not calculate capital gains tax, income tax, taxable
-capital gain, accounting profit, settlement cash or after-tax profit.
+capital gain, accounting profit, a complete settlement statement, annualised
+investment return or after-tax profit.
 
 ## Calculation model
 
@@ -47,12 +51,19 @@ total selling costs = agent commission
                     + other selling costs
                     + sale preparation costs
 
-sale proceeds after selling costs = sale price − total selling costs
+amount after selling costs = sale price − total selling costs
 
-transaction profit = sale proceeds after selling costs
+transaction profit = amount after selling costs
                    − purchase price
                    − purchase costs
                    − renovations and improvements
+
+overall pre-tax property result = transaction profit
+                                + total rental income received
+                                − total holding costs paid
+
+estimated cash after loan payout = amount after selling costs
+                                 − estimated loan payout at settlement
 
 entered-cost break-even sale price =
   (purchase price
@@ -84,10 +95,10 @@ sale-price sensitivity transaction profit =
 ```
 
 “Transaction profit” is deliberately narrower than complete economic,
-accounting or tax profit. It excludes historical holding cash flows such as
-interest, rates, insurance, maintenance, rent and depreciation. Sale proceeds
-are not settlement cash: mortgage balances, loan discharge amounts and other
-settlement adjustments are also excluded.
+accounting or tax profit. Optional holding and settlement results remain
+separate: loan payout never changes transaction profit, and holding costs and
+rental income never change the transaction break-even or target sale price.
+The simplified cash estimate excludes tax and unentered settlement adjustments.
 
 See the [calculation scenario coverage matrix](docs/calculation-scenarios.md) for
 supported scenarios, formulas, automated test mappings and explicit boundaries.

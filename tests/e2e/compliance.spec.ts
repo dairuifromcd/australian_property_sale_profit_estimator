@@ -16,13 +16,13 @@ test("labels the estimate scope and avoids certainty claims", async ({ page }) =
   ).toBeVisible();
   await expect(
     page.getByLabel("Estimate scope notice").getByText(
-      "Based only on the costs you enter. Excludes holding costs, debt and tax.",
+      "Uses only the amounts you enter. Tax and unentered settlement adjustments are excluded.",
       { exact: true },
     ),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Estimate your sale proceeds and transaction result.",
+      name: "Estimate your property sale result and cash position.",
     }),
   ).toBeVisible();
   await expect(
@@ -55,13 +55,16 @@ test("publishes material limitations and government non-affiliation", async ({
   ).toBeVisible();
   await expect(page.getByText(/Nothing here excludes rights or remedies/i)).toBeVisible();
   await expect(
-    page.getByText(/Sale proceeds are not an estimate of cash received at settlement/i),
+    page.getByText(/amount remaining after selling costs is before any mortgage payout/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/mortgage balances, loan discharge amounts/i),
+    page.getByText(/optional settlement cash estimate subtracts only the loan payout entered/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/historical holding cash flows such as interest/i),
+    page.getByText(/optional overall pre-tax result adds only the rental income entered/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Loan principal repayments are not treated as holding costs/i),
   ).toBeVisible();
   await expect(
     page.getByText(/break-even sale price covers only the transaction costs entered/i),

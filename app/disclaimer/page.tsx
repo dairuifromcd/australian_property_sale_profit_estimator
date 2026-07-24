@@ -20,8 +20,8 @@ export default function DisclaimerPage() {
       <aside className="scope-banner" aria-label="Estimate scope notice">
         <strong>Indicative estimate</strong>
         <span>
-          Based only on the costs you enter. Excludes holding costs, debt and
-          tax.
+          Uses only the amounts you enter. Tax and unentered settlement
+          adjustments are excluded.
         </span>
       </aside>
       <header className="site-header">
@@ -56,8 +56,8 @@ export default function DisclaimerPage() {
             The calculator does not provide tax, financial, legal, property
             valuation, conveyancing, credit, accounting or settlement advice.
             It does not predict a sale price, calculate a tax liability or
-            determine the amount you will receive at settlement. Do not rely on
-            an estimate alone to sell, buy, borrow or invest.
+            determine the exact amount you will receive at settlement. Do not
+            rely on an estimate alone to sell, buy, borrow or invest.
           </p>
         </section>
 
@@ -66,18 +66,27 @@ export default function DisclaimerPage() {
           <ul>
             <li>Results depend entirely on the figures and assumptions entered.</li>
             <li>
-              Sale proceeds are not an estimate of cash received at settlement.
-              They exclude mortgage balances, loan discharge amounts and other
-              settlement adjustments.
+              The amount remaining after selling costs is before any mortgage
+              payout. The optional settlement cash estimate subtracts only the
+              loan payout entered and excludes tax, settlement adjustments and
+              unentered amounts.
             </li>
             <li>
-              Transaction profit excludes historical holding cash flows such as
-              interest, rates, insurance, maintenance, rent and depreciation.
+              Transaction profit excludes holding-period income, holding costs
+              and financing. The optional overall pre-tax result adds only the
+              rental income entered and subtracts only the holding costs
+              entered. It is not an annualised or time-adjusted return.
+            </li>
+            <li>
+              Loan principal repayments are not treated as holding costs
+              because the purchase price is already included in transaction
+              profit. The calculator does not determine accounting or tax
+              treatment for interest, rent or other entries.
             </li>
             <li>
               The break-even sale price covers only the transaction costs
-              entered. It excludes holding costs, debt, tax and costs not
-              supplied by the user.
+              entered. It excludes holding cash flows, loan payout, tax and
+              costs not supplied by the user.
             </li>
             <li>
               Sale-price sensitivity rows mechanically apply 5% below and
@@ -118,7 +127,7 @@ export default function DisclaimerPage() {
         </section>
 
         <p className="legal-updated">
-          Model scope and notice last reviewed 23 July 2026.
+          Model scope and notice last reviewed 24 July 2026.
         </p>
       </article>
     </main>

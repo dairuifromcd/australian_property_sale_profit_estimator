@@ -11,6 +11,9 @@ export interface CalculatorInput {
   salePreparationCosts: number;
   purchaseCosts: number;
   renovationsAndImprovements: number;
+  estimatedLoanPayout: number;
+  totalHoldingCosts: number;
+  totalRentalIncome: number;
 }
 
 export interface SalePriceSensitivityScenario {
@@ -30,13 +33,19 @@ export interface CalculatorResult {
   hasAdjustedInputs: boolean;
   agentCommission: number;
   totalSellingCosts: number;
-  netSaleProceeds: number;
+  amountAfterSellingCosts: number;
   transactionProfit: number;
+  overallPreTaxPropertyResult: number;
+  estimatedCashAfterLoanPayout: number;
   breakEvenSalePrice: number;
   salePriceSensitivity: SalePriceSensitivityScenario[];
   validationErrors: CalculatorValidationError[];
+  hasTransactionErrors: boolean;
+  hasSupplementaryErrors: boolean;
   hasCalculationErrors: boolean;
 }
+
+const MAX_MONEY_INPUT = 1_000_000_000_000;
 
 function nonNegative(value: number): number {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -56,7 +65,9 @@ function fixedTransactionCosts(input: CalculatorInput): number {
   );
 }
 
-function validateInput(rawInput: CalculatorInput): CalculatorValidationError[] {
+function validateTransactionInput(
+  rawInput: CalculatorInput,
+): CalculatorValidationError[] {
   const errors: CalculatorValidationError[] = [];
   const addError = (field: keyof CalculatorInput, message: string) =>
     errors.push({ field, message });
@@ -65,6 +76,8 @@ function validateInput(rawInput: CalculatorInput): CalculatorValidationError[] {
     const value = rawInput[field];
     if (!Number.isFinite(value) || value <= 0) {
       addError(field, "Enter an amount greater than zero.");
+    } else if (value > MAX_MONEY_INPUT) {
+      addError(field, "Enter an amount no greater than $1 trillion.");
     }
   }
 
@@ -77,6 +90,8 @@ function validateInput(rawInput: CalculatorInput): CalculatorValidationError[] {
     const value = rawInput[field];
     if (!Number.isFinite(value) || value < 0) {
       addError(field, "Enter an amount of zero or more.");
+    } else if (value > MAX_MONEY_INPUT) {
+      addError(field, "Enter an amount no greater than $1 trillion.");
     }
   }
 
@@ -94,8 +109,40 @@ function validateInput(rawInput: CalculatorInput): CalculatorValidationError[] {
   return errors;
 }
 
+function validateSupplementaryInput(
+  rawInput: CalculatorInput,
+): CalculatorValidationError[] {
+  const errors: CalculatorValidationError[] = [];
+
+  for (const field of [
+    "estimatedLoanPayout",
+    "totalHoldingCosts",
+    "totalRentalIncome",
+  ] as const) {
+    const value = rawInput[field];
+    if (!Number.isFinite(value) || value < 0) {
+      errors.push({ field, message: "Enter an amount of zero or more." });
+    } else if (value > MAX_MONEY_INPUT) {
+      errors.push({
+        field,
+        message: "Enter an amount no greater than $1 trillion.",
+      });
+    }
+  }
+
+  return errors;
+}
+
 export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
-  const validationErrors = validateInput(rawInput);
+  const transactionValidationErrors = validateTransactionInput(rawInput);
+  const supplementaryValidationErrors =
+    validateSupplementaryInput(rawInput);
+  const validationErrors = [
+    ...transactionValidationErrors,
+    ...supplementaryValidationErrors,
+  ];
+  const hasTransactionErrors = transactionValidationErrors.length > 0;
+  const hasSupplementaryErrors = supplementaryValidationErrors.length > 0;
   const hasCalculationErrors = validationErrors.length > 0;
   const salePrice = nonNegative(rawInput.salePrice);
   const purchasePrice = nonNegative(rawInput.purchasePrice);
@@ -106,21 +153,28 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
   const renovationsAndImprovements = nonNegative(
     rawInput.renovationsAndImprovements,
   );
+  const estimatedLoanPayout = nonNegative(rawInput.estimatedLoanPayout);
+  const totalHoldingCosts = nonNegative(rawInput.totalHoldingCosts);
+  const totalRentalIncome = nonNegative(rawInput.totalRentalIncome);
   const agentCommission = salePrice * commissionRate;
   const totalSellingCosts =
     agentCommission + otherSellingCosts + salePreparationCosts;
-  const netSaleProceeds = salePrice - totalSellingCosts;
+  const amountAfterSellingCosts = salePrice - totalSellingCosts;
   const transactionProfit =
-    netSaleProceeds -
+    amountAfterSellingCosts -
     purchasePrice -
     purchaseCosts -
     renovationsAndImprovements;
+  const overallPreTaxPropertyResult =
+    transactionProfit + totalRentalIncome - totalHoldingCosts;
+  const estimatedCashAfterLoanPayout =
+    amountAfterSellingCosts - estimatedLoanPayout;
   const enteredFixedTransactionCosts = fixedTransactionCosts(rawInput);
-  const breakEvenSalePrice = hasCalculationErrors
+  const breakEvenSalePrice = hasTransactionErrors
     ? 0
     : Math.ceil(enteredFixedTransactionCosts / (1 - commissionRate));
   const salePriceSensitivity: SalePriceSensitivityScenario[] =
-    hasCalculationErrors
+    hasTransactionErrors
       ? []
       : ([-5, 0, 5] as const).map((changePercent) => {
           const scenarioSalePrice = salePrice * (1 + changePercent / 100);
@@ -143,11 +197,15 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
       renovationsAndImprovements > 0,
     agentCommission,
     totalSellingCosts,
-    netSaleProceeds,
+    amountAfterSellingCosts,
     transactionProfit,
+    overallPreTaxPropertyResult,
+    estimatedCashAfterLoanPayout,
     breakEvenSalePrice,
     salePriceSensitivity,
     validationErrors,
+    hasTransactionErrors,
+    hasSupplementaryErrors,
     hasCalculationErrors,
   };
 }
@@ -156,7 +214,7 @@ export function calculateRequiredSalePrice(
   rawInput: CalculatorInput,
   targetProfit: number,
 ): RequiredSalePriceResult {
-  if (validateInput(rawInput).length > 0) {
+  if (validateTransactionInput(rawInput).length > 0) {
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,

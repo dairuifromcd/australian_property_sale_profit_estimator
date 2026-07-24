@@ -20,8 +20,8 @@ export default function PrivacyPage() {
       <aside className="scope-banner" aria-label="Estimate scope notice">
         <strong>Indicative estimate</strong>
         <span>
-          Based only on the costs you enter. Excludes holding costs, debt and
-          tax.
+          Uses only the amounts you enter. Tax and unentered settlement
+          adjustments are excluded.
         </span>
       </aside>
       <header className="site-header">
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <p className="legal-updated">Last updated 23 July 2026.</p>
+        <p className="legal-updated">Last updated 24 July 2026.</p>
       </article>
     </main>
   );

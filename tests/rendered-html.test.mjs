@@ -65,13 +65,16 @@ test("server-renders the property sale calculator", async () => {
     html,
     /<title>Property Sale Profit \| Australian Property Sale Profit Estimator<\/title>/i,
   );
-  assert.match(html, /Estimate your sale proceeds and transaction result\./);
+  assert.match(
+    html,
+    /Estimate your property sale result and cash position\./,
+  );
   assert.doesNotMatch(html, /Important information\s+Important information/);
   assert.doesNotMatch(html, /Know what you could really make/i);
   assert.match(html, /Indicative estimate/);
   assert.match(
     html,
-    /Based only on the costs you enter\. Excludes holding costs, debt and tax\./,
+    /Uses only the amounts you enter\. Tax and unentered settlement adjustments are excluded\./,
   );
   assert.doesNotMatch(html, /Public beta|under active development/i);
   assert.match(
@@ -83,6 +86,9 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Other selling costs/);
   assert.match(html, /Sale preparation costs/);
   assert.match(html, /Renovations and improvements/);
+  assert.match(html, /Estimated loan payout at settlement/);
+  assert.match(html, /Total holding costs paid/);
+  assert.match(html, /Total rental income received/);
   assert.match(html, /Break-even and target sale price/);
   assert.match(html, /reach a target transaction profit/i);
   assert.doesNotMatch(html, /Estimate tax on the capital gain/);
@@ -98,7 +104,7 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Calculations stay on this device/);
   assert.match(html, /href="\/privacy"/);
   assert.match(html, /href="\/disclaimer"/);
-  assert.match(html, /does not calculate settlement cash/i);
+  assert.match(html, /does not calculate capital gains tax/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
@@ -295,7 +301,12 @@ test("removes disposable starter preview code and metadata", async () => {
 
   assert.doesNotMatch(renderedPageSource, /SkeletonPreview|codex-preview/);
   assert.match(renderedPageSource, /Whole-property transaction loss/);
-  assert.match(renderedPageSource, /Before holding costs, debt and tax/);
+  assert.match(
+    renderedPageSource,
+    /Before holding costs, rental income, loan payout and tax/,
+  );
+  assert.match(renderedPageSource, /Overall pre-tax property result/);
+  assert.match(renderedPageSource, /Estimated cash after loan payout/);
   assert.match(renderedPageSource, /Sale price sensitivity/);
   assert.match(renderedPageSource, /"LOSS"/);
   assert.doesNotMatch(

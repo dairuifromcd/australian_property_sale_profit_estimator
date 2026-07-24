@@ -22,6 +22,9 @@ function input(
     salePreparationCosts: 0,
     purchaseCosts: 0,
     renovationsAndImprovements: 0,
+    estimatedLoanPayout: 0,
+    totalHoldingCosts: 0,
+    totalRentalIncome: 0,
     ...overrides,
   };
 }
@@ -50,8 +53,10 @@ test("calculates the four-input transaction estimate", () => {
   assert.equal(result.hasAdjustedInputs, false);
   assert.equal(result.agentCommission, 20_000);
   assert.equal(result.totalSellingCosts, 30_000);
-  assert.equal(result.netSaleProceeds, 970_000);
+  assert.equal(result.amountAfterSellingCosts, 970_000);
   assert.equal(result.transactionProfit, 370_000);
+  assert.equal(result.overallPreTaxPropertyResult, 370_000);
+  assert.equal(result.estimatedCashAfterLoanPayout, 970_000);
   assert.equal(Math.round(result.breakEvenSalePrice), 622_449);
   assert.deepEqual(result.validationErrors, []);
   assert.equal(result.hasCalculationErrors, false);
@@ -175,7 +180,7 @@ test("applies every optional transaction cost to the correct result", () => {
 
   assert.equal(result.hasAdjustedInputs, true);
   assert.equal(result.totalSellingCosts, 35_000);
-  assert.equal(result.netSaleProceeds, 965_000);
+  assert.equal(result.amountAfterSellingCosts, 965_000);
   assert.equal(result.transactionProfit, 285_000);
   assert.equal(Math.round(result.breakEvenSalePrice), 709_184);
 });
@@ -205,8 +210,106 @@ test("preserves an entered-cost transaction loss", () => {
     }),
   );
 
-  assert.equal(result.netSaleProceeds, 578_000);
+  assert.equal(result.amountAfterSellingCosts, 578_000);
   assert.equal(result.transactionProfit, -72_000);
+});
+
+test("keeps mortgage payout separate from every transaction-profit calculation", () => {
+  const withoutLoan = calculateEstimate(input());
+  const withLoan = calculateEstimate(input({ estimatedLoanPayout: 450_000 }));
+  const targetWithoutLoan = calculateRequiredSalePrice(input(), 100_000);
+  const targetWithLoan = calculateRequiredSalePrice(
+    input({ estimatedLoanPayout: 450_000 }),
+    100_000,
+  );
+
+  assert.equal(withLoan.estimatedCashAfterLoanPayout, 520_000);
+  assert.equal(withLoan.transactionProfit, withoutLoan.transactionProfit);
+  assert.equal(
+    withLoan.overallPreTaxPropertyResult,
+    withoutLoan.overallPreTaxPropertyResult,
+  );
+  assert.equal(withLoan.breakEvenSalePrice, withoutLoan.breakEvenSalePrice);
+  assert.deepEqual(
+    withLoan.salePriceSensitivity,
+    withoutLoan.salePriceSensitivity,
+  );
+  assert.deepEqual(targetWithLoan, targetWithoutLoan);
+});
+
+test("reports a cash shortfall when the loan payout exceeds the amount after selling costs", () => {
+  const result = calculateEstimate(
+    input({ estimatedLoanPayout: 1_100_000 }),
+  );
+
+  assert.equal(result.amountAfterSellingCosts, 970_000);
+  assert.equal(result.estimatedCashAfterLoanPayout, -130_000);
+  assert.equal(result.transactionProfit, 370_000);
+});
+
+test("combines rental income and holding costs only in the overall pre-tax result", () => {
+  const baseline = calculateEstimate(input());
+  const result = calculateEstimate(
+    input({
+      totalRentalIncome: 90_000,
+      totalHoldingCosts: 55_000,
+    }),
+  );
+
+  assert.equal(result.overallPreTaxPropertyResult, 405_000);
+  assert.equal(result.transactionProfit, baseline.transactionProfit);
+  assert.equal(
+    result.estimatedCashAfterLoanPayout,
+    baseline.estimatedCashAfterLoanPayout,
+  );
+  assert.equal(result.breakEvenSalePrice, baseline.breakEvenSalePrice);
+  assert.deepEqual(result.salePriceSensitivity, baseline.salePriceSensitivity);
+});
+
+test("preserves calculation invariants across supplementary input changes", () => {
+  for (const delta of [1, 10_000, 987_654.32]) {
+    const baseline = calculateEstimate(input());
+    const withLoan = calculateEstimate(
+      input({ estimatedLoanPayout: delta }),
+    );
+    const withHoldingCosts = calculateEstimate(
+      input({ totalHoldingCosts: delta }),
+    );
+    const withRentalIncome = calculateEstimate(
+      input({ totalRentalIncome: delta }),
+    );
+
+    assert.ok(
+      Math.abs(
+        baseline.estimatedCashAfterLoanPayout -
+          withLoan.estimatedCashAfterLoanPayout -
+          delta,
+      ) < 0.000_001,
+    );
+    assert.ok(
+      Math.abs(
+        baseline.overallPreTaxPropertyResult -
+          withHoldingCosts.overallPreTaxPropertyResult -
+          delta,
+      ) < 0.000_001,
+    );
+    assert.ok(
+      Math.abs(
+        withRentalIncome.overallPreTaxPropertyResult -
+          baseline.overallPreTaxPropertyResult -
+          delta,
+      ) < 0.000_001,
+    );
+    assert.equal(withLoan.transactionProfit, baseline.transactionProfit);
+    assert.equal(
+      withHoldingCosts.transactionProfit,
+      baseline.transactionProfit,
+    );
+    assert.equal(
+      withRentalIncome.transactionProfit,
+      baseline.transactionProfit,
+    );
+  }
 });
 
 test("requires positive sale and purchase prices", () => {
@@ -241,12 +344,15 @@ test("rejects invalid commission rates", () => {
   }
 });
 
-test("rejects negative optional transaction costs", () => {
+test("rejects negative optional amounts", () => {
   for (const field of [
     "otherSellingCosts",
     "salePreparationCosts",
     "purchaseCosts",
     "renovationsAndImprovements",
+    "estimatedLoanPayout",
+    "totalHoldingCosts",
+    "totalRentalIncome",
   ] as const) {
     const result = calculateEstimate(input({ [field]: -1 }));
 
@@ -255,8 +361,38 @@ test("rejects negative optional transaction costs", () => {
       result.validationErrors.some((error) => error.field === field),
       true,
     );
-    assert.equal(result.breakEvenSalePrice, 0);
+
+    const isSupplementaryField =
+      field === "estimatedLoanPayout" ||
+      field === "totalHoldingCosts" ||
+      field === "totalRentalIncome";
+
+    assert.equal(
+      result.breakEvenSalePrice,
+      isSupplementaryField ? 622_449 : 0,
+    );
+    assert.equal(
+      result.salePriceSensitivity.length,
+      isSupplementaryField ? 3 : 0,
+    );
   }
+});
+
+test("keeps transaction calculations available when supplementary inputs are invalid", () => {
+  const result = calculateEstimate(
+    input({
+      estimatedLoanPayout: -1,
+      totalHoldingCosts: -2,
+      totalRentalIncome: -3,
+    }),
+  );
+
+  assert.equal(result.hasCalculationErrors, true);
+  assert.equal(result.hasTransactionErrors, false);
+  assert.equal(result.hasSupplementaryErrors, true);
+  assert.equal(result.transactionProfit, 370_000);
+  assert.equal(result.breakEvenSalePrice, 622_449);
+  assert.equal(result.salePriceSensitivity.length, 3);
 });
 
 test("rejects non-finite monetary values", () => {
@@ -267,6 +403,9 @@ test("rejects non-finite monetary values", () => {
     "salePreparationCosts",
     "purchaseCosts",
     "renovationsAndImprovements",
+    "estimatedLoanPayout",
+    "totalHoldingCosts",
+    "totalRentalIncome",
   ] as const) {
     const result = calculateEstimate(input({ [field]: Number.NaN }));
 
@@ -276,6 +415,48 @@ test("rejects non-finite monetary values", () => {
       true,
     );
   }
+});
+
+test("rejects monetary inputs above the supported safe range", () => {
+  for (const field of [
+    "salePrice",
+    "purchasePrice",
+    "otherSellingCosts",
+    "salePreparationCosts",
+    "purchaseCosts",
+    "renovationsAndImprovements",
+    "estimatedLoanPayout",
+    "totalHoldingCosts",
+    "totalRentalIncome",
+  ] as const) {
+    const result = calculateEstimate(
+      input({ [field]: 1_000_000_000_001 }),
+    );
+
+    assert.equal(result.hasCalculationErrors, true);
+    assert.deepEqual(
+      result.validationErrors.find((error) => error.field === field),
+      {
+        field,
+        message: "Enter an amount no greater than $1 trillion.",
+      },
+    );
+  }
+});
+
+test("supplementary validation does not change target-sale-price arithmetic", () => {
+  const result = calculateRequiredSalePrice(
+    input({
+      estimatedLoanPayout: -1,
+      totalHoldingCosts: Number.NaN,
+      totalRentalIncome: Number.POSITIVE_INFINITY,
+    }),
+    100_000,
+  );
+
+  assert.equal(result.requiredSalePrice, 724_490);
+  assert.equal(result.differenceFromExpectedSalePrice, -275_510);
+  assert.equal(result.validationError, null);
 });
 
 test("marks each optional detail as an adjusted estimate", () => {

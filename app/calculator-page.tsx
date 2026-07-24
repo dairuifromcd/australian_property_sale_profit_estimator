@@ -17,6 +17,9 @@ type InputState = {
   salePreparationCosts: string;
   purchaseCosts: string;
   renovationsAndImprovements: string;
+  estimatedLoanPayout: string;
+  totalHoldingCosts: string;
+  totalRentalIncome: string;
 };
 
 const INITIAL_INPUTS: InputState = {
@@ -27,6 +30,9 @@ const INITIAL_INPUTS: InputState = {
   salePreparationCosts: "",
   purchaseCosts: "",
   renovationsAndImprovements: "",
+  estimatedLoanPayout: "",
+  totalHoldingCosts: "",
+  totalRentalIncome: "",
 };
 
 const aud = new Intl.NumberFormat("en-AU", {
@@ -181,10 +187,24 @@ function ResultRow({
   );
 }
 
+function CalculationDetails({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <details className="calculation-details">
+      <summary>Show calculation</summary>
+      <div>{children}</div>
+    </details>
+  );
+}
+
 export default function Home() {
   const [inputs, setInputs] = useState<InputState>(INITIAL_INPUTS);
   const [targetProfit, setTargetProfit] = useState("");
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const transactionDetailsRef = useRef<HTMLDetailsElement>(null);
+  const holdingDetailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     document.documentElement.dataset.clientReady = "true";
@@ -204,7 +224,8 @@ export default function Home() {
   const resetCalculator = () => {
     setInputs(INITIAL_INPUTS);
     setTargetProfit("");
-    detailsRef.current?.removeAttribute("open");
+    transactionDetailsRef.current?.removeAttribute("open");
+    holdingDetailsRef.current?.removeAttribute("open");
   };
 
   const calculatorInput = useMemo<CalculatorInput>(
@@ -218,6 +239,9 @@ export default function Home() {
       renovationsAndImprovements: numberFrom(
         inputs.renovationsAndImprovements,
       ),
+      estimatedLoanPayout: numberFrom(inputs.estimatedLoanPayout),
+      totalHoldingCosts: numberFrom(inputs.totalHoldingCosts),
+      totalRentalIncome: numberFrom(inputs.totalRentalIncome),
     }),
     [inputs],
   );
@@ -234,8 +258,15 @@ export default function Home() {
     [calculatorInput, targetProfit],
   );
 
-  const estimateLevel = result.hasAdjustedInputs
-    ? "Adjusted estimate"
+  const hasHoldingCashFlowInputs =
+    inputs.totalHoldingCosts !== "" || inputs.totalRentalIncome !== "";
+  const hasLoanPayoutInput = inputs.estimatedLoanPayout !== "";
+  const hasExpandedInputs =
+    result.hasAdjustedInputs ||
+    hasHoldingCashFlowInputs ||
+    hasLoanPayoutInput;
+  const estimateLevel = hasExpandedInputs
+    ? "Expanded estimate"
     : "Quick estimate";
   const profitTone = result.transactionProfit < 0 ? "loss" : "gain";
   const errorFor = (field: keyof CalculatorInput) => {
@@ -252,7 +283,15 @@ export default function Home() {
     inputs.purchasePrice !== "" &&
     inputs.commissionRate !== "" &&
     inputs.otherSellingCosts !== "";
-  const hasQuickInputErrors = result.hasCalculationErrors;
+  const hasQuickInputErrors = result.hasTransactionErrors;
+  const hasHoldingCashFlowErrors = result.validationErrors.some(
+    (error) =>
+      error.field === "totalHoldingCosts" ||
+      error.field === "totalRentalIncome",
+  );
+  const hasLoanPayoutError = result.validationErrors.some(
+    (error) => error.field === "estimatedLoanPayout",
+  );
   const canShowEstimate =
     hasAllQuickInputs && !hasQuickInputErrors;
   const targetProfitError =
@@ -269,15 +308,21 @@ export default function Home() {
       ? "Matches your expected sale price."
       : `${aud.format(Math.abs(roundedTargetDifference))} ${
           roundedTargetDifference > 0 ? "above" : "below"
-        } your expected sale price.`;
+        } your expected sale price of ${aud.format(
+          numberFrom(inputs.salePrice),
+        )}.`;
+  const overallResultTone =
+    result.overallPreTaxPropertyResult < 0 ? "loss" : "gain";
+  const settlementCashTone =
+    result.estimatedCashAfterLoanPayout < 0 ? "loss" : "gain";
 
   return (
     <main>
       <aside className="scope-banner" aria-label="Estimate scope notice">
         <strong>Indicative estimate</strong>
         <span>
-          Based only on the costs you enter. Excludes holding costs, debt and
-          tax.
+          Uses only the amounts you enter. Tax and unentered settlement
+          adjustments are excluded.
         </span>
         <Link href="/disclaimer">Read important information</Link>
       </aside>
@@ -301,11 +346,11 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="eyebrow">Australian property sale calculator</div>
-        <h1>Estimate your sale proceeds and transaction result.</h1>
+        <h1>Estimate your property sale result and cash position.</h1>
         <p className="hero-copy">
-          Start with four numbers. See your estimated sale proceeds and
-          transaction profit before holding costs, debt and tax, then add detail
-          only when you need it.
+          Start with four numbers for a transaction estimate. Optionally add
+          buying costs, holding cash flows and a loan payout without mixing
+          those different results together.
         </p>
         <div className="trust-line" aria-label="Privacy benefits">
           <span>Private by design</span>
@@ -393,11 +438,14 @@ export default function Home() {
             />
           </div>
 
-          <details className="details-block" ref={detailsRef}>
+          <details
+            className="details-block transaction-details"
+            ref={transactionDetailsRef}
+          >
             <summary>
               <span>
-                <strong>Improve this estimate</strong>
-                <small>Add sale preparation, buying costs and improvements</small>
+                <strong>Add transaction details</strong>
+                <small>Buying, preparation and improvement costs</small>
               </span>
               <span className="summary-action">
                 <span className="summary-action-closed">Add details</span>
@@ -416,7 +464,7 @@ export default function Home() {
               />
               <AmountField
                 id="purchase-costs"
-                label="Purchase costs"
+                label="Buying costs (excluding purchase price)"
                 value={inputs.purchaseCosts}
                 onChange={(value) => update("purchaseCosts", value)}
                 placeholder="32,000"
@@ -433,6 +481,55 @@ export default function Home() {
                 placeholder="25,000"
                 error={errorFor("renovationsAndImprovements")}
                 help="The renovation and improvement spending you want included in this transaction estimate."
+              />
+            </div>
+          </details>
+
+          <details
+            className="details-block holding-details"
+            ref={holdingDetailsRef}
+          >
+            <summary>
+              <span>
+                <strong>Add holding and loan details</strong>
+                <small>Optional overall result and settlement cash estimates</small>
+              </span>
+              <span className="summary-action">
+                <span className="summary-action-closed">Add details</span>
+                <span className="summary-action-open">Hide details</span>
+              </span>
+            </summary>
+            <div className="details-intro">
+              These figures do not change transaction profit, break-even price
+              or the sale price needed for a target transaction profit.
+            </div>
+            <div className="details-content field-grid">
+              <AmountField
+                id="total-holding-costs"
+                label="Total holding costs paid"
+                value={inputs.totalHoldingCosts}
+                onChange={(value) => update("totalHoldingCosts", value)}
+                placeholder="85,000"
+                error={errorFor("totalHoldingCosts")}
+                help="Interest (not loan principal), rates, insurance, body corporate, management, maintenance and other holding costs you want included."
+              />
+              <AmountField
+                id="total-rental-income"
+                label="Total rental income received"
+                value={inputs.totalRentalIncome}
+                onChange={(value) => update("totalRentalIncome", value)}
+                placeholder="60,000"
+                error={errorFor("totalRentalIncome")}
+                help="Gross rent received over the same period as the holding costs. Enter 0 if there was none."
+              />
+              <AmountField
+                id="estimated-loan-payout"
+                label="Estimated loan payout at settlement"
+                value={inputs.estimatedLoanPayout}
+                onChange={(value) => update("estimatedLoanPayout", value)}
+                placeholder="420,000"
+                error={errorFor("estimatedLoanPayout")}
+                help="Use a lender payout estimate if available. It can differ from the current loan balance and is used only for the simplified cash estimate."
               />
             </div>
           </details>
@@ -481,8 +578,8 @@ export default function Home() {
                 </div>
                 <strong>{aud.format(result.transactionProfit)}</strong>
                 <small>
-                  Before holding costs, debt and tax. Based only on the amounts
-                  entered here.
+                  Before holding costs, rental income, loan payout and tax.
+                  Additional results appear separately when you enter them.
                 </small>
               </div>
 
@@ -510,28 +607,180 @@ export default function Home() {
                 ) : null}
                 <div className="result-divider" />
                 <ResultRow
-                  label="Sale proceeds after selling costs"
-                  value={result.netSaleProceeds}
+                  label="Amount remaining after selling costs"
+                  value={result.amountAfterSellingCosts}
                 />
                 <ResultRow
                   label="Purchase price"
                   value={numberFrom(inputs.purchasePrice)}
                   subtract
                 />
-                {result.hasAdjustedInputs ? (
+                {numberFrom(inputs.purchaseCosts) > 0 ? (
                   <ResultRow
-                    label="Purchase costs & improvements"
-                    value={
-                      numberFrom(inputs.purchaseCosts) +
-                      numberFrom(inputs.renovationsAndImprovements)
-                    }
+                    label="Buying costs"
+                    value={numberFrom(inputs.purchaseCosts)}
                     subtract
                   />
                 ) : null}
+                {numberFrom(inputs.renovationsAndImprovements) > 0 ? (
+                  <ResultRow
+                    label="Renovations and improvements"
+                    value={numberFrom(inputs.renovationsAndImprovements)}
+                    subtract
+                  />
+                ) : null}
+                <div className="result-divider" />
+                <ResultRow
+                  label={
+                    profitTone === "loss"
+                      ? "Transaction loss"
+                      : "Transaction profit"
+                  }
+                  value={result.transactionProfit}
+                />
               </div>
 
+              <CalculationDetails>
+                <p>
+                  Expected sale price minus commission, selling and preparation
+                  costs, purchase price, buying costs and improvements.
+                </p>
+                <code>
+                  {aud.format(numberFrom(inputs.salePrice))} −{" "}
+                  {aud.format(result.agentCommission)} −{" "}
+                  {aud.format(numberFrom(inputs.otherSellingCosts))} −{" "}
+                  {aud.format(numberFrom(inputs.salePreparationCosts))} −{" "}
+                  {aud.format(numberFrom(inputs.purchasePrice))} −{" "}
+                  {aud.format(numberFrom(inputs.purchaseCosts))} −{" "}
+                  {aud.format(numberFrom(inputs.renovationsAndImprovements))} ={" "}
+                  {aud.format(result.transactionProfit)}
+                </code>
+              </CalculationDetails>
+
+                  {hasHoldingCashFlowInputs && !hasHoldingCashFlowErrors ? (
+                <section
+                  className={`supplementary-result ${overallResultTone}`}
+                  aria-labelledby="overall-result-title"
+                >
+                  <div className="supplementary-result-heading">
+                    <div>
+                      <span>Holding-period cash flows</span>
+                      <h3 id="overall-result-title">
+                        Overall pre-tax property result
+                      </h3>
+                    </div>
+                    <span className={`outcome-status ${overallResultTone}`}>
+                      {overallResultTone === "loss" ? "LOSS" : "PROFIT"}
+                    </span>
+                  </div>
+                  <ResultRow
+                    label="Transaction profit"
+                    value={result.transactionProfit}
+                  />
+                  <ResultRow
+                    label="Rental income"
+                    value={numberFrom(inputs.totalRentalIncome)}
+                  />
+                  <ResultRow
+                    label="Holding costs"
+                    value={numberFrom(inputs.totalHoldingCosts)}
+                    subtract
+                  />
+                  <div className="supplementary-total">
+                    <span>Overall pre-tax result</span>
+                    <strong>
+                      {aud.format(result.overallPreTaxPropertyResult)}
+                    </strong>
+                  </div>
+                  <small>
+                    Before tax. Loan principal repayments are excluded because
+                    the purchase price is already counted in transaction profit.
+                  </small>
+                  <CalculationDetails>
+                    <code>
+                      {aud.format(result.transactionProfit)} +{" "}
+                      {aud.format(numberFrom(inputs.totalRentalIncome))} −{" "}
+                      {aud.format(numberFrom(inputs.totalHoldingCosts))} ={" "}
+                      {aud.format(result.overallPreTaxPropertyResult)}
+                    </code>
+                  </CalculationDetails>
+                </section>
+              ) : null}
+
+                  {hasLoanPayoutInput && !hasLoanPayoutError ? (
+                <section
+                  className={`supplementary-result ${settlementCashTone}`}
+                  aria-labelledby="settlement-cash-title"
+                >
+                  <div className="supplementary-result-heading">
+                    <div>
+                      <span>Simplified settlement cash</span>
+                      <h3 id="settlement-cash-title">
+                        {settlementCashTone === "loss"
+                          ? "Estimated cash shortfall after loan payout"
+                          : "Estimated cash after loan payout"}
+                      </h3>
+                    </div>
+                    <span className={`outcome-status ${settlementCashTone}`}>
+                      {settlementCashTone === "loss"
+                        ? "SHORTFALL"
+                        : "ESTIMATE"}
+                    </span>
+                  </div>
+                  <ResultRow
+                    label="Amount after selling costs"
+                    value={result.amountAfterSellingCosts}
+                  />
+                  <ResultRow
+                    label="Estimated loan payout"
+                    value={numberFrom(inputs.estimatedLoanPayout)}
+                    subtract
+                  />
+                  <div className="supplementary-total">
+                    <span>
+                      {settlementCashTone === "loss"
+                        ? "Estimated cash shortfall"
+                        : "Estimated cash"}
+                    </span>
+                    <strong>
+                      {aud.format(result.estimatedCashAfterLoanPayout)}
+                    </strong>
+                  </div>
+                  <small>
+                    Before tax and unentered settlement adjustments. Confirm the
+                    actual payout with your lender and settlement professional.
+                  </small>
+                  <CalculationDetails>
+                    <code>
+                      {aud.format(result.amountAfterSellingCosts)} −{" "}
+                      {aud.format(numberFrom(inputs.estimatedLoanPayout))} ={" "}
+                      {aud.format(result.estimatedCashAfterLoanPayout)}
+                    </code>
+                  </CalculationDetails>
+                </section>
+              ) : null}
+
               <div className="secondary-metric">
-                <span>Break-even sale price for entered transaction costs</span>
+                <div>
+                  <span>Break-even sale price for entered transaction costs</span>
+                  <CalculationDetails>
+                    <p>
+                      Fixed transaction costs divided by one minus the commission
+                      rate. Rounded up to the next dollar.
+                    </p>
+                    <code>
+                      {aud.format(
+                        numberFrom(inputs.purchasePrice) +
+                          numberFrom(inputs.purchaseCosts) +
+                          numberFrom(inputs.renovationsAndImprovements) +
+                          numberFrom(inputs.otherSellingCosts) +
+                          numberFrom(inputs.salePreparationCosts),
+                      )}{" "}
+                      ÷ (1 − {numberFrom(inputs.commissionRate)}%) ={" "}
+                      {aud.format(result.breakEvenSalePrice)}
+                    </code>
+                  </CalculationDetails>
+                </div>
                 <strong>{aud.format(result.breakEvenSalePrice)}</strong>
               </div>
 
@@ -547,8 +796,9 @@ export default function Home() {
                   </h3>
                   <p>
                     Set a whole-property transaction profit before holding
-                    costs, debt and tax. Commission is recalculated at the
-                    required sale price, which is rounded up to the next dollar.
+                    cash flows, loan payout and tax. Commission is recalculated
+                    at the required sale price, which is rounded up to the next
+                    dollar.
                   </p>
                 </div>
 
@@ -604,6 +854,26 @@ export default function Home() {
                       {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
                     </strong>
                     <small>{targetDifferenceText}</small>
+                    <CalculationDetails>
+                      <p>
+                        Entered fixed transaction costs plus target profit,
+                        divided by one minus the commission rate. Rounded up to
+                        the next dollar.
+                      </p>
+                      <code>
+                        (
+                        {aud.format(
+                          numberFrom(inputs.purchasePrice) +
+                            numberFrom(inputs.purchaseCosts) +
+                            numberFrom(inputs.renovationsAndImprovements) +
+                            numberFrom(inputs.otherSellingCosts) +
+                            numberFrom(inputs.salePreparationCosts),
+                        )}{" "}
+                        + {aud.format(numberFrom(targetProfit))}) ÷ (1 −{" "}
+                        {numberFrom(inputs.commissionRate)}%) ={" "}
+                        {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
+                      </code>
+                    </CalculationDetails>
                   </div>
                 ) : null}
               </section>
@@ -663,6 +933,30 @@ export default function Home() {
                     })}
                   </tbody>
                 </table>
+                <CalculationDetails>
+                  <p>
+                    Each row recalculates commission from its scenario sale
+                    price, then subtracts the same fixed transaction costs.
+                  </p>
+                  {result.salePriceSensitivity.map((scenario) => (
+                    <code key={scenario.changePercent}>
+                      {aud.format(scenario.salePrice)} −{" "}
+                      {aud.format(
+                        scenario.salePrice *
+                          (numberFrom(inputs.commissionRate) / 100),
+                      )}{" "}
+                      commission −{" "}
+                      {aud.format(
+                        numberFrom(inputs.purchasePrice) +
+                          numberFrom(inputs.purchaseCosts) +
+                          numberFrom(inputs.renovationsAndImprovements) +
+                          numberFrom(inputs.otherSellingCosts) +
+                          numberFrom(inputs.salePreparationCosts),
+                      )}{" "}
+                      fixed costs = {aud.format(scenario.transactionProfit)}
+                    </code>
+                  ))}
+                </CalculationDetails>
               </section>
             </>
           )}
@@ -676,9 +970,10 @@ export default function Home() {
             Print or save as PDF
           </button>
           <p className="result-note">
-            Indicative transaction estimate only. It is not settlement cash,
-            accounting profit or a tax calculation. Confirm important figures
-            with qualified professionals before making a decision.
+            Indicative estimates only—not accounting profit or a tax
+            calculation. Settlement cash excludes unentered adjustments.
+            Confirm important figures with qualified professionals before
+            making a decision.
           </p>
         </aside>
       </section>
@@ -691,15 +986,19 @@ export default function Home() {
         <div className="explanation-grid">
           <article>
             <span>01</span>
-            <h3>Sale proceeds</h3>
-            <p>What remains after the selling costs you enter, before debt and tax.</p>
+            <h3>Amount after selling costs</h3>
+            <p>
+              Sale price less commission, selling costs and preparation costs.
+              This is before any loan payout.
+            </p>
           </article>
           <article>
             <span>02</span>
             <h3>Transaction profit or loss</h3>
             <p>
-              Sale proceeds less purchase price, buying costs, renovations and
-              improvements—before holding costs, debt and tax.
+              Amount after selling costs less purchase price, buying costs,
+              renovations and improvements—before holding cash flows, loan
+              payout and tax.
             </p>
           </article>
           <article>
@@ -707,8 +1006,16 @@ export default function Home() {
             <h3>Break-even and target sale price</h3>
             <p>
               See the sale price needed to cover the transaction costs you
-              enter or reach a target transaction profit—before holding costs,
-              debt and tax.
+              enter or reach a target transaction profit. Holding cash flows,
+              loan payout and tax do not change these planning prices.
+            </p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Optional overall and cash results</h3>
+            <p>
+              Keep holding-period income and costs separate from a simplified
+              estimate of cash after a loan payout.
             </p>
           </article>
         </div>
@@ -726,9 +1033,9 @@ export default function Home() {
         <div>
           <strong>Important limitations</strong>
           <p>
-            This tool does not calculate settlement cash, holding-period
-            returns, capital gains tax, income tax or after-tax profit. Confirm
-            actual costs, debt and tax treatment separately.
+            Optional overall and settlement cash results use only the amounts
+            entered. This tool does not calculate capital gains tax, income tax,
+            depreciation, time-adjusted returns or after-tax profit.
           </p>
         </div>
         <div className="footer-meta">

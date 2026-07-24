@@ -5,11 +5,11 @@ export const SITE_HOSTNAME = "propertysaleprofit.au";
 export const HOME_TITLE =
   "Property Sale Profit | Australian Property Sale Profit Estimator";
 export const HOME_DESCRIPTION =
-  "Estimate Australian property selling costs, proceeds, transaction profit or loss, break-even price and the sale price needed for a target profit.";
+  "Estimate Australian property selling costs, transaction profit or loss, optional holding-period result, simplified settlement cash and target sale prices.";
 export const HOME_OPEN_GRAPH_TITLE =
-  "Estimate your sale proceeds and transaction result.";
+  "Estimate your property sale result and cash position.";
 export const HOME_OPEN_GRAPH_DESCRIPTION =
-  "Estimate selling costs, proceeds, transaction result and the sale price needed for a target profit privately in your browser.";
+  "Estimate selling costs, transaction result, optional holding cash flows and simplified cash after a loan payout privately in your browser.";
 
 function hostnameFromHeader(host: string | null): string {
   if (!host) {
