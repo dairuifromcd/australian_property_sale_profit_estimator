@@ -1,9 +1,18 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { metadataForPage } from "../site-config";
 
-export const metadata = {
-  title: "Important Information | Property Sale Profit",
-  description: "Important limitations of the Property Sale Profit calculator.",
-};
+export async function generateMetadata() {
+  const requestHeaders = await headers();
+
+  return metadataForPage({
+    host: requestHeaders.get("host"),
+    path: "/disclaimer",
+    title: "Important Information | Property Sale Profit",
+    description:
+      "Important limitations of the Property Sale Profit calculator.",
+  });
+}
 
 export default function DisclaimerPage() {
   return (

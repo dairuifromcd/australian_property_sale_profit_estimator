@@ -1,10 +1,18 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { metadataForPage } from "../site-config";
 
-export const metadata = {
-  title: "Privacy | Property Sale Profit",
-  description:
-    "How Property Sale Profit handles calculator inputs and technical data.",
-};
+export async function generateMetadata() {
+  const requestHeaders = await headers();
+
+  return metadataForPage({
+    host: requestHeaders.get("host"),
+    path: "/privacy",
+    title: "Privacy | Property Sale Profit",
+    description:
+      "How Property Sale Profit handles calculator inputs and technical data.",
+  });
+}
 
 export default function PrivacyPage() {
   return (

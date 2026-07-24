@@ -4,14 +4,18 @@ import test from "node:test";
 
 const templateRoot = new URL("../", import.meta.url);
 
-async function render() {
+async function fetchBuiltRoute(url, accept) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
+  const requestUrl = new URL(url);
 
   return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
+    new Request(requestUrl, {
+      headers: {
+        accept,
+        host: requestUrl.host,
+      },
     }),
     {
       ASSETS: {
@@ -22,6 +26,32 @@ async function render() {
       waitUntil() {},
       passThroughOnException() {},
     },
+  );
+}
+
+async function render(url = "http://localhost/") {
+  return fetchBuiltRoute(url, "text/html");
+}
+
+function tagsWithAttributes(html, tagName, expectedAttributes) {
+  const tags = html.match(new RegExp(`<${tagName}\\b[^>]*>`, "gi")) ?? [];
+  return tags.filter((tag) =>
+    Object.entries(expectedAttributes).every(([name, value]) =>
+      tag.includes(`${name}="${value}"`),
+    ),
+  );
+}
+
+function assertTagAttributes(html, tagName, expectedAttributes) {
+  const matchingTags = tagsWithAttributes(
+    html,
+    tagName,
+    expectedAttributes,
+  );
+
+  assert.ok(
+    matchingTags.length > 0,
+    `Expected a <${tagName}> tag with ${JSON.stringify(expectedAttributes)}`,
   );
 }
 
@@ -70,21 +100,204 @@ test("server-renders the property sale calculator", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("removes disposable starter preview code and metadata", async () => {
-  const [page, calculator, layout, packageJson] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/calculator.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-  ]);
+test("indexes only the production host and always uses production canonicals", async () => {
+  const productionResponse = await render("https://propertysaleprofit.au/");
+  const productionHtml = await productionResponse.text();
 
-  assert.doesNotMatch(page, /SkeletonPreview|codex-preview/);
-  assert.match(page, /Whole-property transaction loss/);
-  assert.match(page, /Before holding costs, debt and tax/);
-  assert.match(page, /Sale price sensitivity/);
-  assert.match(page, /"LOSS"/);
+  assertTagAttributes(productionHtml, "meta", {
+    name: "robots",
+    content: "index, follow",
+  });
+  assertTagAttributes(productionHtml, "link", {
+    rel: "canonical",
+    href: "https://propertysaleprofit.au/",
+  });
+  assertTagAttributes(productionHtml, "meta", {
+    property: "og:url",
+    content: "https://propertysaleprofit.au/",
+  });
+  assertTagAttributes(productionHtml, "meta", {
+    name: "twitter:card",
+    content: "summary",
+  });
+  assert.equal(
+    tagsWithAttributes(productionHtml, "meta", { name: "robots" }).length,
+    1,
+  );
+  assert.equal(
+    tagsWithAttributes(productionHtml, "link", { rel: "canonical" }).length,
+    1,
+  );
+
+  for (const url of [
+    "https://property-profit-au.dairuifromcd.workers.dev/",
+    "https://example-property-profit-au.dairuifromcd.workers.dev/",
+    "https://www.propertysaleprofit.au/",
+    "https://propertysaleprofit.au.example/",
+    "http://localhost/",
+  ]) {
+    const response = await render(url);
+    const html = await response.text();
+
+    assertTagAttributes(html, "meta", {
+      name: "robots",
+      content: "noindex, nofollow",
+    });
+    assertTagAttributes(html, "link", {
+      rel: "canonical",
+      href: "https://propertysaleprofit.au/",
+    });
+    assert.doesNotMatch(html, /rel="canonical"[^>]+workers\.dev/i);
+    assert.doesNotMatch(html, /property="og:url"[^>]+workers\.dev/i);
+    assert.equal(
+      tagsWithAttributes(html, "meta", { name: "robots" }).length,
+      1,
+    );
+    assert.equal(
+      tagsWithAttributes(html, "link", { rel: "canonical" }).length,
+      1,
+    );
+  }
+});
+
+test("publishes a distinct production canonical for each public page", async () => {
+  for (const [path, canonical] of [
+    ["/privacy", "https://propertysaleprofit.au/privacy"],
+    ["/disclaimer", "https://propertysaleprofit.au/disclaimer"],
+  ]) {
+    const response = await render(`https://propertysaleprofit.au${path}`);
+    const html = await response.text();
+
+    assertTagAttributes(html, "meta", {
+      name: "robots",
+      content: "index, follow",
+    });
+    assertTagAttributes(html, "link", {
+      rel: "canonical",
+      href: canonical,
+    });
+    assertTagAttributes(html, "meta", {
+      property: "og:url",
+      content: canonical,
+    });
+    assertTagAttributes(html, "meta", {
+      property: "og:site_name",
+      content: "Property Sale Profit",
+    });
+    assert.equal(
+      tagsWithAttributes(html, "meta", { name: "robots" }).length,
+      1,
+    );
+    assert.equal(
+      tagsWithAttributes(html, "link", { rel: "canonical" }).length,
+      1,
+    );
+  }
+
+  const previewResponse = await render(
+    "https://example-property-profit-au.dairuifromcd.workers.dev/privacy",
+  );
+  const previewHtml = await previewResponse.text();
+  assertTagAttributes(previewHtml, "meta", {
+    name: "robots",
+    content: "noindex, nofollow",
+  });
+  assertTagAttributes(previewHtml, "link", {
+    rel: "canonical",
+    href: "https://propertysaleprofit.au/privacy",
+  });
+});
+
+test("serves crawlable robots rules that reference only the production sitemap", async () => {
+  const response = await fetchBuiltRoute(
+    "https://example-property-profit-au.dairuifromcd.workers.dev/robots.txt",
+    "text/plain",
+  );
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/plain\b/i);
+
+  const body = await response.text();
+  assert.match(body, /^User-Agent: \*\nAllow: \/$/m);
+  assert.match(
+    body,
+    /^Sitemap: https:\/\/propertysaleprofit\.au\/sitemap\.xml$/m,
+  );
+  assert.doesNotMatch(body, /workers\.dev|localhost/i);
+  assert.doesNotMatch(body, /Disallow:\s*\/$/im);
+});
+
+test("serves a sitemap containing only canonical public URLs", async () => {
+  const response = await fetchBuiltRoute(
+    "https://propertysaleprofit.au/sitemap.xml",
+    "application/xml",
+  );
+
+  assert.equal(response.status, 200);
+  assert.match(
+    response.headers.get("content-type") ?? "",
+    /^application\/xml\b/i,
+  );
+
+  const body = await response.text();
+  const locations = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+    (match) => match[1],
+  );
+
+  assert.deepEqual(locations, [
+    "https://propertysaleprofit.au/",
+    "https://propertysaleprofit.au/privacy",
+    "https://propertysaleprofit.au/disclaimer",
+  ]);
+  assert.doesNotMatch(body, /workers\.dev|localhost/i);
+  assert.doesNotMatch(body, /<lastmod>/i);
+});
+
+test("keeps unknown production URLs out of the index", async () => {
+  const response = await render(
+    "https://propertysaleprofit.au/this-page-does-not-exist",
+  );
+
+  assert.equal(response.status, 404);
+
+  const html = await response.text();
+  assertTagAttributes(html, "meta", {
+    name: "robots",
+    content: "noindex",
+  });
+  assert.equal(
+    tagsWithAttributes(html, "meta", { name: "robots" }).length,
+    1,
+  );
+  assert.equal(
+    tagsWithAttributes(html, "link", { rel: "canonical" }).length,
+    0,
+  );
+  assert.equal(
+    tagsWithAttributes(html, "meta", { property: "og:url" }).length,
+    0,
+  );
+  assert.match(html, /Page not found/);
+});
+
+test("removes disposable starter preview code and metadata", async () => {
+  const [page, calculatorPage, calculator, layout, packageJson] =
+    await Promise.all([
+      readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../app/calculator-page.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../app/calculator.ts", import.meta.url), "utf8"),
+      readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../package.json", import.meta.url), "utf8"),
+    ]);
+  const renderedPageSource = `${page}\n${calculatorPage}`;
+
+  assert.doesNotMatch(renderedPageSource, /SkeletonPreview|codex-preview/);
+  assert.match(renderedPageSource, /Whole-property transaction loss/);
+  assert.match(renderedPageSource, /Before holding costs, debt and tax/);
+  assert.match(renderedPageSource, /Sale price sensitivity/);
+  assert.match(renderedPageSource, /"LOSS"/);
   assert.doesNotMatch(
-    `${page}\n${calculator}\n${layout}`,
+    `${renderedPageSource}\n${calculator}\n${layout}`,
     /estimateTax|estimatedCgt|taxableCapitalGain|TaxResult|PropertyUse/,
   );
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);

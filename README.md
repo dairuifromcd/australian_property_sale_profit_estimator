@@ -6,8 +6,9 @@ An Australia-focused, browser-only calculator for estimating property selling
 costs, proceeds before debt and tax, transaction profit before holding costs,
 debt and tax, and a break-even sale price for the transaction costs entered.
 
-The hosted site is the first public MVP. Search indexing remains disabled
-during the initial production rollout.
+The hosted site is the first public MVP. Only the canonical production domain
+is eligible for search indexing; local, Workers and Preview hosts remain
+`noindex`.
 
 ## Why this exists
 
@@ -150,12 +151,33 @@ No Cloudflare password, API token, account ID or GitHub token belongs in the
 repository. Workers Builds creates and manages its deployment token when the
 repository is connected.
 
+## Search discovery
+
+The canonical site origin is `https://propertysaleprofit.au`. The production
+host publishes `index, follow`; Workers, Preview and local hosts publish
+`noindex, nofollow` while still pointing canonical metadata at the production
+URL. This prevents publicly accessible deployment URLs from competing with the
+custom domain.
+
+The application also publishes:
+
+- `https://propertysaleprofit.au/robots.txt`
+- `https://propertysaleprofit.au/sitemap.xml`
+
+After a production deployment, the domain owner must verify the domain with
+Google Search Console and Bing Webmaster Tools, then submit the sitemap.
+
 ## Project structure
 
 ```text
-app/page.tsx               calculator interface
+app/page.tsx               indexable home route and page metadata
+app/calculator-page.tsx    interactive calculator interface
 app/calculator.ts          pure calculation logic
 app/globals.css            responsive visual design
+app/site-config.ts         canonical origin and host-aware metadata rules
+app/not-found.tsx          non-indexable unknown-page response
+app/robots.ts              crawler discovery rules
+app/sitemap.ts             canonical public URL inventory
 app/privacy/               privacy notice
 app/disclaimer/            scope, limitations and non-affiliation notice
 tests/calculator.test.ts   calculation scenarios
