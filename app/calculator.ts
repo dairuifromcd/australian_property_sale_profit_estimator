@@ -48,6 +48,7 @@ export interface CalculatorResult {
 }
 
 const MAX_MONEY_INPUT = 1_000_000_000_000;
+const MAX_COMMISSION_RATE = 99.9;
 
 function nonNegative(value: number): number {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -100,11 +101,11 @@ function validateTransactionInput(
   if (
     !Number.isFinite(rawInput.commissionRate) ||
     rawInput.commissionRate < 0 ||
-    rawInput.commissionRate >= 100
+    rawInput.commissionRate > MAX_COMMISSION_RATE
   ) {
     addError(
       "commissionRate",
-      "Enter a commission rate from 0% to less than 100%.",
+      "Enter a commission rate from 0% to 99.9%.",
     );
   }
 
@@ -237,17 +238,17 @@ export function calculateRequiredSalePrice(
     };
   }
 
-  const exactRequiredSalePrice =
-    (fixedTransactionCosts(rawInput) + targetProfit) /
-    (1 - percentage(rawInput.commissionRate));
-
-  if (!Number.isFinite(exactRequiredSalePrice)) {
+  if (targetProfit > MAX_MONEY_INPUT) {
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "The entered target is too large to calculate.",
+      validationError: "Enter a target profit no greater than $1 trillion.",
     };
   }
+
+  const exactRequiredSalePrice =
+    (fixedTransactionCosts(rawInput) + targetProfit) /
+    (1 - percentage(rawInput.commissionRate));
 
   const requiredSalePrice = Math.ceil(exactRequiredSalePrice);
 

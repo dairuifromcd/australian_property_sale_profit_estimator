@@ -168,7 +168,18 @@ test("keeps target-profit validation separate from the main estimate", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "The entered target is too large to calculate.",
+      validationError: "Enter a target profit no greater than $1 trillion.",
+    },
+  );
+});
+
+test("rejects target profit above the supported safe range", () => {
+  assert.deepEqual(
+    calculateRequiredSalePrice(input(), 1_000_000_000_001),
+    {
+      requiredSalePrice: null,
+      differenceFromExpectedSalePrice: null,
+      validationError: "Enter a target profit no greater than $1 trillion.",
     },
   );
 });
@@ -333,7 +344,7 @@ test("requires positive sale and purchase prices", () => {
 });
 
 test("rejects invalid commission rates", () => {
-  for (const commissionRate of [-1, 100, Number.NaN]) {
+  for (const commissionRate of [-1, 99.91, 100, Number.NaN]) {
     const result = calculateEstimate(input({ commissionRate }));
 
     assert.equal(result.hasCalculationErrors, true);

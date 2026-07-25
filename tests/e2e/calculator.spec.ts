@@ -81,11 +81,16 @@ test("rejects impossible commission rates", async ({ page }) => {
   });
 
   await expect(page.locator("#commission-rate-error")).toHaveText(
-    "Enter a commission rate from 0% to less than 100%.",
+    "Enter a commission rate from 0% to 99.9%.",
   );
   await expect(
     page.getByRole("heading", { name: "Check the highlighted fields" }),
   ).toBeVisible();
+
+  await page.locator("#commission-rate").fill("99.91");
+  await expect(page.locator("#commission-rate-error")).toHaveText(
+    "Enter a commission rate from 0% to 99.9%.",
+  );
 });
 
 test("rejects negative quick and detailed costs", async ({ page }) => {
@@ -263,6 +268,14 @@ test("calculates the sale price needed for a target transaction profit", async (
     "Sale price needed for this target",
   );
   await expect(page.locator(".primary-result")).toContainText("$2,500");
+
+  await page.locator("#target-profit").fill("1000000000001");
+  await expect(page.locator("#target-profit-error")).toHaveText(
+    "Enter a target profit no greater than $1 trillion.",
+  );
+  await expect(targetPlanner).not.toContainText(
+    "Sale price needed for this target",
+  );
 
   await page.locator("#target-profit").fill("0");
   await expect(targetPlanner).toContainText("$622,449");
