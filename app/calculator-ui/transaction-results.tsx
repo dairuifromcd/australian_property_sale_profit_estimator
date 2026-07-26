@@ -1,6 +1,6 @@
 import type { CalculatorResult } from "../calculator";
 import { numberFromInput } from "../input-format";
-import { aud } from "./format";
+import { aud, calculationAud } from "./format";
 import {
   CalculationDetails,
   OutcomeStatus,
@@ -107,15 +107,21 @@ export function TransactionResults({
           purchase price, buying costs and improvements.
         </p>
         <code>
-          {aud.format(numberFromInput(inputs.salePrice))} −{" "}
-          {aud.format(result.agentCommission)} −{" "}
-          {aud.format(numberFromInput(inputs.otherSellingCosts))} −{" "}
-          {aud.format(numberFromInput(inputs.salePreparationCosts))} −{" "}
-          {aud.format(numberFromInput(inputs.purchasePrice))} −{" "}
-          {aud.format(numberFromInput(inputs.purchaseCosts))} −{" "}
-          {aud.format(numberFromInput(inputs.renovationsAndImprovements))} ={" "}
-          {aud.format(result.transactionProfit)}
+          {calculationAud.format(numberFromInput(inputs.salePrice))} −{" "}
+          {calculationAud.format(result.agentCommission)} −{" "}
+          {calculationAud.format(numberFromInput(inputs.otherSellingCosts))} −{" "}
+          {calculationAud.format(numberFromInput(inputs.salePreparationCosts))}{" "}
+          − {calculationAud.format(numberFromInput(inputs.purchasePrice))} −{" "}
+          {calculationAud.format(numberFromInput(inputs.purchaseCosts))} −{" "}
+          {calculationAud.format(
+            numberFromInput(inputs.renovationsAndImprovements),
+          )}{" "}
+          ≈ {calculationAud.format(result.transactionProfit)}
         </code>
+        <small>
+          Displayed amounts are rounded to cents; the estimate uses the entered
+          values before display rounding.
+        </small>
       </CalculationDetails>
 
       {showHoldingResult ? (
@@ -170,11 +176,14 @@ function HoldingResult({
       </small>
       <CalculationDetails>
         <code>
-          {aud.format(result.transactionProfit)} +{" "}
-          {aud.format(numberFromInput(inputs.totalRentalIncome))} −{" "}
-          {aud.format(numberFromInput(inputs.totalHoldingCosts))} ={" "}
-          {aud.format(result.overallPreTaxPropertyResult)}
+          {calculationAud.format(result.transactionProfit)} +{" "}
+          {calculationAud.format(numberFromInput(inputs.totalRentalIncome))} −{" "}
+          {calculationAud.format(numberFromInput(inputs.totalHoldingCosts))} ≈{" "}
+          {calculationAud.format(result.overallPreTaxPropertyResult)}
         </code>
+        <small>
+          The estimate uses the transaction result before display rounding.
+        </small>
       </CalculationDetails>
     </section>
   );
@@ -230,10 +239,16 @@ function SettlementCashResult({
       </small>
       <CalculationDetails>
         <code>
-          {aud.format(result.amountAfterSellingCosts)} −{" "}
-          {aud.format(numberFromInput(inputs.estimatedLoanPayout))} ={" "}
-          {aud.format(result.estimatedCashAfterLoanPayout)}
+          {calculationAud.format(result.amountAfterSellingCosts)} −{" "}
+          {calculationAud.format(
+            numberFromInput(inputs.estimatedLoanPayout),
+          )}{" "}
+          ≈ {calculationAud.format(result.estimatedCashAfterLoanPayout)}
         </code>
+        <small>
+          Displayed amounts are rounded to cents; the estimate uses values
+          before display rounding.
+        </small>
       </CalculationDetails>
     </section>
   );

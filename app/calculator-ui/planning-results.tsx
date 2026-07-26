@@ -3,7 +3,8 @@ import type {
   RequiredSalePriceResult,
 } from "../calculator";
 import { numberFromInput } from "../input-format";
-import { aud } from "./format";
+import { AmountInput } from "./fields";
+import { aud, calculationAud } from "./format";
 import { CalculationDetails, toneFor } from "./result-primitives";
 import type { InputState } from "./use-calculator-form";
 
@@ -49,8 +50,8 @@ export function PlanningResults({
               Rounded up to the next dollar.
             </p>
             <code>
-              {aud.format(result.fixedTransactionCosts)} ÷ (1 −{" "}
-              {numberFromInput(inputs.commissionRate)}%) ={" "}
+              {calculationAud.format(result.fixedTransactionCosts)} ÷ (1 −{" "}
+              {numberFromInput(inputs.commissionRate)}%) → rounded up ={" "}
               {aud.format(result.breakEvenSalePrice)}
             </code>
           </CalculationDetails>
@@ -84,19 +85,17 @@ export function PlanningResults({
             }`}
           >
             <span aria-hidden="true">$</span>
-            <input
+            <AmountInput
               id="target-profit"
-              type="text"
-              inputMode="decimal"
               value={targetProfit}
-              onChange={(event) => updateTargetProfit(event.target.value)}
+              onChange={updateTargetProfit}
               placeholder="100,000"
-              aria-describedby={
+              describedBy={
                 targetProfitError
                   ? "target-profit-help target-profit-error"
                   : "target-profit-help"
               }
-              aria-invalid={targetProfitError ? true : undefined}
+              invalid={Boolean(targetProfitError)}
             />
             <span className="currency" aria-hidden="true">
               AUD
@@ -129,9 +128,9 @@ export function PlanningResults({
                 one minus the commission rate. Rounded up to the next dollar.
               </p>
               <code>
-                ({aud.format(result.fixedTransactionCosts)} +{" "}
-                {aud.format(numberFromInput(targetProfit))}) ÷ (1 −{" "}
-                {numberFromInput(inputs.commissionRate)}%) ={" "}
+                ({calculationAud.format(result.fixedTransactionCosts)} +{" "}
+                {calculationAud.format(numberFromInput(targetProfit))}) ÷ (1 −{" "}
+                {numberFromInput(inputs.commissionRate)}%) → rounded up ={" "}
                 {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
               </code>
             </CalculationDetails>
@@ -198,12 +197,16 @@ export function PlanningResults({
           </p>
           {result.salePriceSensitivity.map((scenario) => (
             <code key={scenario.changePercent}>
-              {aud.format(scenario.salePrice)} −{" "}
-              {aud.format(scenario.agentCommission)} commission −{" "}
-              {aud.format(result.fixedTransactionCosts)} fixed costs ={" "}
-              {aud.format(scenario.transactionProfit)}
+              {calculationAud.format(scenario.salePrice)} −{" "}
+              {calculationAud.format(scenario.agentCommission)} commission −{" "}
+              {calculationAud.format(result.fixedTransactionCosts)} fixed costs{" "}
+              ≈ {calculationAud.format(scenario.transactionProfit)}
             </code>
           ))}
+          <small>
+            Displayed amounts are rounded to cents; each scenario uses values
+            before display rounding.
+          </small>
         </CalculationDetails>
       </section>
     </>

@@ -8,6 +8,7 @@ import {
 } from "../app/calculator.ts";
 import {
   formatAmountInput,
+  normaliseAmountInputDraft,
   numberFromInput,
 } from "../app/input-format.ts";
 
@@ -36,11 +37,29 @@ test("formats monetary input with grouping separators", () => {
   assert.equal(numberFromInput("1,250,000.50"), 1_250_000.5);
 });
 
+test("preserves a stable monetary draft while the user is editing", () => {
+  assert.equal(normaliseAmountInputDraft("1,000"), "1000");
+  assert.equal(normaliseAmountInputDraft(",000"), "000");
+  assert.equal(normaliseAmountInputDraft("2,000"), "2000");
+  assert.equal(
+    normaliseAmountInputDraft("$ 1,250,000.50"),
+    "1250000.50",
+  );
+  assert.equal(normaliseAmountInputDraft("000"), "000");
+  assert.equal(normaliseAmountInputDraft(".5"), ".5");
+  assert.equal(normaliseAmountInputDraft("-1.2"), "-1.2");
+  assert.equal(normaliseAmountInputDraft("12..345"), "12.34");
+  assert.equal(normaliseAmountInputDraft("abc"), "");
+  assert.equal(normaliseAmountInputDraft("-"), "-");
+});
+
 test("normalises partial and malformed monetary text safely", () => {
   assert.equal(formatAmountInput(""), "");
   assert.equal(formatAmountInput("-"), "-");
   assert.equal(formatAmountInput(".5"), "0.5");
+  assert.equal(formatAmountInput("-0.5"), "-0.5");
   assert.equal(formatAmountInput("12..34"), "12.34");
+  assert.equal(formatAmountInput("000"), "0");
   assert.equal(formatAmountInput("abc"), "");
   assert.equal(numberFromInput(""), 0);
   assert.equal(numberFromInput("-"), 0);

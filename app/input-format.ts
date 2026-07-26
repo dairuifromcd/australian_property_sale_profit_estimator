@@ -1,4 +1,11 @@
-export function formatAmountInput(value: string): string {
+type AmountParts = {
+  isNegative: boolean;
+  wholePart: string;
+  fractionPart: string;
+  hasDecimalPoint: boolean;
+};
+
+function amountParts(value: string): AmountParts {
   const trimmed = value.trimStart();
   const isNegative = trimmed.startsWith("-");
   const numeric = value.replace(/[^\d.]/g, "");
@@ -11,15 +18,40 @@ export function formatAmountInput(value: string): string {
           .slice(dotIndex + 1)
           .replace(/\./g, "")
           .slice(0, 2);
+
+  return {
+    isNegative,
+    wholePart,
+    fractionPart,
+    hasDecimalPoint: dotIndex !== -1,
+  };
+}
+
+export function normaliseAmountInputDraft(value: string): string {
+  const { isNegative, wholePart, fractionPart, hasDecimalPoint } =
+    amountParts(value);
+
+  if (!wholePart && !hasDecimalPoint) {
+    return isNegative ? "-" : "";
+  }
+
+  return `${isNegative ? "-" : ""}${wholePart}${
+    hasDecimalPoint ? `.${fractionPart}` : ""
+  }`;
+}
+
+export function formatAmountInput(value: string): string {
+  const { isNegative, wholePart, fractionPart, hasDecimalPoint } =
+    amountParts(value);
   const normalizedWhole =
     wholePart.replace(/^0+(?=\d)/, "") ||
-    (dotIndex === -1 ? "" : "0");
+    (hasDecimalPoint ? "0" : "");
   const groupedWhole = normalizedWhole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   if (!groupedWhole && isNegative) return "-";
 
   return `${isNegative ? "-" : ""}${groupedWhole}${
-    dotIndex === -1 ? "" : `.${fractionPart}`
+    hasDecimalPoint ? `.${fractionPart}` : ""
   }`;
 }
 

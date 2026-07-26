@@ -6,7 +6,7 @@ import {
   calculateRequiredSalePrice,
   type CalculatorInput,
 } from "../calculator";
-import { formatAmountInput, numberFromInput } from "../input-format";
+import { numberFromInput } from "../input-format";
 
 export type InputState = {
   salePrice: string;
@@ -48,7 +48,7 @@ export function useCalculatorForm() {
   };
 
   const updateTargetProfit = (value: string) => {
-    setTargetProfit(formatAmountInput(value));
+    setTargetProfit(value);
   };
 
   const resetCalculator = () => {

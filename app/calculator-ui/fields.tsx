@@ -1,5 +1,15 @@
-import type { ReactNode } from "react";
-import { formatAmountInput } from "../input-format";
+"use client";
+
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  formatAmountInput,
+  normaliseAmountInputDraft,
+} from "../input-format";
 
 type FieldProps = {
   id: string;
@@ -14,6 +24,97 @@ type FieldProps = {
 type AmountFieldProps = FieldProps & {
   help?: ReactNode;
 };
+
+type AmountInputProps = {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  describedBy?: string;
+  invalid?: boolean;
+  required?: boolean;
+};
+
+function selectionPosition(value: string, position: number | null): number {
+  if (position === null) {
+    return normaliseAmountInputDraft(value).length;
+  }
+
+  return normaliseAmountInputDraft(value.slice(0, position)).length;
+}
+
+export function AmountInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  describedBy,
+  invalid = false,
+  required = false,
+}: AmountInputProps) {
+  const [hasEditedSinceFocus, setHasEditedSinceFocus] = useState(false);
+  const [selectionRevision, setSelectionRevision] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pendingSelectionRef = useRef<{
+    start: number;
+    end: number;
+  } | null>(null);
+  const displayedValue = hasEditedSinceFocus
+    ? normaliseAmountInputDraft(value)
+    : formatAmountInput(value);
+
+  useLayoutEffect(() => {
+    const pendingSelection = pendingSelectionRef.current;
+    if (!pendingSelection || !inputRef.current) {
+      return;
+    }
+
+    inputRef.current.setSelectionRange(
+      pendingSelection.start,
+      pendingSelection.end,
+    );
+    pendingSelectionRef.current = null;
+  }, [displayedValue, hasEditedSinceFocus, selectionRevision]);
+
+  return (
+    <input
+      ref={inputRef}
+      id={id}
+      type="text"
+      inputMode="decimal"
+      value={displayedValue}
+      onFocus={() => setHasEditedSinceFocus(false)}
+      onChange={(event) => {
+        pendingSelectionRef.current = {
+          start: selectionPosition(
+            event.currentTarget.value,
+            event.currentTarget.selectionStart,
+          ),
+          end: selectionPosition(
+            event.currentTarget.value,
+            event.currentTarget.selectionEnd,
+          ),
+        };
+        onChange(normaliseAmountInputDraft(event.currentTarget.value));
+        setHasEditedSinceFocus(true);
+        setSelectionRevision((revision) => revision + 1);
+      }}
+      onBlur={(event) => {
+        pendingSelectionRef.current = null;
+        onChange(
+          normaliseAmountInputDraft(
+            formatAmountInput(event.currentTarget.value),
+          ),
+        );
+        setHasEditedSinceFocus(false);
+      }}
+      placeholder={placeholder}
+      aria-describedby={describedBy}
+      aria-invalid={invalid ? true : undefined}
+      required={required}
+    />
+  );
+}
 
 export function AmountField({
   id,
@@ -37,15 +138,13 @@ export function AmountField({
       </span>
       <span className={`money-input ${error ? "field-control-error" : ""}`}>
         <span aria-hidden="true">$</span>
-        <input
+        <AmountInput
           id={id}
-          type="text"
-          inputMode="decimal"
           value={value}
-          onChange={(event) => onChange(formatAmountInput(event.target.value))}
+          onChange={onChange}
           placeholder={placeholder}
-          aria-describedby={describedBy}
-          aria-invalid={error ? true : undefined}
+          describedBy={describedBy}
+          invalid={Boolean(error)}
           required={required}
         />
         <span className="currency" aria-hidden="true">

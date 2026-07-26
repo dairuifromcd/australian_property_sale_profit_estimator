@@ -43,9 +43,10 @@ test("requires four quick inputs and accepts explicit zero costs", async ({
   await page.locator("#sale-price").fill("1000000");
   await page.locator("#purchase-price").fill("650000");
   await expect(page.locator("#sale-price")).toHaveValue("1,000,000");
-  await expect(page.locator("#purchase-price")).toHaveValue("650,000");
+  await expect(page.locator("#purchase-price")).toHaveValue("650000");
 
   await page.locator("#commission-rate").fill("0");
+  await expect(page.locator("#purchase-price")).toHaveValue("650,000");
   await page.locator("#other-selling-costs").fill("0");
 
   await expect(results).toContainText("Whole-property transaction profit");
@@ -54,6 +55,35 @@ test("requires four quick inputs and accepts explicit zero costs", async ({
   await expect(
     page.getByRole("button", { name: "Print or save as PDF" }),
   ).toBeEnabled();
+});
+
+test("keeps money editing stable and groups the value only on blur", async ({
+  page,
+}) => {
+  const salePrice = page.locator("#sale-price");
+  const commissionRate = page.locator("#commission-rate");
+
+  await salePrice.fill("1000");
+  await commissionRate.click();
+  await expect(salePrice).toHaveValue("1,000");
+
+  await salePrice.click();
+  await expect(salePrice).toHaveValue("1,000");
+  await salePrice.evaluate((input: HTMLInputElement) => {
+    input.setSelectionRange(0, 1);
+  });
+  await salePrice.press("Backspace");
+  await expect(salePrice).toHaveValue("000");
+  await salePrice.type("2");
+  await expect(salePrice).toHaveValue("2000");
+
+  await commissionRate.click();
+  await expect(salePrice).toHaveValue("2,000");
+
+  await salePrice.fill("$ 1,250,000.50");
+  await expect(salePrice).toHaveValue("1250000.50");
+  await commissionRate.click();
+  await expect(salePrice).toHaveValue("1,250,000.50");
 });
 
 test("rejects zero sale and purchase prices", async ({ page }) => {
@@ -251,7 +281,7 @@ test("calculates the sale price needed for a target transaction profit", async (
   await expect(targetPlanner).toBeVisible();
 
   await page.locator("#target-profit").fill("100000");
-  await expect(page.locator("#target-profit")).toHaveValue("100,000");
+  await expect(page.locator("#target-profit")).toHaveValue("100000");
   await expect(targetPlanner).toContainText(
     "Sale price needed for this target",
   );
@@ -259,6 +289,10 @@ test("calculates the sale price needed for a target transaction profit", async (
   await expect(targetPlanner).toContainText(
     "$99,490 above your expected sale price of $625,000.",
   );
+  await page.locator("#commission-rate").click();
+  await expect(page.locator("#target-profit")).toHaveValue("100,000");
+  await page.locator("#target-profit").click();
+  await expect(page.locator("#target-profit")).toHaveValue("100,000");
 
   await page.locator("#target-profit").fill("-1");
   await expect(page.locator("#target-profit-error")).toHaveText(
@@ -440,13 +474,69 @@ test("shows substituted calculations for every derived result group", async ({
   }
 
   await expect(page.locator(".results-panel")).toContainText(
-    "$1,000,000 − $20,000 − $10,000",
+    "$1,000,000.00 − $20,000.00 − $10,000.00",
   );
   await expect(page.locator(".results-panel")).toContainText(
-    "$370,000 + $90,000 − $55,000 = $405,000",
+    "$370,000.00 + $90,000.00 − $55,000.00 ≈ $405,000.00",
   );
   await expect(page.locator(".results-panel")).toContainText(
-    "$970,000 − $450,000 = $520,000",
+    "$970,000.00 − $450,000.00 ≈ $520,000.00",
+  );
+});
+
+test("keeps every displayed calculation honest for cent inputs", async ({
+  page,
+}) => {
+  await fillQuickInputs(page, {
+    salePrice: "1000001.49",
+    purchasePrice: "600000.51",
+    commissionRate: "2.37",
+    sellingCosts: "8500.49",
+  });
+  await page.getByText("Add transaction details", { exact: true }).click();
+  await page.locator("#sale-preparation-costs").fill("4000.51");
+  await page.locator("#purchase-costs").fill("32000.49");
+  await page
+    .locator("#renovations-and-improvements")
+    .fill("25000.51");
+  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator("#total-holding-costs").fill("85000.49");
+  await page.locator("#total-rental-income").fill("60000.51");
+  await page.locator("#estimated-loan-payout").fill("420000.49");
+  await page.locator("#target-profit").fill("100000.51");
+
+  const calculationToggles = page.getByText("Show calculation", {
+    exact: true,
+  });
+  await expect(calculationToggles).toHaveCount(6);
+  for (let index = 0; index < 6; index += 1) {
+    await calculationToggles.nth(index).click();
+  }
+
+  const results = page.locator(".results-panel");
+  await expect(results).toContainText(
+    "$1,000,001.49 − $23,700.04 − $8,500.49 − $4,000.51 − $600,000.51 − $32,000.49 − $25,000.51 ≈ $306,798.94",
+  );
+  await expect(results).toContainText(
+    "$306,798.94 + $60,000.51 − $85,000.49 ≈ $281,798.96",
+  );
+  await expect(results).toContainText(
+    "$963,800.45 − $420,000.49 ≈ $543,799.96",
+  );
+  await expect(results).toContainText(
+    "$669,502.51 ÷ (1 − 2.37%) → rounded up = $685,755",
+  );
+  await expect(results).toContainText(
+    "($669,502.51 + $100,000.51) ÷ (1 − 2.37%) → rounded up = $788,183",
+  );
+  await expect(results).toContainText(
+    "$950,001.42 − $22,515.03 commission − $669,502.51 fixed costs ≈ $257,983.87",
+  );
+  await expect(results).toContainText(
+    "$1,000,001.49 − $23,700.04 commission − $669,502.51 fixed costs ≈ $306,798.94",
+  );
+  await expect(results).toContainText(
+    "$1,050,001.56 − $24,885.04 commission − $669,502.51 fixed costs ≈ $355,614.02",
   );
 });
 
