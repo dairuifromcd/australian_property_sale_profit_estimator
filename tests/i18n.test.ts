@@ -82,9 +82,30 @@ test("locale routes preserve the English URLs and localize every page", () => {
 
 test("localized source text preserves key scope and privacy boundaries", () => {
   assert.match(zhHans.home.limitationsBody, /不计算资本利得税/);
-  assert.match(ko.home.limitationsBody, /양도소득세.*계산하지 않습니다/);
+  assert.match(
+    ko.home.limitationsBody,
+    /자본이득세\(CGT\).*계산하지 않습니다/,
+  );
   assert.match(zhHans.privacy.entriesBody, /不会.*传输.*服务器|不会.*服务器/);
   assert.match(ko.privacy.entriesBody, /서버로 전송하거나 서버에 저장하지 않습니다/);
   assert.match(zhHans.disclaimer.adviceBody, /不提供税务/);
   assert.match(ko.disclaimer.adviceBody, /세무.*조언을 제공하지 않습니다/);
+  assert.doesNotMatch(entries(ko).map(([, value]) => value).join(" "), /결제/);
+});
+
+test("localized fragments form complete sentences around links", () => {
+  assert.equal(enAU.form.salePriceHelpAfter, ".");
+  assert.equal(zhHans.form.salePriceHelpAfter, "。");
+  assert.equal(ko.form.salePriceHelpAfter, "에서 확인하세요.");
+  assert.equal(enAU.privacy.cloudflareAfter, ".");
+  assert.equal(zhHans.privacy.cloudflareAfter, "。");
+  assert.equal(ko.privacy.cloudflareAfter, ".");
+
+  const chineseQuestions = `${zhHans.privacy.questionsBefore} ${zhHans.privacy.issueTracker}${zhHans.privacy.questionsAfter}`;
+  const koreanQuestions = `${ko.privacy.questionsBefore} ${ko.privacy.issueTracker}${ko.privacy.questionsAfter}`;
+
+  assert.match(chineseQuestions, /公开问题跟踪器联系。/);
+  assert.doesNotMatch(chineseQuestions, /跟踪器\./);
+  assert.match(koreanQuestions, /공개 이슈 트래커를 통해 문의하세요/);
+  assert.doesNotMatch(koreanQuestions, /트래커\.\s*를/);
 });

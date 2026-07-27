@@ -62,7 +62,7 @@ export function CalculatorForm({
               >
                 Domain
               </a>
-              .
+              {messages.salePriceHelpAfter}
             </>
           }
         />

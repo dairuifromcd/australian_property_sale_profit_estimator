@@ -142,8 +142,10 @@
 }
 
 .result-row strong {
+  min-width: 0;
   color: #f4f7f5;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
   text-align: right;
 }
 
@@ -290,7 +292,10 @@
 }
 
 .secondary-metric > strong {
-  flex: 0 0 auto;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .secondary-metric strong {

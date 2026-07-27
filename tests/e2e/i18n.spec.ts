@@ -115,6 +115,76 @@ test("language links preserve the current legal page", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("localized link sentences, language names and currency affixes remain intact", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+
+  for (const [path, languageName, saleHelp] of [
+    [
+      "/zh-Hans",
+      "简体中文",
+      "需要参考？可查看 realestate.com.au 或 Domain。",
+    ],
+    [
+      "/ko",
+      "한국어",
+      "참고 가격이 필요하면 realestate.com.au 또는 Domain에서 확인하세요.",
+    ],
+  ] as const) {
+    await page.goto(path);
+    await waitForClient(page);
+    await expect(
+      page.getByRole("link", { name: languageName, exact: true }),
+    ).toBeVisible();
+    await expect(page.locator("#sale-price-help")).toContainText(saleHelp);
+    await page.locator("#sale-price").fill("1000000");
+    await page.locator("#purchase-price").fill("600000");
+    await page.locator("#commission-rate").fill("2");
+    await page.locator("#other-selling-costs").fill("10000");
+
+    const currencyLayout = await page.locator(".currency").evaluateAll(
+      (elements) =>
+        elements.map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            height: rect.height,
+            whiteSpace: getComputedStyle(element).whiteSpace,
+          };
+        }),
+    );
+
+    expect(currencyLayout.length).toBeGreaterThan(0);
+    expect(
+      currencyLayout.every(
+        ({ height, whiteSpace }) =>
+          whiteSpace === "nowrap" && height <= 20,
+      ),
+    ).toBe(true);
+  }
+
+  await page.goto("/zh-Hans/privacy");
+  await expect(
+    page.locator(".legal-section").filter({
+      has: page.getByRole("heading", { name: "问题与联系" }),
+    }),
+  ).toContainText(
+    "请通过项目的 公开问题跟踪器联系。请勿在公开问题中填写个人、房产或财务信息。",
+  );
+  await expect(page.locator("main")).toContainText(
+    "请参阅 Cloudflare 隐私政策。",
+  );
+
+  await page.goto("/ko/privacy");
+  await expect(
+    page.locator(".legal-section").filter({
+      has: page.getByRole("heading", { name: "문의" }),
+    }),
+  ).toContainText(
+    "프로젝트의 공개 이슈 트래커를 통해 문의하세요. 공개 이슈에 개인, 부동산 또는 재무 정보를 포함하지 마세요.",
+  );
+});
+
 test("localized home and legal pages do not overflow on mobile", async ({
   page,
 }) => {

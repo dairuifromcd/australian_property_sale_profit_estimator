@@ -9,6 +9,7 @@
 
 .form-panel,
 .results-panel {
+  min-width: 0;
   border: 1px solid rgba(16, 42, 56, 0.14);
   background: rgba(255, 254, 250, 0.94);
   box-shadow: var(--shadow);
@@ -140,10 +141,17 @@
 }
 
 .currency {
+  flex: 0 0 auto;
   color: var(--muted);
   font-size: 11px;
   font-weight: 760;
   letter-spacing: 0.05em;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.field-help a {
+  overflow-wrap: anywhere;
 }
 
 .field > input,
@@ -269,5 +277,12 @@
 
   .details-block > summary {
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  .form-panel,
+  .results-panel {
+    padding: 18px;
   }
 }

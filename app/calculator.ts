@@ -61,6 +61,10 @@ export interface CalculatorResult {
 
 const MAX_MONEY_INPUT = 1_000_000_000_000;
 const MAX_COMMISSION_RATE = 99.9;
+const BIGINT_ZERO = BigInt(0);
+const BIGINT_ONE = BigInt(1);
+const BIGINT_TEN = BigInt(10);
+const BIGINT_ONE_HUNDRED = BigInt(100);
 
 function nonNegative(value: number): number {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -78,6 +82,71 @@ function fixedTransactionCosts(input: CalculatorInput): number {
     nonNegative(input.otherSellingCosts) +
     nonNegative(input.salePreparationCosts)
   );
+}
+
+function moneyInCents(value: number): bigint {
+  return BigInt(Math.round(nonNegative(value) * 100));
+}
+
+function fixedTransactionCostsInCents(input: CalculatorInput): bigint {
+  return [
+    input.purchasePrice,
+    input.purchaseCosts,
+    input.renovationsAndImprovements,
+    input.otherSellingCosts,
+    input.salePreparationCosts,
+  ].reduce(
+    (total, value) => total + moneyInCents(value),
+    BIGINT_ZERO,
+  );
+}
+
+function decimalRatio(value: number): {
+  numerator: bigint;
+  denominator: bigint;
+} {
+  const [coefficient, exponentText = "0"] = value
+    .toString()
+    .toLowerCase()
+    .split("e");
+  const [wholePart, fractionPart = ""] = coefficient.split(".");
+  const digits = `${wholePart}${fractionPart}`.replace(/^0+(?=\d)/, "");
+  const decimalPlaces = fractionPart.length - Number(exponentText);
+
+  if (decimalPlaces <= 0) {
+    return {
+      numerator:
+        BigInt(digits) * BIGINT_TEN ** BigInt(-decimalPlaces),
+      denominator: BIGINT_ONE,
+    };
+  }
+
+  return {
+    numerator: BigInt(digits),
+    denominator: BIGINT_TEN ** BigInt(decimalPlaces),
+  };
+}
+
+function ceilDivision(numerator: bigint, denominator: bigint): bigint {
+  return (numerator + denominator - BIGINT_ONE) / denominator;
+}
+
+function requiredWholeDollarSalePrice(
+  input: CalculatorInput,
+  targetProfit = 0,
+): number {
+  const commission = decimalRatio(nonNegative(input.commissionRate));
+  const percentageDenominator =
+    BIGINT_ONE_HUNDRED * commission.denominator;
+  const retainedPercentage =
+    percentageDenominator - commission.numerator;
+  const requiredDollars = ceilDivision(
+    (fixedTransactionCostsInCents(input) + moneyInCents(targetProfit)) *
+      commission.denominator,
+    retainedPercentage,
+  );
+
+  return Number(requiredDollars);
 }
 
 function validateTransactionInput(
@@ -186,7 +255,7 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
   const enteredFixedTransactionCosts = fixedTransactionCosts(rawInput);
   const breakEvenSalePrice = hasTransactionErrors
     ? 0
-    : Math.ceil(enteredFixedTransactionCosts / (1 - commissionRate));
+    : requiredWholeDollarSalePrice(rawInput);
   const salePriceSensitivity: SalePriceSensitivityScenario[] =
     hasTransactionErrors
       ? []
@@ -257,11 +326,10 @@ export function calculateRequiredSalePrice(
     };
   }
 
-  const exactRequiredSalePrice =
-    (fixedTransactionCosts(rawInput) + targetProfit) /
-    (1 - percentage(rawInput.commissionRate));
-
-  const requiredSalePrice = Math.ceil(exactRequiredSalePrice);
+  const requiredSalePrice = requiredWholeDollarSalePrice(
+    rawInput,
+    targetProfit,
+  );
 
   return {
     requiredSalePrice,

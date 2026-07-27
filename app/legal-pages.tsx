@@ -89,7 +89,7 @@ export function PrivacyPageContent({
             >
               {content.cloudflareLink}
             </a>
-            .
+            {content.cloudflareAfter}
           </p>
         </section>
 
@@ -114,7 +114,7 @@ export function PrivacyPageContent({
             >
               {content.issueTracker}
             </a>
-            . {content.questionsAfter}
+            {content.questionsAfter}
           </p>
         </section>
 

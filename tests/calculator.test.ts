@@ -162,6 +162,58 @@ test("rounds required prices up so the displayed whole-dollar price meets the ta
   );
 });
 
+test("does not round an exact high-commission result up by an extra dollar", () => {
+  const highCommissionInput = input({
+    purchasePrice: 600_000,
+    commissionRate: 99.9,
+    otherSellingCosts: 0,
+  });
+  const estimate = calculateEstimate(highCommissionInput);
+  const target = calculateRequiredSalePrice(highCommissionInput, 0);
+
+  assert.equal(estimate.breakEvenSalePrice, 600_000_000);
+  assert.equal(target.requiredSalePrice, 600_000_000);
+});
+
+test("preserves very small decimal commission rates", () => {
+  const smallCommissionInput = input({
+    salePrice: 100,
+    purchasePrice: 100,
+    commissionRate: 0.000_000_1,
+    otherSellingCosts: 0,
+  });
+
+  assert.equal(
+    calculateEstimate(smallCommissionInput).breakEvenSalePrice,
+    101,
+  );
+  assert.equal(
+    calculateRequiredSalePrice(smallCommissionInput, 1)
+      .requiredSalePrice,
+    102,
+  );
+});
+
+test("keeps break-even and target prices exact at supported money limits", () => {
+  const maximumInput = input({
+    salePrice: 1_000_000_000_000,
+    purchasePrice: 1_000_000_000_000,
+    commissionRate: 99.9,
+    otherSellingCosts: 1_000_000_000_000,
+    salePreparationCosts: 1_000_000_000_000,
+    purchaseCosts: 1_000_000_000_000,
+    renovationsAndImprovements: 1_000_000_000_000,
+  });
+  const estimate = calculateEstimate(maximumInput);
+  const target = calculateRequiredSalePrice(
+    maximumInput,
+    1_000_000_000_000,
+  );
+
+  assert.equal(estimate.breakEvenSalePrice, 5_000_000_000_000_000);
+  assert.equal(target.requiredSalePrice, 6_000_000_000_000_000);
+});
+
 test("keeps target-profit validation separate from the main estimate", () => {
   for (const targetProfit of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
     const result = calculateRequiredSalePrice(input(), targetProfit);

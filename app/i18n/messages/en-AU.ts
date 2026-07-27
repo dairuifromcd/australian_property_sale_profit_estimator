@@ -92,6 +92,7 @@ export const enAU = {
     salePrice: "Expected sale price",
     salePriceHelpBefore: "Need a reference? Check",
     salePriceHelpOr: "or",
+    salePriceHelpAfter: ".",
     purchasePrice: "Original purchase price",
     commissionRate: "Agent commission",
     commissionHelp:
@@ -243,6 +244,7 @@ export const enAU = {
       "Cloudflare hosts, secures and delivers this site. Like other web infrastructure providers, it may process technical request data such as an IP address, browser information, requested URL, request time and security signals. Calculator entries are not placed in the URL.",
     cloudflareBefore: "See the",
     cloudflareLink: "Cloudflare Privacy Policy",
+    cloudflareAfter: ".",
     accountsTitle: "Accounts, analytics and cookies",
     accountsBody:
       "This release has no user accounts, feedback form, advertising analytics or application cookies. These practices may change in a later release; this notice will be updated before such features are introduced.",
@@ -253,7 +255,7 @@ export const enAU = {
     questionsBefore: "Contact the project through its",
     issueTracker: "public issue tracker",
     questionsAfter:
-      "Do not include personal, property or financial information in a public issue.",
+      ". Do not include personal, property or financial information in a public issue.",
     updated: "Last updated 24 July 2026.",
   },
   disclaimer: {

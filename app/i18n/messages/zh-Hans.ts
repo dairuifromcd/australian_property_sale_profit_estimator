@@ -89,6 +89,7 @@ export const zhHans = {
     salePrice: "预计售价",
     salePriceHelpBefore: "需要参考？可查看",
     salePriceHelpOr: "或",
+    salePriceHelpAfter: "。",
     purchasePrice: "原始买价",
     commissionRate: "中介佣金率",
     commissionHelp:
@@ -113,7 +114,7 @@ export const zhHans = {
       "这些数据不会改变交易利润、保本售价或达到目标交易利润所需的售价。",
     holdingCosts: "已支付的持有成本总额",
     holdingCostsHelp:
-      "您希望计入的利息（不含贷款本金）、Council rates、保险、物业管理费、管理费、维护费及其他持有成本。",
+      "您希望计入的利息（不含贷款本金）、Council rates、保险、业主委员会费（body corporate）、房屋中介管理费、维护费及其他持有成本。",
     rentalIncome: "已收租金总额",
     rentalIncomeHelp:
       "与持有成本相同期间内收到的租金总额；如没有租金收入请输入 0。",
@@ -226,6 +227,7 @@ export const zhHans = {
       "Cloudflare 托管、保护并交付本网站。与其他网站基础设施提供商一样，它可能处理 IP 地址、浏览器信息、请求网址、请求时间和安全信号等技术请求数据。计算器输入不会写入网址。",
     cloudflareBefore: "请参阅",
     cloudflareLink: "Cloudflare 隐私政策",
+    cloudflareAfter: "。",
     accountsTitle: "账户、分析和 Cookie",
     accountsBody:
       "当前版本没有用户账户、反馈表单、广告分析或应用 Cookie。如未来版本改变这些做法，我们会在引入相关功能前更新本声明。",

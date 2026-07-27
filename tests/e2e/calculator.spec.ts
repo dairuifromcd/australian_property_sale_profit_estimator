@@ -646,3 +646,31 @@ test("resets the calculator and avoids horizontal overflow on mobile", async ({
     page.getByRole("button", { name: "Print or save as PDF" }),
   ).toBeDisabled();
 });
+
+test("keeps maximum supported calculations exact without 320px overflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 812 });
+  await fillQuickInputs(page, {
+    salePrice: "1000000000000",
+    purchasePrice: "1000000000000",
+    commissionRate: "99.9",
+    sellingCosts: "1000000000000",
+  });
+
+  const results = page.locator(".results-panel");
+  await expect(results.locator(".secondary-metric")).toContainText(
+    "$2,000,000,000,000,000",
+  );
+
+  await page.locator("#target-profit").fill("1000000000000");
+  await expect(
+    page.getByRole("region", { name: "Sale price for a target profit" }),
+  ).toContainText("$3,000,000,000,000,000");
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    ),
+  ).toBe(false);
+});
