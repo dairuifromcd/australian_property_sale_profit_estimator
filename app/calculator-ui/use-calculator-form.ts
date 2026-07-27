@@ -6,6 +6,7 @@ import {
   calculateRequiredSalePrice,
   type CalculatorInput,
 } from "../calculator";
+import type { SiteMessages } from "../i18n/messages/types";
 import { numberFromInput } from "../input-format";
 
 export type InputState = {
@@ -34,7 +35,9 @@ const INITIAL_INPUTS: InputState = {
   totalRentalIncome: "",
 };
 
-export function useCalculatorForm() {
+export function useCalculatorForm(
+  validationMessages: SiteMessages["validation"],
+) {
   const [inputs, setInputs] = useState<InputState>(INITIAL_INPUTS);
   const [targetProfit, setTargetProfit] = useState("");
   const transactionDetailsRef = useRef<HTMLDetailsElement>(null);
@@ -91,8 +94,11 @@ export function useCalculatorForm() {
 
   const errorFor = (field: keyof CalculatorInput) => {
     if (inputs[field] === "") return undefined;
-    return result.validationErrors.find((error) => error.field === field)
-      ?.message;
+    const code = result.validationErrors.find(
+      (error) => error.field === field,
+    )?.code;
+
+    return code ? validationMessages[code] : undefined;
   };
 
   const hasHoldingCashFlowInputs =
@@ -115,6 +121,9 @@ export function useCalculatorForm() {
   const hasLoanPayoutError = result.validationErrors.some(
     (error) => error.field === "estimatedLoanPayout",
   );
+  const hasAnyInput =
+    targetProfit !== "" ||
+    Object.values(inputs).some((value) => value !== "");
 
   return {
     inputs,
@@ -133,6 +142,7 @@ export function useCalculatorForm() {
     hasAllQuickInputs,
     hasHoldingCashFlowErrors,
     hasLoanPayoutError,
+    hasAnyInput,
     canShowEstimate: hasAllQuickInputs && !result.hasTransactionErrors,
   };
 }

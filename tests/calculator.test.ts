@@ -169,7 +169,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     assert.deepEqual(result, {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Enter a target profit of zero or more.",
+      validationError: "targetZeroOrMore",
     });
   }
 
@@ -178,7 +178,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Complete a valid transaction estimate first.",
+      validationError: "completeValidEstimate",
     },
   );
 
@@ -187,7 +187,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Enter a target profit no greater than $1 trillion.",
+      validationError: "targetMaxTrillion",
     },
   );
 });
@@ -198,7 +198,7 @@ test("rejects target profit above the supported safe range", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Enter a target profit no greater than $1 trillion.",
+      validationError: "targetMaxTrillion",
     },
   );
 });
@@ -355,7 +355,7 @@ test("requires positive sale and purchase prices", () => {
     assert.deepEqual(result.validationErrors, [
       {
         field,
-        message: "Enter an amount greater than zero.",
+        code: "amountGreaterThanZero",
       },
     ]);
     assert.equal(result.breakEvenSalePrice, 0);
@@ -472,7 +472,7 @@ test("rejects monetary inputs above the supported safe range", () => {
       result.validationErrors.find((error) => error.field === field),
       {
         field,
-        message: "Enter an amount no greater than $1 trillion.",
+        code: "amountMaxTrillion",
       },
     );
   }

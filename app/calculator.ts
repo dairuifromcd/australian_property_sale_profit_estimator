@@ -1,6 +1,18 @@
+export const validationErrorCodes = [
+  "amountGreaterThanZero",
+  "amountZeroOrMore",
+  "amountMaxTrillion",
+  "commissionRange",
+  "completeValidEstimate",
+  "targetZeroOrMore",
+  "targetMaxTrillion",
+] as const;
+
+export type ValidationErrorCode = (typeof validationErrorCodes)[number];
+
 export interface CalculatorValidationError {
   field: keyof CalculatorInput;
-  message: string;
+  code: ValidationErrorCode;
 }
 
 export interface CalculatorInput {
@@ -26,7 +38,7 @@ export interface SalePriceSensitivityScenario {
 export interface RequiredSalePriceResult {
   requiredSalePrice: number | null;
   differenceFromExpectedSalePrice: number | null;
-  validationError: string | null;
+  validationError: ValidationErrorCode | null;
 }
 
 export interface CalculatorResult {
@@ -72,15 +84,17 @@ function validateTransactionInput(
   rawInput: CalculatorInput,
 ): CalculatorValidationError[] {
   const errors: CalculatorValidationError[] = [];
-  const addError = (field: keyof CalculatorInput, message: string) =>
-    errors.push({ field, message });
+  const addError = (
+    field: keyof CalculatorInput,
+    code: ValidationErrorCode,
+  ) => errors.push({ field, code });
 
   for (const field of ["salePrice", "purchasePrice"] as const) {
     const value = rawInput[field];
     if (!Number.isFinite(value) || value <= 0) {
-      addError(field, "Enter an amount greater than zero.");
+      addError(field, "amountGreaterThanZero");
     } else if (value > MAX_MONEY_INPUT) {
-      addError(field, "Enter an amount no greater than $1 trillion.");
+      addError(field, "amountMaxTrillion");
     }
   }
 
@@ -92,9 +106,9 @@ function validateTransactionInput(
   ] as const) {
     const value = rawInput[field];
     if (!Number.isFinite(value) || value < 0) {
-      addError(field, "Enter an amount of zero or more.");
+      addError(field, "amountZeroOrMore");
     } else if (value > MAX_MONEY_INPUT) {
-      addError(field, "Enter an amount no greater than $1 trillion.");
+      addError(field, "amountMaxTrillion");
     }
   }
 
@@ -103,10 +117,7 @@ function validateTransactionInput(
     rawInput.commissionRate < 0 ||
     rawInput.commissionRate > MAX_COMMISSION_RATE
   ) {
-    addError(
-      "commissionRate",
-      "Enter a commission rate from 0% to 99.9%.",
-    );
+    addError("commissionRate", "commissionRange");
   }
 
   return errors;
@@ -124,11 +135,11 @@ function validateSupplementaryInput(
   ] as const) {
     const value = rawInput[field];
     if (!Number.isFinite(value) || value < 0) {
-      errors.push({ field, message: "Enter an amount of zero or more." });
+      errors.push({ field, code: "amountZeroOrMore" });
     } else if (value > MAX_MONEY_INPUT) {
       errors.push({
         field,
-        message: "Enter an amount no greater than $1 trillion.",
+        code: "amountMaxTrillion",
       });
     }
   }
@@ -226,7 +237,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Complete a valid transaction estimate first.",
+      validationError: "completeValidEstimate",
     };
   }
 
@@ -234,7 +245,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Enter a target profit of zero or more.",
+      validationError: "targetZeroOrMore",
     };
   }
 
@@ -242,7 +253,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
-      validationError: "Enter a target profit no greater than $1 trillion.",
+      validationError: "targetMaxTrillion",
     };
   }
 

@@ -216,6 +216,126 @@ test("publishes a distinct production canonical for each public page", async () 
   });
 });
 
+test("server-renders every locale with localized metadata and language links", async () => {
+  for (const [
+    path,
+    lang,
+    title,
+    heading,
+    canonical,
+  ] of [
+    [
+      "/",
+      "en-AU",
+      "Property Sale Profit | Australian Property Sale Profit Estimator",
+      "Estimate your property sale result and cash position.",
+      "https://propertysaleprofit.au/",
+    ],
+    [
+      "/zh-Hans",
+      "zh-Hans",
+      "澳洲房产出售收益计算器 | Property Sale Profit",
+      "估算房产出售结果和现金状况。",
+      "https://propertysaleprofit.au/zh-Hans",
+    ],
+    [
+      "/ko",
+      "ko",
+      "호주 부동산 매각 수익 계산기 | Property Sale Profit",
+      "부동산 매각 결과와 현금 상황을 추정해 보세요.",
+      "https://propertysaleprofit.au/ko",
+    ],
+  ]) {
+    const response = await render(`https://propertysaleprofit.au${path}`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+
+    assert.match(html, new RegExp(`<html[^>]+lang="${lang}"`));
+    assert.match(html, new RegExp(`<title>${title}</title>`));
+    assert.match(html, new RegExp(heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assertTagAttributes(html, "link", {
+      rel: "canonical",
+      href: canonical,
+    });
+
+    for (const [hrefLang, href] of [
+      ["en-AU", "https://propertysaleprofit.au/"],
+      ["zh-Hans", "https://propertysaleprofit.au/zh-Hans"],
+      ["ko", "https://propertysaleprofit.au/ko"],
+      ["x-default", "https://propertysaleprofit.au/"],
+    ]) {
+      assertTagAttributes(html, "link", {
+        rel: "alternate",
+        hrefLang,
+        href,
+      });
+    }
+  }
+});
+
+test("server-renders localized legal pages and rejects unsupported locales", async () => {
+  for (const [path, lang, text, canonical] of [
+    [
+      "/zh-Hans/privacy",
+      "zh-Hans",
+      "您的数据如何处理",
+      "https://propertysaleprofit.au/zh-Hans/privacy",
+    ],
+    [
+      "/zh-Hans/disclaimer",
+      "zh-Hans",
+      "请仅将本估算作为起点",
+      "https://propertysaleprofit.au/zh-Hans/disclaimer",
+    ],
+    [
+      "/ko/privacy",
+      "ko",
+      "데이터 처리 방식",
+      "https://propertysaleprofit.au/ko/privacy",
+    ],
+    [
+      "/ko/disclaimer",
+      "ko",
+      "이 예상치는 출발점으로만 사용하세요",
+      "https://propertysaleprofit.au/ko/disclaimer",
+    ],
+  ]) {
+    const response = await render(`https://propertysaleprofit.au${path}`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, new RegExp(`<html[^>]+lang="${lang}"`));
+    assert.match(html, new RegExp(text));
+    assertTagAttributes(html, "link", {
+      rel: "canonical",
+      href: canonical,
+    });
+  }
+
+  const previewResponse = await render(
+    "https://example-property-profit-au.dairuifromcd.workers.dev/ko",
+  );
+  assertTagAttributes(await previewResponse.text(), "meta", {
+    name: "robots",
+    content: "noindex, nofollow",
+  });
+
+  for (const path of [
+    "/en-AU",
+    "/fr",
+    "/fr/privacy",
+    "/zh",
+    "/zh-Hans/not-a-page",
+  ]) {
+    const response = await render(`https://propertysaleprofit.au${path}`);
+    assert.equal(response.status, 404);
+    const html = await response.text();
+    assertTagAttributes(html, "meta", {
+      name: "robots",
+      content: "noindex",
+    });
+  }
+});
+
 test("serves crawlable robots rules that reference only the production sitemap", async () => {
   const response = await fetchBuiltRoute(
     "https://example-property-profit-au.dairuifromcd.workers.dev/robots.txt",
@@ -254,8 +374,14 @@ test("serves a sitemap containing only canonical public URLs", async () => {
 
   assert.deepEqual(locations, [
     "https://propertysaleprofit.au/",
+    "https://propertysaleprofit.au/zh-Hans",
+    "https://propertysaleprofit.au/ko",
     "https://propertysaleprofit.au/privacy",
+    "https://propertysaleprofit.au/zh-Hans/privacy",
+    "https://propertysaleprofit.au/ko/privacy",
     "https://propertysaleprofit.au/disclaimer",
+    "https://propertysaleprofit.au/zh-Hans/disclaimer",
+    "https://propertysaleprofit.au/ko/disclaimer",
   ]);
   assert.doesNotMatch(body, /workers\.dev|localhost/i);
   assert.doesNotMatch(body, /<lastmod>/i);
@@ -299,10 +425,11 @@ test("removes disposable starter preview code and metadata", async () => {
     resultPrimitives,
     calculator,
     layout,
+    englishMessages,
     packageJson,
   ] =
     await Promise.all([
-      readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../app/(english)/page.tsx", import.meta.url), "utf8"),
       readFile(new URL("../app/calculator-page.tsx", import.meta.url), "utf8"),
       readFile(
         new URL(
@@ -337,7 +464,14 @@ test("removes disposable starter preview code and metadata", async () => {
         "utf8",
       ),
       readFile(new URL("../app/calculator.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+      readFile(
+        new URL("../app/(english)/layout.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(
+        new URL("../app/i18n/messages/en-AU.ts", import.meta.url),
+        "utf8",
+      ),
       readFile(new URL("../package.json", import.meta.url), "utf8"),
     ]);
   const renderedPageSource = [
@@ -348,6 +482,7 @@ test("removes disposable starter preview code and metadata", async () => {
     transactionResults,
     planningResults,
     resultPrimitives,
+    englishMessages,
   ].join("\n");
 
   assert.doesNotMatch(renderedPageSource, /SkeletonPreview|codex-preview/);

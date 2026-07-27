@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
+import {
+  getMessages,
+  openGraphLocale,
+  pathFor,
+} from "./i18n/config";
+import {
+  locales,
+  type Locale,
+  type SitePage,
+} from "./i18n/routing";
 
 export const SITE_ORIGIN = "https://propertysaleprofit.au";
 export const SITE_HOSTNAME = "propertysaleprofit.au";
-export const HOME_TITLE =
-  "Property Sale Profit | Australian Property Sale Profit Estimator";
-export const HOME_DESCRIPTION =
-  "Estimate Australian property selling costs, transaction profit or loss, optional holding-period result, simplified settlement cash and target sale prices.";
+const englishMessages = getMessages("en-AU");
+export const HOME_TITLE = englishMessages.metadata.home.title;
+export const HOME_DESCRIPTION = englishMessages.metadata.home.description;
 export const HOME_OPEN_GRAPH_TITLE =
-  "Estimate your property sale result and cash position.";
+  englishMessages.metadata.home.openGraphTitle;
 export const HOME_OPEN_GRAPH_DESCRIPTION =
-  "Estimate selling costs, transaction result, optional holding cash flows and simplified cash after a loan payout privately in your browser.";
+  englishMessages.metadata.home.openGraphDescription;
 
 function hostnameFromHeader(host: string | null): string {
   if (!host) {
@@ -43,32 +52,51 @@ export function robotsForHost(host: string | null): Metadata["robots"] {
 
 export function metadataForPage({
   host,
-  path,
-  title,
-  description,
-  openGraphTitle = title,
-  openGraphDescription = description,
+  locale,
+  page,
 }: {
   host: string | null;
-  path: `/${string}` | "/";
-  title: string;
-  description: string;
-  openGraphTitle?: string;
-  openGraphDescription?: string;
+  locale: Locale;
+  page: SitePage;
 }): Metadata {
+  const messages = getMessages(locale);
+  const pageMetadata = messages.metadata[page];
+  const title = pageMetadata.title;
+  const description = pageMetadata.description;
+  const openGraphTitle =
+    "openGraphTitle" in pageMetadata
+      ? pageMetadata.openGraphTitle
+      : title;
+  const openGraphDescription =
+    "openGraphDescription" in pageMetadata
+      ? pageMetadata.openGraphDescription
+      : description;
+  const path = pathFor(locale, page);
+  const languages = Object.fromEntries([
+    ...locales.map((alternateLocale) => [
+      alternateLocale,
+      pathFor(alternateLocale, page),
+    ]),
+    ["x-default", pathFor("en-AU", page)],
+  ]);
+
   return {
     title,
     description,
     robots: robotsForHost(host),
     alternates: {
       canonical: path,
+      languages,
     },
     openGraph: {
       title: openGraphTitle,
       description: openGraphDescription,
       type: "website",
-      locale: "en_AU",
-      siteName: "Property Sale Profit",
+      locale: openGraphLocale[locale],
+      alternateLocale: locales
+        .filter((alternateLocale) => alternateLocale !== locale)
+        .map((alternateLocale) => openGraphLocale[alternateLocale]),
+      siteName: messages.common.siteName,
       url: path,
     },
     twitter: {

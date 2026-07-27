@@ -27,10 +27,16 @@ export function ResultRow({
   );
 }
 
-export function CalculationDetails({ children }: { children: ReactNode }) {
+export function CalculationDetails({
+  children,
+  summary,
+}: {
+  children: ReactNode;
+  summary: string;
+}) {
   return (
     <details className="calculation-details">
-      <summary>Show calculation</summary>
+      <summary>{summary}</summary>
       <div>{children}</div>
     </details>
   );
@@ -38,12 +44,12 @@ export function CalculationDetails({ children }: { children: ReactNode }) {
 
 export function OutcomeStatus({
   tone,
-  gainLabel = "PROFIT",
-  lossLabel = "LOSS",
+  gainLabel,
+  lossLabel,
 }: {
   tone: ResultTone;
-  gainLabel?: string;
-  lossLabel?: string;
+  gainLabel: string;
+  lossLabel: string;
 }) {
   return (
     <span className={`outcome-status ${tone}`}>

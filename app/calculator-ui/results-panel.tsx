@@ -1,11 +1,14 @@
 import { PlanningResults } from "./planning-results";
 import { TransactionResults } from "./transaction-results";
 import type { CalculatorController } from "./use-calculator-form";
+import type { CalculatorMessages } from "../i18n/messages/types";
 
 export function ResultsPanel({
   controller,
+  messages,
 }: {
   controller: CalculatorController;
+  messages: CalculatorMessages;
 }) {
   const {
     inputs,
@@ -26,16 +29,18 @@ export function ResultsPanel({
     <aside className="results-panel">
       <div className="result-topline">
         <span className="estimate-level">
-          {hasExpandedInputs ? "Expanded estimate" : "Quick estimate"}
+          {hasExpandedInputs
+            ? messages.results.expandedEstimate
+            : messages.results.quickEstimate}
         </span>
-        <span className="result-privacy">On-device</span>
+        <span className="result-privacy">{messages.results.onDevice}</span>
       </div>
 
       {!hasAllQuickInputs ? (
         <div className="empty-result" role="status" aria-atomic="true">
           <span className="empty-number">$—</span>
-          <h2>Complete the four quick inputs</h2>
-          <p>Enter 0 if commission or other selling costs do not apply.</p>
+          <h2>{messages.results.incompleteTitle}</h2>
+          <p>{messages.results.incompleteBody}</p>
         </div>
       ) : result.hasTransactionErrors ? (
         <div
@@ -44,8 +49,8 @@ export function ResultsPanel({
           aria-atomic="true"
         >
           <span className="empty-number">!</span>
-          <h2>Check the highlighted fields</h2>
-          <p>Fix the entered values before using this estimate.</p>
+          <h2>{messages.results.invalidTitle}</h2>
+          <p>{messages.results.invalidBody}</p>
         </div>
       ) : (
         <>
@@ -56,6 +61,7 @@ export function ResultsPanel({
               hasHoldingCashFlowInputs && !hasHoldingCashFlowErrors
             }
             showSettlementCash={hasLoanPayoutInput && !hasLoanPayoutError}
+            messages={messages.results}
           />
           <PlanningResults
             inputs={inputs}
@@ -63,6 +69,8 @@ export function ResultsPanel({
             targetProfit={targetProfit}
             targetSalePrice={targetSalePrice}
             updateTargetProfit={updateTargetProfit}
+            messages={messages.results}
+            validationMessages={messages.validation}
           />
         </>
       )}
@@ -73,13 +81,9 @@ export function ResultsPanel({
         onClick={() => window.print()}
         disabled={!canShowEstimate}
       >
-        Print or save as PDF
+        {messages.results.print}
       </button>
-      <p className="result-note">
-        Indicative estimates only—not accounting profit or a tax calculation.
-        Settlement cash excludes unentered adjustments. Confirm important
-        figures with qualified professionals before making a decision.
-      </p>
+      <p className="result-note">{messages.results.resultNote}</p>
     </aside>
   );
 }

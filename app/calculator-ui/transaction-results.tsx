@@ -8,17 +8,20 @@ import {
   toneFor,
 } from "./result-primitives";
 import type { InputState } from "./use-calculator-form";
+import type { SiteMessages } from "../i18n/messages/types";
 
 export function TransactionResults({
   inputs,
   result,
   showHoldingResult,
   showSettlementCash,
+  messages,
 }: {
   inputs: InputState;
   result: CalculatorResult;
   showHoldingResult: boolean;
   showSettlementCash: boolean;
+  messages: SiteMessages["results"];
 }) {
   const transactionTone = toneFor(result.transactionProfit);
 
@@ -32,60 +35,63 @@ export function TransactionResults({
         <div className="primary-result-heading">
           <span>
             {transactionTone === "loss"
-              ? "Whole-property transaction loss"
-              : "Whole-property transaction profit"}
+              ? messages.transactionLossTitle
+              : messages.transactionProfitTitle}
           </span>
-          <OutcomeStatus tone={transactionTone} />
+          <OutcomeStatus
+            tone={transactionTone}
+            gainLabel={messages.profitStatus}
+            lossLabel={messages.lossStatus}
+          />
         </div>
         <strong>{aud.format(result.transactionProfit)}</strong>
         <small>
-          Before holding costs, rental income, loan payout and tax. Additional
-          results appear separately when you enter them.
+          {messages.transactionIntro}
         </small>
       </div>
 
       <div className="result-breakdown">
         <ResultRow
-          label="Expected sale price"
+          label={messages.expectedSalePrice}
           value={numberFromInput(inputs.salePrice)}
         />
         <ResultRow
-          label="Agent commission"
+          label={messages.agentCommission}
           value={result.agentCommission}
           subtract
         />
         <ResultRow
-          label="Other selling costs"
+          label={messages.otherSellingCosts}
           value={numberFromInput(inputs.otherSellingCosts)}
           subtract
         />
         {numberFromInput(inputs.salePreparationCosts) > 0 ? (
           <ResultRow
-            label="Sale preparation costs"
+            label={messages.salePreparationCosts}
             value={numberFromInput(inputs.salePreparationCosts)}
             subtract
           />
         ) : null}
         <div className="result-divider" />
         <ResultRow
-          label="Amount remaining after selling costs"
+          label={messages.amountAfterSellingCosts}
           value={result.amountAfterSellingCosts}
         />
         <ResultRow
-          label="Purchase price"
+          label={messages.purchasePrice}
           value={numberFromInput(inputs.purchasePrice)}
           subtract
         />
         {numberFromInput(inputs.purchaseCosts) > 0 ? (
           <ResultRow
-            label="Buying costs"
+            label={messages.buyingCosts}
             value={numberFromInput(inputs.purchaseCosts)}
             subtract
           />
         ) : null}
         {numberFromInput(inputs.renovationsAndImprovements) > 0 ? (
           <ResultRow
-            label="Renovations and improvements"
+            label={messages.renovations}
             value={numberFromInput(inputs.renovationsAndImprovements)}
             subtract
           />
@@ -94,18 +100,15 @@ export function TransactionResults({
         <ResultRow
           label={
             transactionTone === "loss"
-              ? "Transaction loss"
-              : "Transaction profit"
+              ? messages.transactionLoss
+              : messages.transactionProfit
           }
           value={result.transactionProfit}
         />
       </div>
 
-      <CalculationDetails>
-        <p>
-          Expected sale price minus commission, selling and preparation costs,
-          purchase price, buying costs and improvements.
-        </p>
+      <CalculationDetails summary={messages.showCalculation}>
+        <p>{messages.transactionCalculation}</p>
         <code>
           {calculationAud.format(numberFromInput(inputs.salePrice))} −{" "}
           {calculationAud.format(result.agentCommission)} −{" "}
@@ -118,18 +121,19 @@ export function TransactionResults({
           )}{" "}
           ≈ {calculationAud.format(result.transactionProfit)}
         </code>
-        <small>
-          Displayed amounts are rounded to cents; the estimate uses the entered
-          values before display rounding.
-        </small>
+        <small>{messages.displayedAmountsNote}</small>
       </CalculationDetails>
 
       {showHoldingResult ? (
-        <HoldingResult inputs={inputs} result={result} />
+        <HoldingResult inputs={inputs} result={result} messages={messages} />
       ) : null}
 
       {showSettlementCash ? (
-        <SettlementCashResult inputs={inputs} result={result} />
+        <SettlementCashResult
+          inputs={inputs}
+          result={result}
+          messages={messages}
+        />
       ) : null}
     </>
   );
@@ -138,9 +142,11 @@ export function TransactionResults({
 function HoldingResult({
   inputs,
   result,
+  messages,
 }: {
   inputs: InputState;
   result: CalculatorResult;
+  messages: SiteMessages["results"];
 }) {
   const tone = toneFor(result.overallPreTaxPropertyResult);
 
@@ -151,39 +157,41 @@ function HoldingResult({
     >
       <div className="supplementary-result-heading">
         <div>
-          <span>Holding-period cash flows</span>
-          <h3 id="overall-result-title">Overall pre-tax property result</h3>
+          <span>{messages.holdingPeriodCashFlows}</span>
+          <h3 id="overall-result-title">{messages.overallResultTitle}</h3>
         </div>
-        <OutcomeStatus tone={tone} />
+        <OutcomeStatus
+          tone={tone}
+          gainLabel={messages.profitStatus}
+          lossLabel={messages.lossStatus}
+        />
       </div>
-      <ResultRow label="Transaction profit" value={result.transactionProfit} />
       <ResultRow
-        label="Rental income"
+        label={messages.transactionProfit}
+        value={result.transactionProfit}
+      />
+      <ResultRow
+        label={messages.rentalIncome}
         value={numberFromInput(inputs.totalRentalIncome)}
       />
       <ResultRow
-        label="Holding costs"
+        label={messages.holdingCosts}
         value={numberFromInput(inputs.totalHoldingCosts)}
         subtract
       />
       <div className="supplementary-total">
-        <span>Overall pre-tax result</span>
+        <span>{messages.overallResult}</span>
         <strong>{aud.format(result.overallPreTaxPropertyResult)}</strong>
       </div>
-      <small>
-        Before tax. Loan principal repayments are excluded because the purchase
-        price is already counted in transaction profit.
-      </small>
-      <CalculationDetails>
+      <small>{messages.overallResultNote}</small>
+      <CalculationDetails summary={messages.showCalculation}>
         <code>
           {calculationAud.format(result.transactionProfit)} +{" "}
           {calculationAud.format(numberFromInput(inputs.totalRentalIncome))} −{" "}
           {calculationAud.format(numberFromInput(inputs.totalHoldingCosts))} ≈{" "}
           {calculationAud.format(result.overallPreTaxPropertyResult)}
         </code>
-        <small>
-          The estimate uses the transaction result before display rounding.
-        </small>
+        <small>{messages.transactionPrecisionNote}</small>
       </CalculationDetails>
     </section>
   );
@@ -192,9 +200,11 @@ function HoldingResult({
 function SettlementCashResult({
   inputs,
   result,
+  messages,
 }: {
   inputs: InputState;
   result: CalculatorResult;
+  messages: SiteMessages["results"];
 }) {
   const tone = toneFor(result.estimatedCashAfterLoanPayout);
 
@@ -205,39 +215,38 @@ function SettlementCashResult({
     >
       <div className="supplementary-result-heading">
         <div>
-          <span>Simplified settlement cash</span>
+          <span>{messages.settlementCashLabel}</span>
           <h3 id="settlement-cash-title">
             {tone === "loss"
-              ? "Estimated cash shortfall after loan payout"
-              : "Estimated cash after loan payout"}
+              ? messages.settlementShortfallTitle
+              : messages.settlementCashTitle}
           </h3>
         </div>
         <OutcomeStatus
           tone={tone}
-          gainLabel="ESTIMATE"
-          lossLabel="SHORTFALL"
+          gainLabel={messages.estimateStatus}
+          lossLabel={messages.shortfallStatus}
         />
       </div>
       <ResultRow
-        label="Amount after selling costs"
+        label={messages.amountAfterSellingCosts}
         value={result.amountAfterSellingCosts}
       />
       <ResultRow
-        label="Estimated loan payout"
+        label={messages.estimatedLoanPayout}
         value={numberFromInput(inputs.estimatedLoanPayout)}
         subtract
       />
       <div className="supplementary-total">
         <span>
-          {tone === "loss" ? "Estimated cash shortfall" : "Estimated cash"}
+          {tone === "loss"
+            ? messages.estimatedCashShortfall
+            : messages.estimatedCash}
         </span>
         <strong>{aud.format(result.estimatedCashAfterLoanPayout)}</strong>
       </div>
-      <small>
-        Before tax and unentered settlement adjustments. Confirm the actual
-        payout with your lender and settlement professional.
-      </small>
-      <CalculationDetails>
+      <small>{messages.settlementNote}</small>
+      <CalculationDetails summary={messages.showCalculation}>
         <code>
           {calculationAud.format(result.amountAfterSellingCosts)} −{" "}
           {calculationAud.format(
@@ -245,10 +254,7 @@ function SettlementCashResult({
           )}{" "}
           ≈ {calculationAud.format(result.estimatedCashAfterLoanPayout)}
         </code>
-        <small>
-          Displayed amounts are rounded to cents; the estimate uses values
-          before display rounding.
-        </small>
+        <small>{messages.settlementPrecisionNote}</small>
       </CalculationDetails>
     </section>
   );

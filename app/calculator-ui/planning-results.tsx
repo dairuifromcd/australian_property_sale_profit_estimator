@@ -7,6 +7,8 @@ import { AmountInput } from "./fields";
 import { aud, calculationAud } from "./format";
 import { CalculationDetails, toneFor } from "./result-primitives";
 import type { InputState } from "./use-calculator-form";
+import type { SiteMessages } from "../i18n/messages/types";
+import { interpolate } from "../i18n/interpolate";
 
 export function PlanningResults({
   inputs,
@@ -14,15 +16,22 @@ export function PlanningResults({
   targetProfit,
   targetSalePrice,
   updateTargetProfit,
+  messages,
+  validationMessages,
 }: {
   inputs: InputState;
   result: CalculatorResult;
   targetProfit: string;
   targetSalePrice: RequiredSalePriceResult;
   updateTargetProfit: (value: string) => void;
+  messages: SiteMessages["results"];
+  validationMessages: SiteMessages["validation"];
 }) {
-  const targetProfitError =
-    targetProfit === "" ? undefined : targetSalePrice.validationError;
+  const targetProfitErrorCode =
+    targetProfit === "" ? null : targetSalePrice.validationError;
+  const targetProfitError = targetProfitErrorCode
+    ? validationMessages[targetProfitErrorCode]
+    : undefined;
   const hasTargetSalePrice =
     targetProfit !== "" &&
     targetSalePrice.requiredSalePrice !== null &&
@@ -32,26 +41,28 @@ export function PlanningResults({
   );
   const targetDifferenceText =
     roundedTargetDifference === 0
-      ? "Matches your expected sale price."
-      : `${aud.format(Math.abs(roundedTargetDifference))} ${
-          roundedTargetDifference > 0 ? "above" : "below"
-        } your expected sale price of ${aud.format(
-          numberFromInput(inputs.salePrice),
-        )}.`;
+      ? messages.targetMatches
+      : interpolate(
+          roundedTargetDifference > 0
+            ? messages.targetAbove
+            : messages.targetBelow,
+          {
+            difference: aud.format(Math.abs(roundedTargetDifference)),
+            salePrice: aud.format(numberFromInput(inputs.salePrice)),
+          },
+        );
 
   return (
     <>
       <div className="secondary-metric">
         <div>
-          <span>Break-even sale price for entered transaction costs</span>
-          <CalculationDetails>
-            <p>
-              Fixed transaction costs divided by one minus the commission rate.
-              Rounded up to the next dollar.
-            </p>
+          <span>{messages.breakEvenLabel}</span>
+          <CalculationDetails summary={messages.showCalculation}>
+            <p>{messages.breakEvenExplanation}</p>
             <code>
               {calculationAud.format(result.fixedTransactionCosts)} ÷ (1 −{" "}
-              {numberFromInput(inputs.commissionRate)}%) → rounded up ={" "}
+              {numberFromInput(inputs.commissionRate)}%) →{" "}
+              {messages.roundedUp} ={" "}
               {aud.format(result.breakEvenSalePrice)}
             </code>
           </CalculationDetails>
@@ -66,19 +77,15 @@ export function PlanningResults({
         aria-labelledby="target-sale-price-title"
       >
         <div className="target-sale-price-heading">
-          <h3 id="target-sale-price-title">Sale price for a target profit</h3>
-          <p>
-            Set a whole-property transaction profit before holding cash flows,
-            loan payout and tax. Commission is recalculated at the required
-            sale price, which is rounded up to the next dollar.
-          </p>
+          <h3 id="target-sale-price-title">{messages.targetTitle}</h3>
+          <p>{messages.targetIntro}</p>
         </div>
 
         <label
           className="target-profit-control no-print"
           htmlFor="target-profit"
         >
-          <span>Target transaction profit</span>
+          <span>{messages.targetProfit}</span>
           <span
             className={`money-input ${
               targetProfitError ? "field-control-error" : ""
@@ -102,7 +109,7 @@ export function PlanningResults({
             </span>
           </span>
           <small id="target-profit-help">
-            Enter 0 to reproduce the entered-cost break-even price.
+            {messages.targetProfitHelp}
           </small>
           {targetProfitError ? (
             <span className="field-error" id="target-profit-error">
@@ -117,20 +124,18 @@ export function PlanningResults({
             role="status"
             aria-live="polite"
           >
-            <span>Sale price needed for this target</span>
+            <span>{messages.targetResultLabel}</span>
             <strong>
               {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
             </strong>
             <small>{targetDifferenceText}</small>
-            <CalculationDetails>
-              <p>
-                Entered fixed transaction costs plus target profit, divided by
-                one minus the commission rate. Rounded up to the next dollar.
-              </p>
+            <CalculationDetails summary={messages.showCalculation}>
+              <p>{messages.targetCalculation}</p>
               <code>
                 ({calculationAud.format(result.fixedTransactionCosts)} +{" "}
                 {calculationAud.format(numberFromInput(targetProfit))}) ÷ (1 −{" "}
-                {numberFromInput(inputs.commissionRate)}%) → rounded up ={" "}
+                {numberFromInput(inputs.commissionRate)}%) →{" "}
+                {messages.roundedUp} ={" "}
                 {aud.format(targetSalePrice.requiredSalePrice ?? 0)}
               </code>
             </CalculationDetails>
@@ -143,19 +148,15 @@ export function PlanningResults({
         aria-labelledby="sale-sensitivity-title"
       >
         <div className="sale-sensitivity-heading">
-          <h3 id="sale-sensitivity-title">Sale price sensitivity</h3>
-          <p>
-            Illustrative scenarios 5% below and above your entered sale
-            price—not a price prediction. Commission is recalculated; other
-            entered costs stay fixed.
-          </p>
+          <h3 id="sale-sensitivity-title">{messages.sensitivityTitle}</h3>
+          <p>{messages.sensitivityIntro}</p>
         </div>
         <table>
           <thead>
             <tr>
-              <th scope="col">Scenario</th>
-              <th scope="col">Sale price</th>
-              <th scope="col">Result</th>
+              <th scope="col">{messages.scenario}</th>
+              <th scope="col">{messages.salePrice}</th>
+              <th scope="col">{messages.result}</th>
             </tr>
           </thead>
           <tbody>
@@ -163,7 +164,7 @@ export function PlanningResults({
               const scenarioTone = toneFor(scenario.transactionProfit);
               const scenarioLabel =
                 scenario.changePercent === 0
-                  ? "Current"
+                  ? messages.current
                   : scenario.changePercent > 0
                     ? `+${scenario.changePercent}%`
                     : `−${Math.abs(scenario.changePercent)}%`;
@@ -183,30 +184,30 @@ export function PlanningResults({
                     <strong className={scenarioTone}>
                       {aud.format(scenario.transactionProfit)}
                     </strong>
-                    <small>{scenarioTone === "loss" ? "Loss" : "Profit"}</small>
+                    <small>
+                      {scenarioTone === "loss"
+                        ? messages.loss
+                        : messages.profit}
+                    </small>
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-        <CalculationDetails>
-          <p>
-            Each row recalculates commission from its scenario sale price, then
-            subtracts the same fixed transaction costs.
-          </p>
+        <CalculationDetails summary={messages.showCalculation}>
+          <p>{messages.sensitivityCalculation}</p>
           {result.salePriceSensitivity.map((scenario) => (
             <code key={scenario.changePercent}>
               {calculationAud.format(scenario.salePrice)} −{" "}
-              {calculationAud.format(scenario.agentCommission)} commission −{" "}
-              {calculationAud.format(result.fixedTransactionCosts)} fixed costs{" "}
-              ≈ {calculationAud.format(scenario.transactionProfit)}
+              {calculationAud.format(scenario.agentCommission)}{" "}
+              {messages.commissionFormulaLabel} −{" "}
+              {calculationAud.format(result.fixedTransactionCosts)}{" "}
+              {messages.fixedCostsFormulaLabel} ≈{" "}
+              {calculationAud.format(scenario.transactionProfit)}
             </code>
           ))}
-          <small>
-            Displayed amounts are rounded to cents; each scenario uses values
-            before display rounding.
-          </small>
+          <small>{messages.sensitivityPrecisionNote}</small>
         </CalculationDetails>
       </section>
     </>

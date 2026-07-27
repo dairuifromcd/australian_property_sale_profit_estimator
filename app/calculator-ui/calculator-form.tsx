@@ -1,10 +1,13 @@
 import type { CalculatorController } from "./use-calculator-form";
 import { AmountField, PercentageField } from "./fields";
+import type { SiteMessages } from "../i18n/messages/types";
 
 export function CalculatorForm({
   controller,
+  messages,
 }: {
   controller: CalculatorController;
+  messages: SiteMessages["form"];
 }) {
   const {
     inputs,
@@ -19,30 +22,31 @@ export function CalculatorForm({
     <div className="form-panel">
       <div className="section-heading">
         <div>
-          <span className="step-label">01 · Quick estimate</span>
-          <h2 id="calculator-title">Start with four numbers</h2>
+          <span className="step-label">{messages.quickEstimateStep}</span>
+          <h2 id="calculator-title">{messages.title}</h2>
         </div>
         <button
           className="text-button no-print"
           type="button"
           onClick={resetCalculator}
         >
-          Reset
+          {messages.reset}
         </button>
       </div>
 
       <div className="field-grid">
         <AmountField
           id="sale-price"
-          label="Expected sale price"
+          label={messages.salePrice}
           value={inputs.salePrice}
           onChange={(value) => update("salePrice", value)}
           placeholder="1,050,000"
           error={errorFor("salePrice")}
           required
+          requiredLabel={messages.required}
           help={
             <>
-              Need a reference? Check{" "}
+              {messages.salePriceHelpBefore}{" "}
               <a
                 href="https://www.realestate.com.au/property/"
                 target="_blank"
@@ -50,7 +54,7 @@ export function CalculatorForm({
               >
                 realestate.com.au
               </a>{" "}
-              or{" "}
+              {messages.salePriceHelpOr}{" "}
               <a
                 href="https://www.domain.com.au/property-profile/"
                 target="_blank"
@@ -64,33 +68,36 @@ export function CalculatorForm({
         />
         <AmountField
           id="purchase-price"
-          label="Original purchase price"
+          label={messages.purchasePrice}
           value={inputs.purchasePrice}
           onChange={(value) => update("purchasePrice", value)}
           placeholder="650,000"
           error={errorFor("purchasePrice")}
           required
+          requiredLabel={messages.required}
         />
         <PercentageField
           id="commission-rate"
-          label="Agent commission"
+          label={messages.commissionRate}
           value={inputs.commissionRate}
           onChange={(value) => update("commissionRate", value)}
           placeholder="2.2"
           max={99.9}
           error={errorFor("commissionRate")}
-          help="Use the GST-inclusive rate from your agent quote. Enter 0 only if no commission applies."
+          help={messages.commissionHelp}
           required
+          requiredLabel={messages.required}
         />
         <AmountField
           id="other-selling-costs"
-          label="Other selling costs"
+          label={messages.otherSellingCosts}
           value={inputs.otherSellingCosts}
           onChange={(value) => update("otherSellingCosts", value)}
           placeholder="8,500"
           error={errorFor("otherSellingCosts")}
-          help="Advertising, conveyancing, legal and other selling costs. Enter 0 if none apply."
+          help={messages.otherSellingCostsHelp}
           required
+          requiredLabel={messages.required}
         />
       </div>
 
@@ -100,41 +107,41 @@ export function CalculatorForm({
       >
         <summary>
           <span>
-            <strong>Add transaction details</strong>
-            <small>Buying, preparation and improvement costs</small>
+            <strong>{messages.transactionDetailsTitle}</strong>
+            <small>{messages.transactionDetailsSummary}</small>
           </span>
           <span className="summary-action">
-            <span className="summary-action-closed">Add details</span>
-            <span className="summary-action-open">Hide details</span>
+            <span className="summary-action-closed">{messages.addDetails}</span>
+            <span className="summary-action-open">{messages.hideDetails}</span>
           </span>
         </summary>
         <div className="details-content field-grid">
           <AmountField
             id="sale-preparation-costs"
-            label="Sale preparation costs"
+            label={messages.salePreparationCosts}
             value={inputs.salePreparationCosts}
             onChange={(value) => update("salePreparationCosts", value)}
             placeholder="4,000"
             error={errorFor("salePreparationCosts")}
-            help="Styling, cleaning, repairs and other preparation costs entered for this sale."
+            help={messages.salePreparationHelp}
           />
           <AmountField
             id="purchase-costs"
-            label="Buying costs (excluding purchase price)"
+            label={messages.purchaseCosts}
             value={inputs.purchaseCosts}
             onChange={(value) => update("purchaseCosts", value)}
             placeholder="32,000"
             error={errorFor("purchaseCosts")}
-            help="Stamp duty, conveyancing and other purchase costs you want included."
+            help={messages.purchaseCostsHelp}
           />
           <AmountField
             id="renovations-and-improvements"
-            label="Renovations and improvements"
+            label={messages.renovations}
             value={inputs.renovationsAndImprovements}
             onChange={(value) => update("renovationsAndImprovements", value)}
             placeholder="25,000"
             error={errorFor("renovationsAndImprovements")}
-            help="The renovation and improvement spending you want included in this transaction estimate."
+            help={messages.renovationsHelp}
           />
         </div>
       </details>
@@ -145,45 +152,44 @@ export function CalculatorForm({
       >
         <summary>
           <span>
-            <strong>Add holding and loan details</strong>
-            <small>Optional overall result and settlement cash estimates</small>
+            <strong>{messages.holdingDetailsTitle}</strong>
+            <small>{messages.holdingDetailsSummary}</small>
           </span>
           <span className="summary-action">
-            <span className="summary-action-closed">Add details</span>
-            <span className="summary-action-open">Hide details</span>
+            <span className="summary-action-closed">{messages.addDetails}</span>
+            <span className="summary-action-open">{messages.hideDetails}</span>
           </span>
         </summary>
         <div className="details-intro">
-          These figures do not change transaction profit, break-even price or
-          the sale price needed for a target transaction profit.
+          {messages.holdingDetailsIntro}
         </div>
         <div className="details-content field-grid">
           <AmountField
             id="total-holding-costs"
-            label="Total holding costs paid"
+            label={messages.holdingCosts}
             value={inputs.totalHoldingCosts}
             onChange={(value) => update("totalHoldingCosts", value)}
             placeholder="85,000"
             error={errorFor("totalHoldingCosts")}
-            help="Interest (not loan principal), rates, insurance, body corporate, management, maintenance and other holding costs you want included."
+            help={messages.holdingCostsHelp}
           />
           <AmountField
             id="total-rental-income"
-            label="Total rental income received"
+            label={messages.rentalIncome}
             value={inputs.totalRentalIncome}
             onChange={(value) => update("totalRentalIncome", value)}
             placeholder="60,000"
             error={errorFor("totalRentalIncome")}
-            help="Gross rent received over the same period as the holding costs. Enter 0 if there was none."
+            help={messages.rentalIncomeHelp}
           />
           <AmountField
             id="estimated-loan-payout"
-            label="Estimated loan payout at settlement"
+            label={messages.loanPayout}
             value={inputs.estimatedLoanPayout}
             onChange={(value) => update("estimatedLoanPayout", value)}
             placeholder="420,000"
             error={errorFor("estimatedLoanPayout")}
-            help="Use a lender payout estimate if available. It can differ from the current loan balance and is used only for the simplified cash estimate."
+            help={messages.loanPayoutHelp}
           />
         </div>
       </details>

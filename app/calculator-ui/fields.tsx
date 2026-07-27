@@ -19,6 +19,7 @@ type FieldProps = {
   placeholder: string;
   error?: string;
   required?: boolean;
+  requiredLabel?: string;
 };
 
 type AmountFieldProps = FieldProps & {
@@ -125,6 +126,7 @@ export function AmountField({
   help,
   error,
   required = false,
+  requiredLabel = "Required",
 }: AmountFieldProps) {
   const helpId = help ? `${id}-help` : undefined;
   const errorId = error ? `${id}-error` : undefined;
@@ -134,7 +136,7 @@ export function AmountField({
     <label className="field" htmlFor={id}>
       <span className="field-label">
         {label}
-        {required ? <span className="required">Required</span> : null}
+        {required ? <span className="required">{requiredLabel}</span> : null}
       </span>
       <span className={`money-input ${error ? "field-control-error" : ""}`}>
         <span aria-hidden="true">$</span>
@@ -180,6 +182,7 @@ export function PercentageField({
   error,
   max = 100,
   required = false,
+  requiredLabel = "Required",
 }: PercentageFieldProps) {
   const helpId = help ? `${id}-help` : undefined;
   const errorId = error ? `${id}-error` : undefined;
@@ -189,7 +192,7 @@ export function PercentageField({
     <label className="field" htmlFor={id}>
       <span className="field-label">
         {label}
-        {required ? <span className="required">Required</span> : null}
+        {required ? <span className="required">{requiredLabel}</span> : null}
       </span>
       <span className={`percent-input ${error ? "field-control-error" : ""}`}>
         <input

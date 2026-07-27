@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../globals.css";
 import {
   HOME_DESCRIPTION,
   HOME_TITLE,
   SITE_ORIGIN,
-} from "./site-config";
+} from "../site-config";
 
 const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),

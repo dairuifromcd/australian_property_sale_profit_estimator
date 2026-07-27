@@ -57,6 +57,9 @@ Coverage labels are written as text so that they do not depend on colour.
 | Reset | Reset clears the entered values and returns the result panel to its incomplete state. | **E2E** — [`resets the calculator and avoids mobile horizontal overflow`](../tests/e2e/calculator.spec.ts) |
 | Print | Print remains disabled until the four required inputs are valid, then becomes available. The printable result includes sensitivity, target-profit, overall pre-tax and settlement-cash results when those inputs are entered; input controls and calculation toggles remain hidden. | **E2E** — [`requires four quick inputs and accepts explicit zero costs`](../tests/e2e/calculator.spec.ts); [`includes planning scenarios in the printable result`](../tests/e2e/calculator.spec.ts) |
 | Mobile layout | The form and result remain readable without horizontal page overflow at the tested mobile viewport. | **E2E** — [`resets the calculator and avoids horizontal overflow on mobile`](../tests/e2e/calculator.spec.ts) |
+| Language-invariant arithmetic | English, Simplified Chinese and Korean routes use the same calculation model, AUD formatter and input parser. Translated text cannot alter operands, rounding or result values. All six substituted calculations are exposed in every language. | **Dictionary + E2E** — [dictionary shape and validation-code coverage](../tests/i18n.test.ts); [cross-language arithmetic: `all locales use the same AUD arithmetic and expose every calculation`](../tests/e2e/i18n.spec.ts) |
+| Language switch with entered figures | Calculator figures are kept only in component memory. Switching language navigates to another canonical route and therefore clears them; when any figure has been entered, the user must confirm before navigation. Cancelling preserves the entered figures. Locale choice and calculator figures are not written to cookies, local storage, session storage or the URL. | **E2E** — [`language switching warns before clearing entered figures`](../tests/e2e/i18n.spec.ts) |
+| Localized mobile layout | Chinese and Korean calculator, privacy and important-information pages remain readable without horizontal page overflow at the tested mobile viewport. | **E2E** — [`localized home and legal pages do not overflow on mobile`](../tests/e2e/i18n.spec.ts) |
 
 ## Explicitly outside the current model
 
@@ -74,3 +77,8 @@ Coverage labels are written as text so that they do not depend on colour.
 When calculation behaviour changes, update the corresponding row in this file
 in the same pull request. Add a row for every new user-visible calculation,
 guardrail, or material exclusion, and link it to a focused automated test.
+
+When source-language copy changes, update every locale dictionary in the same
+pull request. The typed dictionary and placeholder tests must pass, and any
+change to financial, legal, privacy or tax wording must repeat the human review
+recorded in [`translation-review.md`](./translation-review.md).
