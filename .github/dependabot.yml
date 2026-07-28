@@ -20,11 +20,18 @@ updates:
           - patch
       production-dependencies:
         dependency-type: production
+        # These packages must be upgraded with react-server-dom-webpack.
+        exclude-patterns:
+          - react
+          - react-dom
         update-types:
           - minor
           - patch
       development-dependencies:
         dependency-type: development
+        # Keep the React runtime together in the react-runtime group above.
+        exclude-patterns:
+          - react-server-dom-webpack
         update-types:
           - minor
           - patch
