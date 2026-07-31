@@ -79,6 +79,7 @@ export const ko = {
     limitationsTitle: "중요한 한계",
     limitationsBody:
       "선택적 종합 결과와 정산 후 현금 결과에는 입력한 금액만 사용됩니다. 이 도구는 자본이득세(CGT), 소득세, 감가상각, 시간 조정 수익률 또는 세후 이익을 계산하지 않습니다.",
+    contactTitle: "문의 또는 의견이 있으신가요?",
     independence:
       "독립 계산기 · 호주 국세청(ATO) 또는 기타 정부 기관과 제휴하거나 그 승인을 받지 않음",
   },
@@ -237,13 +238,12 @@ export const ko = {
       "현재 버전에는 사용자 계정, 피드백 양식, 광고 분석 또는 애플리케이션 쿠키가 없습니다. 향후 버전에서 이러한 방식이 바뀌는 경우 관련 기능을 도입하기 전에 이 안내를 업데이트합니다.",
     externalTitle: "외부 웹사이트",
     externalBody:
-      "realestate.com.au, Domain, GitHub 및 기타 제3자 웹사이트 링크에는 각 사이트의 개인정보 보호 관행이 적용됩니다. 계산기 입력값은 해당 링크에 첨부되지 않습니다.",
-    questionsTitle: "문의",
-    questionsBefore: "프로젝트의",
-    issueTracker: "공개 이슈 트래커",
+      "realestate.com.au, Domain 및 기타 제3자 웹사이트 링크에는 각 사이트의 개인정보 보호 관행이 적용됩니다. 계산기 입력값은 해당 링크에 첨부되지 않습니다.",
+    questionsTitle: "문의 및 의견",
+    questionsBefore: "문의 또는 의견은",
     questionsAfter:
-      "를 통해 문의하세요. 공개 이슈에 개인, 부동산 또는 재무 정보를 포함하지 마세요.",
-    updated: "최종 업데이트: 2026년 7월 24일.",
+      "로 보내 주세요. 이메일은 Cloudflare Email Routing을 통해 전달되어 Gmail에 저장되므로 Cloudflare와 Google이 이메일 내용과 기술 데이터를 처리할 수 있습니다. 계산기 입력값이나 민감한 개인·부동산·재무 정보를 보내지 마세요.",
+    updated: "최종 업데이트: 2026년 7월 31일.",
   },
   disclaimer: {
     eyebrow: "중요 정보",

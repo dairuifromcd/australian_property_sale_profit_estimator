@@ -169,7 +169,7 @@ test("localized link sentences, language names and currency affixes remain intac
       has: page.getByRole("heading", { name: "问题与联系" }),
     }),
   ).toContainText(
-    "请通过项目的 公开问题跟踪器联系。请勿在公开问题中填写个人、房产或财务信息。",
+    "如有问题或建议，请发送邮件至 support@propertysaleprofit.au。邮件会通过 Cloudflare Email Routing 转发并存储在 Gmail 中",
   );
   await expect(page.locator("main")).toContainText(
     "请参阅 Cloudflare 隐私政策。",
@@ -178,11 +178,32 @@ test("localized link sentences, language names and currency affixes remain intac
   await page.goto("/ko/privacy");
   await expect(
     page.locator(".legal-section").filter({
-      has: page.getByRole("heading", { name: "문의" }),
+      has: page.getByRole("heading", { name: "문의 및 의견" }),
     }),
   ).toContainText(
-    "프로젝트의 공개 이슈 트래커를 통해 문의하세요. 공개 이슈에 개인, 부동산 또는 재무 정보를 포함하지 마세요.",
+    "문의 또는 의견은 support@propertysaleprofit.au로 보내 주세요. 이메일은 Cloudflare Email Routing을 통해 전달되어 Gmail에 저장되므로",
   );
+});
+
+test("every localized home footer publishes only the support address", async ({
+  page,
+}) => {
+  for (const [path, contactTitle] of [
+    ["/", "Questions or feedback?"],
+    ["/zh-Hans", "有问题或建议？"],
+    ["/ko", "문의 또는 의견이 있으신가요?"],
+  ] as const) {
+    await page.goto(path);
+    await waitForClient(page);
+
+    const footer = page.locator("footer");
+    await expect(footer.getByText(contactTitle, { exact: true })).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "support@propertysaleprofit.au" }),
+    ).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
+    await expect(footer).not.toContainText("info@propertysaleprofit.au");
+    await expect(footer).not.toContainText("drfromcd.business@gmail.com");
+  }
 });
 
 test("localized home and legal pages do not overflow on mobile", async ({

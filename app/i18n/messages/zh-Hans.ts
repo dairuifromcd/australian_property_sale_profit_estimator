@@ -78,6 +78,7 @@ export const zhHans = {
     limitationsTitle: "重要限制",
     limitationsBody:
       "可选的整体结果和交割现金结果仅使用您输入的金额。本工具不计算资本利得税、所得税、折旧、经时间调整的回报或税后利润。",
+    contactTitle: "有问题或建议？",
     independence:
       "独立计算器 · 与澳大利亚税务局（ATO）或其他政府机构无隶属关系，也未获其认可",
   },
@@ -233,13 +234,12 @@ export const zhHans = {
       "当前版本没有用户账户、反馈表单、广告分析或应用 Cookie。如未来版本改变这些做法，我们会在引入相关功能前更新本声明。",
     externalTitle: "外部网站",
     externalBody:
-      "realestate.com.au、Domain、GitHub 及其他第三方网站链接受各自隐私规则约束。计算器输入不会附加到这些链接中。",
+      "realestate.com.au、Domain 及其他第三方网站链接受各自隐私规则约束。计算器输入不会附加到这些链接中。",
     questionsTitle: "问题与联系",
-    questionsBefore: "请通过项目的",
-    issueTracker: "公开问题跟踪器",
+    questionsBefore: "如有问题或建议，请发送邮件至",
     questionsAfter:
-      "联系。请勿在公开问题中填写个人、房产或财务信息。",
-    updated: "最后更新：2026 年 7 月 24 日。",
+      "。邮件会通过 Cloudflare Email Routing 转发并存储在 Gmail 中，因此 Cloudflare 和 Google 可能会处理邮件内容和技术数据。请勿发送计算器数据或敏感的个人、房产或财务信息。",
+    updated: "最后更新：2026 年 7 月 31 日。",
   },
   disclaimer: {
     eyebrow: "重要信息",

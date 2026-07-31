@@ -105,8 +105,24 @@ test("explains on-device inputs separately from hosting metadata", async ({
     page.getByText(/does not transmit or store those entries/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/Do not include personal, property or financial information/i),
+    page.getByText(/Do not include calculator figures or sensitive personal, property or financial information/i),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "support@propertysaleprofit.au" }),
+  ).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
+  await expect(page.getByText(/routed through Cloudflare Email Routing/i)).toBeVisible();
+});
+
+test("publishes one support address without exposing the routing inbox", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await expect(
+    page.getByRole("link", { name: "support@propertysaleprofit.au" }),
+  ).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
+  await expect(page.locator("body")).not.toContainText("info@propertysaleprofit.au");
+  await expect(page.locator("body")).not.toContainText("drfromcd.business@gmail.com");
 });
 
 test("does not make network requests when calculator values change", async ({

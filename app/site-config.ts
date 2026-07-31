@@ -12,6 +12,8 @@ import {
 
 export const SITE_ORIGIN = "https://propertysaleprofit.au";
 export const SITE_HOSTNAME = "propertysaleprofit.au";
+export const SUPPORT_EMAIL = "support@propertysaleprofit.au";
+export const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}`;
 const englishMessages = getMessages("en-AU");
 export const HOME_TITLE = englishMessages.metadata.home.title;
 export const HOME_DESCRIPTION = englishMessages.metadata.home.description;

@@ -8,6 +8,7 @@ import { useCalculatorForm } from "./calculator-ui/use-calculator-form";
 import { LanguageSwitcher } from "./language-switcher";
 import { pathFor, type Locale } from "./i18n/routing";
 import type { CalculatorMessages } from "./i18n/messages/types";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "./site-config";
 
 export default function CalculatorPage({
   locale,
@@ -117,6 +118,12 @@ export default function CalculatorPage({
         <div>
           <strong>{messages.home.limitationsTitle}</strong>
           <p>{messages.home.limitationsBody}</p>
+        </div>
+        <div className="footer-contact">
+          <strong>{messages.home.contactTitle}</strong>
+          <p>
+            <a href={SUPPORT_MAILTO}>{SUPPORT_EMAIL}</a>
+          </p>
         </div>
         <div className="footer-meta">
           <span>

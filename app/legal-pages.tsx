@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { SiteMessages } from "./i18n/messages/types";
 import { pathFor, type Locale, type SitePage } from "./i18n/routing";
 import { LanguageSwitcher } from "./language-switcher";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "./site-config";
 
 function LegalHeader({
   locale,
@@ -107,13 +108,7 @@ export function PrivacyPageContent({
           <h2>{content.questionsTitle}</h2>
           <p>
             {content.questionsBefore}{" "}
-            <a
-              href="https://github.com/dairuifromcd/australian_property_sale_profit_estimator/issues/new"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {content.issueTracker}
-            </a>
+            <a href={SUPPORT_MAILTO}>{SUPPORT_EMAIL}</a>
             {content.questionsAfter}
           </p>
         </section>

@@ -101,11 +101,12 @@ test("localized fragments form complete sentences around links", () => {
   assert.equal(zhHans.privacy.cloudflareAfter, "。");
   assert.equal(ko.privacy.cloudflareAfter, ".");
 
-  const chineseQuestions = `${zhHans.privacy.questionsBefore} ${zhHans.privacy.issueTracker}${zhHans.privacy.questionsAfter}`;
-  const koreanQuestions = `${ko.privacy.questionsBefore} ${ko.privacy.issueTracker}${ko.privacy.questionsAfter}`;
+  const email = "support@propertysaleprofit.au";
+  const chineseQuestions = `${zhHans.privacy.questionsBefore} ${email}${zhHans.privacy.questionsAfter}`;
+  const koreanQuestions = `${ko.privacy.questionsBefore} ${email}${ko.privacy.questionsAfter}`;
 
-  assert.match(chineseQuestions, /公开问题跟踪器联系。/);
-  assert.doesNotMatch(chineseQuestions, /跟踪器\./);
-  assert.match(koreanQuestions, /공개 이슈 트래커를 통해 문의하세요/);
-  assert.doesNotMatch(koreanQuestions, /트래커\.\s*를/);
+  assert.match(chineseQuestions, /support@propertysaleprofit\.au。邮件会通过/);
+  assert.doesNotMatch(chineseQuestions, /\.邮件/);
+  assert.match(koreanQuestions, /support@propertysaleprofit\.au로 보내 주세요/);
+  assert.doesNotMatch(koreanQuestions, /\.au\.\s*로/);
 });

@@ -81,6 +81,7 @@ export const enAU = {
     limitationsTitle: "Important limitations",
     limitationsBody:
       "Optional overall and settlement cash results use only the amounts entered. This tool does not calculate capital gains tax, income tax, depreciation, time-adjusted returns or after-tax profit.",
+    contactTitle: "Questions or feedback?",
     independence:
       "Independent calculator · Not affiliated with or endorsed by the ATO or another government agency",
   },
@@ -250,13 +251,12 @@ export const enAU = {
       "This release has no user accounts, feedback form, advertising analytics or application cookies. These practices may change in a later release; this notice will be updated before such features are introduced.",
     externalTitle: "External websites",
     externalBody:
-      "Links to realestate.com.au, Domain, GitHub and other third-party websites are governed by those websites' own privacy practices. Calculator entries are not attached to those links.",
-    questionsTitle: "Questions",
-    questionsBefore: "Contact the project through its",
-    issueTracker: "public issue tracker",
+      "Links to realestate.com.au, Domain and other third-party websites are governed by those websites' own privacy practices. Calculator entries are not attached to those links.",
+    questionsTitle: "Questions and feedback",
+    questionsBefore: "For questions or feedback, email",
     questionsAfter:
-      ". Do not include personal, property or financial information in a public issue.",
-    updated: "Last updated 24 July 2026.",
+      ". Messages are routed through Cloudflare Email Routing and stored in Gmail, so Cloudflare and Google may process their content and technical data. Do not include calculator figures or sensitive personal, property or financial information.",
+    updated: "Last updated 31 July 2026.",
   },
   disclaimer: {
     eyebrow: "Important information",

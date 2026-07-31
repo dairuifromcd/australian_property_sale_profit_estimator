@@ -104,6 +104,11 @@ test("server-renders the property sale calculator", async () => {
   assert.match(html, /Calculations stay on this device/);
   assert.match(html, /href="\/privacy"/);
   assert.match(html, /href="\/disclaimer"/);
+  assert.match(
+    html,
+    /href="mailto:support@propertysaleprofit\.au"[^>]*>support@propertysaleprofit\.au<\/a>/,
+  );
+  assert.doesNotMatch(html, /info@propertysaleprofit\.au|drfromcd\.business@gmail\.com/);
   assert.match(html, /does not calculate capital gains tax/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
@@ -309,6 +314,12 @@ test("server-renders localized legal pages and rejects unsupported locales", asy
       rel: "canonical",
       href: canonical,
     });
+    if (path.endsWith("/privacy")) {
+      assert.match(
+        html,
+        /href="mailto:support@propertysaleprofit\.au"[^>]*>support@propertysaleprofit\.au<\/a>/,
+      );
+    }
   }
 
   const previewResponse = await render(
