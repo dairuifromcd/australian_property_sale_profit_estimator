@@ -24,17 +24,15 @@
     "test:coverage": "node --experimental-strip-types --experimental-test-coverage --test-coverage-include=app/calculator.ts --test-coverage-include=app/input-format.ts --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 --test tests/calculator.test.ts",
     "test:e2e": "npm run build && playwright test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler",
-    "typecheck": "tsc -p tsconfig.app.json",
-    "db:generate": "drizzle-kit generate"
+    "typecheck": "tsc -p tsconfig.app.json"
   },
   "dependencies": {
-    "drizzle-orm": "0.45.2",
-    "next": "16.2.10",
+    "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.45.1",
+    "@cloudflare/vite-plugin": "1.50.0",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.19",
@@ -42,15 +40,20 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.3",
     "@vitejs/plugin-rsc": "0.5.28",
-    "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.2.12",
     "react-server-dom-webpack": "19.2.8",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vinext": "0.0.50",
     "vite": "8.1.5",
-    "wrangler": "4.112.0"
+    "wrangler": "4.118.0"
+  },
+  "overrides": {
+    "postcss": "8.5.20",
+    "next": {
+      "sharp": "0.35.3"
+    }
   },
   "type": "module"
 }
