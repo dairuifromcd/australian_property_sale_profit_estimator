@@ -3,6 +3,7 @@ import "../globals.css";
 import {
   HOME_DESCRIPTION,
   HOME_TITLE,
+  SITE_ICON_LINKS,
   SITE_ORIGIN,
 } from "../site-config";
 
@@ -22,6 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-AU">
+      <head>
+        {SITE_ICON_LINKS.map((icon) => (
+          <link key={icon.href} rel="icon" {...icon} />
+        ))}
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -278,6 +278,67 @@ test("server-renders every locale with localized metadata and language links", a
   }
 });
 
+test("publishes compatible favicon metadata for every locale and host", async () => {
+  for (const url of [
+    "https://propertysaleprofit.au/",
+    "https://propertysaleprofit.au/zh-Hans",
+    "https://propertysaleprofit.au/ko",
+    "https://example-property-profit-au.dairuifromcd.workers.dev/",
+  ]) {
+    const response = await render(url);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+
+    assertTagAttributes(html, "link", {
+      rel: "icon",
+      href: "/favicon.ico",
+      type: "image/x-icon",
+      sizes: "16x16 32x32 48x48",
+    });
+    assertTagAttributes(html, "link", {
+      rel: "icon",
+      href: "/favicon.svg",
+      type: "image/svg+xml",
+      sizes: "any",
+    });
+    assert.doesNotMatch(html, /rel="icon"[^>]+workers\.dev/i);
+    assert.equal(
+      tagsWithAttributes(html, "link", { rel: "icon" }).length,
+      2,
+    );
+  }
+});
+
+test("ships a valid multi-size ICO fallback", async () => {
+  const favicon = await readFile(
+    new URL("../public/favicon.ico", import.meta.url),
+  );
+
+  assert.equal(favicon.readUInt16LE(0), 0, "ICO reserved field");
+  assert.equal(favicon.readUInt16LE(2), 1, "ICO image type");
+  assert.equal(favicon.readUInt16LE(4), 3, "ICO image count");
+
+  const imageSizes = [];
+  for (let index = 0; index < 3; index += 1) {
+    const entryOffset = 6 + index * 16;
+    const width = favicon[entryOffset] || 256;
+    const height = favicon[entryOffset + 1] || 256;
+    const imageLength = favicon.readUInt32LE(entryOffset + 8);
+    const imageOffset = favicon.readUInt32LE(entryOffset + 12);
+
+    assert.equal(width, height);
+    assert.ok(imageLength > 8);
+    assert.ok(imageOffset + imageLength <= favicon.length);
+    assert.deepEqual(
+      favicon.subarray(imageOffset, imageOffset + 8),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    imageSizes.push(width);
+  }
+
+  assert.deepEqual(imageSizes, [16, 32, 48]);
+});
+
 test("server-renders localized legal pages and rejects unsupported locales", async () => {
   for (const [path, lang, text, canonical] of [
     [

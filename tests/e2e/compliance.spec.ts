@@ -125,6 +125,32 @@ test("publishes one support address without exposing the routing inbox", async (
   await expect(page.locator("body")).not.toContainText("drfromcd.business@gmail.com");
 });
 
+test("serves favicon metadata and the ICO fallback for every locale", async ({
+  page,
+  request,
+}) => {
+  const faviconResponse = await request.get("/favicon.ico");
+  expect(faviconResponse.ok()).toBe(true);
+  expect(faviconResponse.headers()["content-type"]).toMatch(
+    /^image\/(?:x-icon|vnd\.microsoft\.icon)\b/i,
+  );
+  expect((await faviconResponse.body()).length).toBeGreaterThan(100);
+
+  for (const path of ["/", "/zh-Hans", "/ko"]) {
+    await page.goto(path);
+    await expect(
+      page.locator(
+        'link[rel="icon"][href="/favicon.ico"][type="image/x-icon"]',
+      ),
+    ).toHaveAttribute("sizes", "16x16 32x32 48x48");
+    await expect(
+      page.locator(
+        'link[rel="icon"][href="/favicon.svg"][type="image/svg+xml"]',
+      ),
+    ).toHaveAttribute("sizes", "any");
+  }
+});
+
 test("does not make network requests when calculator values change", async ({
   page,
 }) => {

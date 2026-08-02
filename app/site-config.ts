@@ -14,6 +14,18 @@ export const SITE_ORIGIN = "https://propertysaleprofit.au";
 export const SITE_HOSTNAME = "propertysaleprofit.au";
 export const SUPPORT_EMAIL = "support@propertysaleprofit.au";
 export const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}`;
+export const SITE_ICON_LINKS = [
+  {
+    href: "/favicon.ico",
+    type: "image/x-icon",
+    sizes: "16x16 32x32 48x48",
+  },
+  {
+    href: "/favicon.svg",
+    type: "image/svg+xml",
+    sizes: "any",
+  },
+] as const;
 const englishMessages = getMessages("en-AU");
 export const HOME_TITLE = englishMessages.metadata.home.title;
 export const HOME_DESCRIPTION = englishMessages.metadata.home.description;
