@@ -152,6 +152,7 @@ Open `http://localhost:3000`.
 npm run lint
 npm test
 npm run test:coverage
+npm run test:mutation
 npm run test:e2e
 ```
 
@@ -161,6 +162,11 @@ for the calculation and monetary-input modules. `npm run test:e2e` exercises
 the critical form, validation, profit/loss, reset, compliance, input-privacy and
 mobile-overflow scenarios in Chromium. GitHub Actions runs all checks for pushes
 and pull requests to `main`.
+
+`npm run test:mutation` uses StrykerJS to make controlled faults in
+`app/calculator.ts` and `app/input-format.ts`, then checks whether the focused
+calculation tests detect them. The generated HTML and JSON reports are written
+under `reports/mutation/` and are intentionally not committed.
 
 ## Deploy to Cloudflare Workers
 

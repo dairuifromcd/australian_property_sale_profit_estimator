@@ -105,21 +105,13 @@ function decimalRatio(value: number): {
   numerator: bigint;
   denominator: bigint;
 } {
-  const [coefficient, exponentText = "0"] = value
+  const [coefficient, exponentText] = value
     .toString()
     .toLowerCase()
     .split("e");
   const [wholePart, fractionPart = ""] = coefficient.split(".");
-  const digits = `${wholePart}${fractionPart}`.replace(/^0+(?=\d)/, "");
-  const decimalPlaces = fractionPart.length - Number(exponentText);
-
-  if (decimalPlaces <= 0) {
-    return {
-      numerator:
-        BigInt(digits) * BIGINT_TEN ** BigInt(-decimalPlaces),
-      denominator: BIGINT_ONE,
-    };
-  }
+  const digits = `${wholePart}${fractionPart}`;
+  const decimalPlaces = fractionPart.length - Number(exponentText ?? 0);
 
   return {
     numerator: BigInt(digits),

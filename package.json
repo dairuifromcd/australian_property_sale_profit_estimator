@@ -22,6 +22,7 @@
     "deploy:preview": "wrangler versions upload",
     "test": "npm run typecheck && npm run build && node --experimental-strip-types --test tests/calculator.test.ts tests/i18n.test.ts tests/usage-events.test.ts tests/rendered-html.test.mjs",
     "test:coverage": "node --experimental-strip-types --experimental-test-coverage --test-coverage-include=app/calculator.ts --test-coverage-include=app/input-format.ts --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 --test tests/calculator.test.ts",
+    "test:mutation": "stryker run",
     "test:e2e": "npm run build && playwright test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler --ignore-pattern app/worker-configuration.d.ts",
     "typecheck": "tsc -p tsconfig.app.json"
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.50.0",
     "@playwright/test": "^1.61.1",
+    "@stryker-mutator/core": "9.6.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.19",
     "@types/react": "19.2.17",
@@ -51,6 +53,7 @@
   },
   "overrides": {
     "postcss": "8.5.20",
+    "qs": "6.15.3",
     "next": {
       "sharp": "0.35.3"
     }
