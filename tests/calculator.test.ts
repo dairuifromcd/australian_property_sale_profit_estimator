@@ -34,6 +34,7 @@ test("formats monetary input with grouping separators", () => {
   assert.equal(formatAmountInput("650000"), "650,000");
   assert.equal(formatAmountInput("$ 1,250,000.50"), "1,250,000.50");
   assert.equal(formatAmountInput("-12000"), "-12,000");
+  assert.equal(formatAmountInput("   -12000"), "-12,000");
   assert.equal(numberFromInput("1,250,000.50"), 1_250_000.5);
 });
 
@@ -48,6 +49,7 @@ test("preserves a stable monetary draft while the user is editing", () => {
   assert.equal(normaliseAmountInputDraft("000"), "000");
   assert.equal(normaliseAmountInputDraft(".5"), ".5");
   assert.equal(normaliseAmountInputDraft("-1.2"), "-1.2");
+  assert.equal(normaliseAmountInputDraft("   -12"), "-12");
   assert.equal(normaliseAmountInputDraft("12..345"), "12.34");
   assert.equal(normaliseAmountInputDraft("abc"), "");
   assert.equal(normaliseAmountInputDraft("-"), "-");
@@ -79,6 +81,8 @@ test("calculates the four-input transaction estimate", () => {
   assert.equal(result.estimatedCashAfterLoanPayout, 970_000);
   assert.equal(Math.round(result.breakEvenSalePrice), 622_449);
   assert.deepEqual(result.validationErrors, []);
+  assert.equal(result.hasTransactionErrors, false);
+  assert.equal(result.hasSupplementaryErrors, false);
   assert.equal(result.hasCalculationErrors, false);
 });
 
@@ -105,6 +109,58 @@ test("calculates sale-price sensitivity with scenario commission", () => {
       transactionProfit: 419_000,
     },
   ]);
+});
+
+test("applies every fixed optional transaction cost to sensitivity scenarios", () => {
+  const baseline = calculateEstimate(input());
+
+  for (const field of [
+    "salePreparationCosts",
+    "purchaseCosts",
+    "renovationsAndImprovements",
+  ] as const) {
+    const result = calculateEstimate(input({ [field]: 1_000 }));
+
+    assert.equal(
+      result.fixedTransactionCosts,
+      baseline.fixedTransactionCosts + 1_000,
+    );
+    for (const changePercent of [-5, 5] as const) {
+      const baselineScenario = baseline.salePriceSensitivity.find(
+        (scenario) => scenario.changePercent === changePercent,
+      );
+      const scenario = result.salePriceSensitivity.find(
+        (candidate) => candidate.changePercent === changePercent,
+      );
+
+      assert.equal(
+        scenario?.transactionProfit,
+        (baselineScenario?.transactionProfit ?? 0) - 1_000,
+      );
+    }
+  }
+});
+
+test("reuses the exact transaction result in the unchanged sensitivity scenario", () => {
+  const result = calculateEstimate(
+    input({
+      salePrice: 0.03,
+      purchasePrice: 0.01,
+      commissionRate: 2.2,
+      otherSellingCosts: 0.01,
+      salePreparationCosts: 0.01,
+      purchaseCosts: 0.01,
+      renovationsAndImprovements: 0.01,
+    }),
+  );
+  const unchangedScenario = result.salePriceSensitivity.find(
+    (scenario) => scenario.changePercent === 0,
+  );
+
+  assert.equal(
+    unchangedScenario?.transactionProfit,
+    result.transactionProfit,
+  );
 });
 
 test("calculates the sale price required for a target transaction profit", () => {
@@ -419,12 +475,9 @@ test("rejects invalid commission rates", () => {
     const result = calculateEstimate(input({ commissionRate }));
 
     assert.equal(result.hasCalculationErrors, true);
-    assert.equal(
-      result.validationErrors.some(
-        (error) => error.field === "commissionRate",
-      ),
-      true,
-    );
+    assert.deepEqual(result.validationErrors, [
+      { field: "commissionRate", code: "commissionRange" },
+    ]);
     assert.equal(result.breakEvenSalePrice, 0);
     assert.deepEqual(result.salePriceSensitivity, []);
   }
@@ -443,10 +496,9 @@ test("rejects negative optional amounts", () => {
     const result = calculateEstimate(input({ [field]: -1 }));
 
     assert.equal(result.hasCalculationErrors, true);
-    assert.equal(
-      result.validationErrors.some((error) => error.field === field),
-      true,
-    );
+    assert.deepEqual(result.validationErrors, [
+      { field, code: "amountZeroOrMore" },
+    ]);
 
     const isSupplementaryField =
       field === "estimatedLoanPayout" ||
@@ -494,11 +546,35 @@ test("rejects non-finite monetary values", () => {
     "totalRentalIncome",
   ] as const) {
     const result = calculateEstimate(input({ [field]: Number.NaN }));
+    const code =
+      field === "salePrice" || field === "purchasePrice"
+        ? "amountGreaterThanZero"
+        : "amountZeroOrMore";
 
     assert.equal(result.hasCalculationErrors, true);
+    assert.deepEqual(result.validationErrors, [{ field, code }]);
+  }
+});
+
+test("accepts the exact supported maximum for every monetary input", () => {
+  for (const field of [
+    "salePrice",
+    "purchasePrice",
+    "otherSellingCosts",
+    "salePreparationCosts",
+    "purchaseCosts",
+    "renovationsAndImprovements",
+    "estimatedLoanPayout",
+    "totalHoldingCosts",
+    "totalRentalIncome",
+  ] as const) {
+    const result = calculateEstimate(
+      input({ [field]: 1_000_000_000_000 }),
+    );
+
     assert.equal(
       result.validationErrors.some((error) => error.field === field),
-      true,
+      false,
     );
   }
 });
