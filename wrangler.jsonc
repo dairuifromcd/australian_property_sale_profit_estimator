@@ -10,5 +10,11 @@
     "directory": "./dist/client",
     "binding": "ASSETS",
     "not_found_handling": "none"
-  }
+  },
+  "analytics_engine_datasets": [
+    {
+      "binding": "USAGE_ANALYTICS",
+      "dataset": "property_sale_profit_usage"
+    }
+  ]
 }

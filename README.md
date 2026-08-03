@@ -34,7 +34,9 @@ the first estimate to four inputs.
 - Text as well as colour for profit and loss outcomes
 - Print or save the result as a PDF
 - Responsive, accessible single-page calculator interface
-- No account, database, advertising analytics or server-side storage of inputs
+- No account, advertising analytics or server-side storage of calculator inputs
+- Minimal anonymous usage events without calculator figures, application-generated
+  identifiers or cookies
 - Persistent estimate-scope notice, privacy notice, material limitations and government
   non-affiliation disclosure
 
@@ -109,11 +111,19 @@ runtime.
 ## Privacy
 
 Calculator inputs stay in the browser. The application does not send them to a
-database or external valuation service. Links to third-party property sites
-remain ordinary outbound links. Cloudflare may process ordinary technical
-request metadata such as IP addresses, browser information, requested URLs and
-security signals to host and protect the site; calculator entries are not
-placed in those URLs. See the in-app privacy notice for the full disclosure.
+database or external valuation service. To measure whether the calculator is
+useful, it records a small allow-listed event when the calculator is viewed,
+when a visitor first starts or completes an estimate during a page visit, opens
+optional sections, calculates a target sale price or selects print. These events contain only the event type,
+page language, production-or-Preview environment and Cloudflare timestamp—not
+calculator figures, page contents, application-generated user or session
+identifiers, or cookies. See [anonymous usage analytics](docs/usage-analytics.md)
+and the in-app privacy notice for the full disclosure.
+
+Links to third-party property sites remain ordinary outbound links. Cloudflare
+may process ordinary technical request metadata such as IP addresses, browser
+information, requested URLs and security signals to host and protect the site;
+calculator entries are not placed in those URLs.
 
 ## Technology
 
@@ -197,6 +207,7 @@ Google Search Console and Bing Webmaster Tools, then submit the sitemap.
 app/page.tsx               indexable home route and page metadata
 app/calculator-page.tsx    interactive calculator interface
 app/calculator.ts          pure calculation logic
+app/usage-events.ts        allow-listed anonymous event schema
 app/globals.css            responsive visual design
 app/site-config.ts         canonical origin and host-aware metadata rules
 app/not-found.tsx          non-indexable unknown-page response
@@ -209,6 +220,7 @@ tests/rendered-html.test.mjs
 tests/e2e/                 Playwright browser scenarios
 playwright.config.ts       browser test configuration
 public/                    static icons
+docs/usage-analytics.md    aggregate event definitions and query guidance
 wrangler.jsonc             Cloudflare Worker and Preview configuration
 ```
 

@@ -74,7 +74,7 @@ export const zhHans = {
       },
     ],
     footerPrivacyBody:
-      "您的数据只在本浏览器中计算，本应用不会接收或保存这些数据。Cloudflare 可能会处理网站交付和安全保护所需的常规请求元数据。",
+      "您的数据只在本浏览器中计算，本应用不会接收或保存这些数据。有限的匿名使用事件不包含计算器数据、应用生成的标识符或 Cookie；详情请参阅隐私声明。",
     limitationsTitle: "重要限制",
     limitationsBody:
       "可选的整体结果和交割现金结果仅使用您输入的金额。本工具不计算资本利得税、所得税、折旧、经时间调整的回报或税后利润。",
@@ -219,7 +219,7 @@ export const zhHans = {
     eyebrow: "隐私声明",
     title: "您的数据如何处理",
     intro:
-      "本计算器无需账户或数据库即可运行。您输入的财务数据会留在浏览器中。",
+      "使用本计算器无需账户。您输入的财务数据会留在浏览器中。",
     entriesTitle: "计算器输入",
     entriesBody:
       "售价、买价、佣金率和成本假设均在您的设备上计算。当前应用代码不会将这些输入传输到服务器或存储在服务器上；重新加载页面会将其重置。打印或保存 PDF 的操作由您的浏览器和设备完成。",
@@ -229,7 +229,10 @@ export const zhHans = {
     cloudflareBefore: "请参阅",
     cloudflareLink: "Cloudflare 隐私政策",
     cloudflareAfter: "。",
-    accountsTitle: "账户、分析和 Cookie",
+    analyticsTitle: "匿名使用情况分析",
+    analyticsBody:
+      "为了了解本计算器是否真正有用，当计算器被查看，以及访客在一次页面访问中首次开始或完成估算、展开可选明细、算出目标售价或选择打印时，应用会发送一个简短事件。Analytics Engine 数据集仅记录事件类型、页面语言、请求来自正式环境还是 Preview，以及 Cloudflare 生成的事件时间戳；不会包含计算器输入、页面内容、应用生成的用户或会话标识符，也不使用 Cookie。事件由 Cloudflare 最多保留三个月，仅用于汇总分析。",
+    accountsTitle: "账户和 Cookie",
     accountsBody:
       "当前版本没有用户账户、反馈表单、广告分析或应用 Cookie。如未来版本改变这些做法，我们会在引入相关功能前更新本声明。",
     externalTitle: "外部网站",
@@ -239,7 +242,7 @@ export const zhHans = {
     questionsBefore: "如有问题或建议，请发送邮件至",
     questionsAfter:
       "。邮件会通过 Cloudflare Email Routing 转发并存储在 Gmail 中，因此 Cloudflare 和 Google 可能会处理邮件内容和技术数据。请勿发送计算器数据或敏感的个人、房产或财务信息。",
-    updated: "最后更新：2026 年 7 月 31 日。",
+    updated: "最后更新：2026 年 8 月 3 日。",
   },
   disclaimer: {
     eyebrow: "重要信息",

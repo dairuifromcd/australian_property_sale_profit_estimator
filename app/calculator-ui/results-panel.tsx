@@ -2,13 +2,16 @@ import { PlanningResults } from "./planning-results";
 import { TransactionResults } from "./transaction-results";
 import type { CalculatorController } from "./use-calculator-form";
 import type { CalculatorMessages } from "../i18n/messages/types";
+import type { UsageEvent } from "../usage-events";
 
 export function ResultsPanel({
   controller,
   messages,
+  trackUsageEvent,
 }: {
   controller: CalculatorController;
   messages: CalculatorMessages;
+  trackUsageEvent: (event: UsageEvent) => void;
 }) {
   const {
     inputs,
@@ -78,7 +81,10 @@ export function ResultsPanel({
       <button
         className="print-button no-print"
         type="button"
-        onClick={() => window.print()}
+        onClick={() => {
+          trackUsageEvent("print_selected");
+          window.print();
+        }}
         disabled={!canShowEstimate}
       >
         {messages.results.print}

@@ -95,6 +95,11 @@ export function PrivacyPageContent({
         </section>
 
         <section className="legal-section">
+          <h2>{content.analyticsTitle}</h2>
+          <p>{content.analyticsBody}</p>
+        </section>
+
+        <section className="legal-section">
           <h2>{content.accountsTitle}</h2>
           <p>{content.accountsBody}</p>
         </section>

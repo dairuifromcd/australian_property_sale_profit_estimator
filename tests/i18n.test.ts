@@ -88,6 +88,10 @@ test("localized source text preserves key scope and privacy boundaries", () => {
   );
   assert.match(zhHans.privacy.entriesBody, /不会.*传输.*服务器|不会.*服务器/);
   assert.match(ko.privacy.entriesBody, /서버로 전송하거나 서버에 저장하지 않습니다/);
+  assert.match(zhHans.privacy.analyticsBody, /不会包含计算器输入/);
+  assert.match(zhHans.privacy.analyticsBody, /用户或会话标识符/);
+  assert.match(ko.privacy.analyticsBody, /계산기 입력값.*포함되지 않습니다/);
+  assert.match(ko.privacy.analyticsBody, /사용자·세션 식별자/);
   assert.match(zhHans.disclaimer.adviceBody, /不提供税务/);
   assert.match(ko.disclaimer.adviceBody, /세무.*조언을 제공하지 않습니다/);
   assert.doesNotMatch(entries(ko).map(([, value]) => value).join(" "), /결제/);

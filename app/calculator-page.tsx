@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "./language-switcher";
 import { pathFor, type Locale } from "./i18n/routing";
 import type { CalculatorMessages } from "./i18n/messages/types";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "./site-config";
+import { useAnonymousUsageEvents } from "./usage-analytics-client";
 
 export default function CalculatorPage({
   locale,
@@ -18,6 +19,15 @@ export default function CalculatorPage({
   messages: CalculatorMessages;
 }) {
   const controller = useCalculatorForm(messages.validation);
+  const trackUsageEvent = useAnonymousUsageEvents({
+    locale,
+    hasAnyInput: controller.hasAnyInput,
+    canShowEstimate: controller.canShowEstimate,
+    canShowTargetSalePrice:
+      controller.targetProfit !== "" &&
+      controller.targetSalePrice.requiredSalePrice !== null &&
+      controller.targetSalePrice.differenceFromExpectedSalePrice !== null,
+  });
 
   useEffect(() => {
     document.documentElement.dataset.clientReady = "true";
@@ -90,8 +100,16 @@ export default function CalculatorPage({
       </section>
 
       <section className="calculator-shell" aria-labelledby="calculator-title">
-        <CalculatorForm controller={controller} messages={messages.form} />
-        <ResultsPanel controller={controller} messages={messages} />
+        <CalculatorForm
+          controller={controller}
+          messages={messages.form}
+          trackUsageEvent={trackUsageEvent}
+        />
+        <ResultsPanel
+          controller={controller}
+          messages={messages}
+          trackUsageEvent={trackUsageEvent}
+        />
       </section>
 
       <section className="explanation" aria-labelledby="what-counts-title">
