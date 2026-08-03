@@ -1,13 +1,16 @@
 import type { CalculatorController } from "./use-calculator-form";
 import { AmountField, PercentageField } from "./fields";
 import type { SiteMessages } from "../i18n/messages/types";
+import type { UsageEvent } from "../usage-events";
 
 export function CalculatorForm({
   controller,
   messages,
+  trackUsageEvent,
 }: {
   controller: CalculatorController;
   messages: SiteMessages["form"];
+  trackUsageEvent: (event: UsageEvent) => void;
 }) {
   const {
     inputs,
@@ -104,6 +107,11 @@ export function CalculatorForm({
       <details
         className="details-block transaction-details"
         ref={transactionDetailsRef}
+        onToggle={(event) => {
+          if (event.currentTarget.open) {
+            trackUsageEvent("transaction_details_opened");
+          }
+        }}
       >
         <summary>
           <span>
@@ -149,6 +157,11 @@ export function CalculatorForm({
       <details
         className="details-block holding-details"
         ref={holdingDetailsRef}
+        onToggle={(event) => {
+          if (event.currentTarget.open) {
+            trackUsageEvent("holding_details_opened");
+          }
+        }}
       >
         <summary>
           <span>

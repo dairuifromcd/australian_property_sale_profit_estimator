@@ -77,7 +77,7 @@ export const enAU = {
       },
     ],
     footerPrivacyBody:
-      "Your figures are calculated in this browser and are not sent to or saved by this application. Cloudflare may process ordinary request metadata needed to deliver and protect the site.",
+      "Your figures are calculated in this browser and are not sent to or saved by this application. Limited anonymous usage events contain no calculator figures, application-generated identifiers or cookies; see Privacy for details.",
     limitationsTitle: "Important limitations",
     limitationsBody:
       "Optional overall and settlement cash results use only the amounts entered. This tool does not calculate capital gains tax, income tax, depreciation, time-adjusted returns or after-tax profit.",
@@ -236,7 +236,7 @@ export const enAU = {
     eyebrow: "Privacy notice",
     title: "How your data is handled",
     intro:
-      "The calculator is designed to work without an account or a database. The financial figures you enter remain in your browser.",
+      "You do not need an account to use the calculator. The financial figures you enter remain in your browser.",
     entriesTitle: "Calculator entries",
     entriesBody:
       "Sale prices, purchase prices, commission rates and cost assumptions are calculated on your device. The current application code does not transmit or store those entries on a server. Reloading the page resets them. Printing or saving a PDF is an action performed by your browser and device.",
@@ -246,7 +246,10 @@ export const enAU = {
     cloudflareBefore: "See the",
     cloudflareLink: "Cloudflare Privacy Policy",
     cloudflareAfter: ".",
-    accountsTitle: "Accounts, analytics and cookies",
+    analyticsTitle: "Anonymous usage analytics",
+    analyticsBody:
+      "To understand whether the calculator is useful, the application sends a small event when the calculator is viewed and when someone first starts or completes an estimate in a page visit, opens optional sections, calculates a target sale price or selects print. The Analytics Engine dataset records only the event type, page language, whether the request came from production or a Preview, and Cloudflare's event timestamp. It does not include calculator entries, page contents, an application-generated user or session identifier, or cookies. Events are retained by Cloudflare for up to three months and used only in aggregate.",
+    accountsTitle: "Accounts and cookies",
     accountsBody:
       "This release has no user accounts, feedback form, advertising analytics or application cookies. These practices may change in a later release; this notice will be updated before such features are introduced.",
     externalTitle: "External websites",
@@ -256,7 +259,7 @@ export const enAU = {
     questionsBefore: "For questions or feedback, email",
     questionsAfter:
       ". Messages are routed through Cloudflare Email Routing and stored in Gmail, so Cloudflare and Google may process their content and technical data. Do not include calculator figures or sensitive personal, property or financial information.",
-    updated: "Last updated 31 July 2026.",
+    updated: "Last updated 3 August 2026.",
   },
   disclaimer: {
     eyebrow: "Important information",

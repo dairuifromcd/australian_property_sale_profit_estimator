@@ -102,7 +102,19 @@ test("explains on-device inputs separately from hosting metadata", async ({
     page.getByRole("heading", { name: "Technical request data" }),
   ).toBeVisible();
   await expect(
+    page.getByRole("heading", { name: "Anonymous usage analytics" }),
+  ).toBeVisible();
+  await expect(
     page.getByText(/does not transmit or store those entries/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/does not include calculator entries, page contents/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/user or session identifier, or cookies/i),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/retained by Cloudflare for up to three months/i),
   ).toBeVisible();
   await expect(
     page.getByText(/Do not include calculator figures or sensitive personal, property or financial information/i),
@@ -151,9 +163,18 @@ test("serves favicon metadata and the ICO fallback for every locale", async ({
   }
 });
 
-test("does not make network requests when calculator values change", async ({
+test("sends only allow-listed anonymous events without calculator values", async ({
   page,
 }) => {
+  const usageEvents: Array<Record<string, unknown>> = [];
+  await page.route("**/api/usage-events", async (route) => {
+    usageEvents.push(route.request().postDataJSON());
+    await route.fulfill({
+      status: 204,
+      headers: { "cache-control": "no-store" },
+    });
+  });
+
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute(
     "data-client-ready",
@@ -167,9 +188,14 @@ test("does not make network requests when calculator values change", async ({
     const requestContent = decodeURIComponent(
       `${request.url()} ${request.postData() ?? ""}`,
     ).replaceAll(",", "");
+    if (inputValues.some((value) => requestContent.includes(value))) {
+      suspiciousRequests.push(
+        `${request.method()} ${request.resourceType()} ${request.url()}`,
+      );
+    }
     if (
-      request.method() !== "GET" ||
-      inputValues.some((value) => requestContent.includes(value))
+      request.method() !== "GET" &&
+      new URL(request.url()).pathname !== "/api/usage-events"
     ) {
       suspiciousRequests.push(
         `${request.method()} ${request.resourceType()} ${request.url()}`,
@@ -182,6 +208,38 @@ test("does not make network requests when calculator values change", async ({
   await page.locator("#commission-rate").fill("2.2");
   await page.locator("#other-selling-costs").fill("7654");
   await expect(page.locator(".results-panel")).toContainText("$987,654");
+
+  await page.locator(".transaction-details summary").click();
+  await page.locator(".transaction-details summary").click();
+  await page.locator(".transaction-details summary").click();
+  await page.locator(".holding-details summary").click();
+  await page.locator("#target-profit").fill("100000");
+  await page.evaluate(() => {
+    window.print = () => undefined;
+  });
+  await page.getByRole("button", { name: "Print or save as PDF" }).click();
+
+  await expect
+    .poll(() => usageEvents.map(({ event }) => event).sort())
+    .toEqual(
+      [
+        "calculator_viewed",
+        "calculator_started",
+        "estimate_completed",
+        "holding_details_opened",
+        "print_selected",
+        "target_profit_completed",
+        "transaction_details_opened",
+      ].sort(),
+    );
+
+  for (const payload of usageEvents) {
+    expect(Object.keys(payload).sort()).toEqual(["event", "locale"]);
+    expect(payload.locale).toBe("en-AU");
+  }
+  expect(new Set(usageEvents.map(({ event }) => event)).size).toBe(
+    usageEvents.length,
+  );
 
   expect(suspiciousRequests).toEqual([]);
   expect(await page.context().cookies()).toEqual([]);
