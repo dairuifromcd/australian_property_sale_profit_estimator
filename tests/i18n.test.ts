@@ -5,6 +5,7 @@ import { validationErrorCodes } from "../app/calculator.ts";
 import { enAU } from "../app/i18n/messages/en-AU.ts";
 import { ko } from "../app/i18n/messages/ko.ts";
 import { zhHans } from "../app/i18n/messages/zh-Hans.ts";
+import { guideMessages } from "../app/i18n/guide-messages.ts";
 import {
   locales,
   pathFor,
@@ -95,6 +96,17 @@ test("localized source text preserves key scope and privacy boundaries", () => {
   assert.match(zhHans.disclaimer.adviceBody, /不提供税务/);
   assert.match(ko.disclaimer.adviceBody, /세무.*조언을 제공하지 않습니다/);
   assert.doesNotMatch(entries(ko).map(([, value]) => value).join(" "), /결제/);
+});
+
+test("localized rental and guide wording preserves gross amounts and profit terminology", () => {
+  assert.match(enAU.form.rentalIncomeHelp, /Gross rent/);
+  assert.match(zhHans.form.rentalIncomeHelp, /扣除.*费用前/);
+  assert.match(ko.form.rentalIncomeHelp, /비용 차감 전/);
+  const koreanGuide = entries(guideMessages.ko).map(([, value]) => value).join(" ");
+  assert.match(koreanGuide, /거래 이익/);
+  assert.doesNotMatch(koreanGuide, /거래 수익|회계 수익|세후 수익/);
+  assert.match(zhHans.form.holdingCostsHelp, /不含贷款本金/);
+  assert.match(ko.form.holdingCostsHelp, /원금 제외/);
 });
 
 test("localized fragments form complete sentences around links", () => {

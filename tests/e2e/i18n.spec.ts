@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { captureTranslationReview } from "./review-artifacts";
 
 async function waitForClient(page: Page) {
   await expect(page.locator("html")).toHaveAttribute(
@@ -18,6 +19,7 @@ async function enterCompleteScenario(page: Page) {
   await page.locator("#purchase-costs").fill("30000");
   await page.locator("#renovations-and-improvements").fill("50000");
   await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("55000");
   await page.locator("#total-rental-income").fill("90000");
   await page.locator("#estimated-loan-payout").fill("450000");
@@ -43,6 +45,7 @@ test("all locales use the same AUD arithmetic and expose every calculation", asy
     await expect(results).toContainText("$320,000");
     await expect(results).toContainText("$515,000");
     await expect(results).toContainText("$811,225");
+    await captureTranslationReview(page, lang, "calculator");
 
     const toggles = page.getByText(showCalculation, { exact: true });
     await expect(toggles).toHaveCount(6);
@@ -226,5 +229,7 @@ test("localized home and legal pages do not overflow on mobile", async ({
       ),
       `${path} should not overflow`,
     ).toBe(false);
+    const [, locale, name] = path.split("/");
+    if (name) await captureTranslationReview(page, locale, name);
   }
 });

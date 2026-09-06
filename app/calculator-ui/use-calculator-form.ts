@@ -7,7 +7,7 @@ import {
   type CalculatorInput,
 } from "../calculator";
 import type { SiteMessages } from "../i18n/messages/types";
-import { numberFromInput } from "../input-format";
+import { numberFromInputForValidation } from "../input-format";
 
 export type InputState = {
   salePrice: string;
@@ -42,6 +42,7 @@ export function useCalculatorForm(
   const [targetProfit, setTargetProfit] = useState("");
   const transactionDetailsRef = useRef<HTMLDetailsElement>(null);
   const holdingDetailsRef = useRef<HTMLDetailsElement>(null);
+  const loanDetailsRef = useRef<HTMLDetailsElement>(null);
 
   const update = <Key extends keyof InputState>(
     key: Key,
@@ -59,22 +60,23 @@ export function useCalculatorForm(
     setTargetProfit("");
     transactionDetailsRef.current?.removeAttribute("open");
     holdingDetailsRef.current?.removeAttribute("open");
+    loanDetailsRef.current?.removeAttribute("open");
   };
 
   const calculatorInput = useMemo<CalculatorInput>(
     () => ({
-      salePrice: numberFromInput(inputs.salePrice),
-      purchasePrice: numberFromInput(inputs.purchasePrice),
-      commissionRate: numberFromInput(inputs.commissionRate),
-      otherSellingCosts: numberFromInput(inputs.otherSellingCosts),
-      salePreparationCosts: numberFromInput(inputs.salePreparationCosts),
-      purchaseCosts: numberFromInput(inputs.purchaseCosts),
-      renovationsAndImprovements: numberFromInput(
+      salePrice: numberFromInputForValidation(inputs.salePrice),
+      purchasePrice: numberFromInputForValidation(inputs.purchasePrice),
+      commissionRate: numberFromInputForValidation(inputs.commissionRate),
+      otherSellingCosts: numberFromInputForValidation(inputs.otherSellingCosts),
+      salePreparationCosts: numberFromInputForValidation(inputs.salePreparationCosts),
+      purchaseCosts: numberFromInputForValidation(inputs.purchaseCosts),
+      renovationsAndImprovements: numberFromInputForValidation(
         inputs.renovationsAndImprovements,
       ),
-      estimatedLoanPayout: numberFromInput(inputs.estimatedLoanPayout),
-      totalHoldingCosts: numberFromInput(inputs.totalHoldingCosts),
-      totalRentalIncome: numberFromInput(inputs.totalRentalIncome),
+      estimatedLoanPayout: numberFromInputForValidation(inputs.estimatedLoanPayout),
+      totalHoldingCosts: numberFromInputForValidation(inputs.totalHoldingCosts),
+      totalRentalIncome: numberFromInputForValidation(inputs.totalRentalIncome),
     }),
     [inputs],
   );
@@ -87,7 +89,7 @@ export function useCalculatorForm(
     () =>
       calculateRequiredSalePrice(
         calculatorInput,
-        targetProfit === "-" ? Number.NaN : numberFromInput(targetProfit),
+        numberFromInputForValidation(targetProfit),
       ),
     [calculatorInput, targetProfit],
   );
@@ -130,6 +132,7 @@ export function useCalculatorForm(
     targetProfit,
     transactionDetailsRef,
     holdingDetailsRef,
+    loanDetailsRef,
     result,
     targetSalePrice,
     errorFor,

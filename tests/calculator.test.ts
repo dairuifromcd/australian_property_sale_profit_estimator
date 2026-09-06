@@ -10,6 +10,7 @@ import {
   formatAmountInput,
   normaliseAmountInputDraft,
   numberFromInput,
+  numberFromInputForValidation,
 } from "../app/input-format.ts";
 
 function input(
@@ -65,6 +66,24 @@ test("normalises partial and malformed monetary text safely", () => {
   assert.equal(formatAmountInput("abc"), "");
   assert.equal(numberFromInput(""), 0);
   assert.equal(numberFromInput("-"), 0);
+});
+
+test("keeps unfinished monetary drafts invalid through formatting and model validation", () => {
+  for (const draft of ["-", ".", "-."]) {
+    assert.equal(formatAmountInput(draft), draft);
+    const parsed = numberFromInputForValidation(formatAmountInput(draft));
+    assert.ok(Number.isNaN(parsed));
+    assert.equal(calculateEstimate(input({ otherSellingCosts: parsed })).hasTransactionErrors, true);
+    assert.equal(calculateEstimate(input({ estimatedLoanPayout: parsed })).hasSupplementaryErrors, true);
+    assert.equal(calculateRequiredSalePrice(input(), parsed).requiredSalePrice, null);
+  }
+  assert.equal(numberFromInputForValidation(""), 0);
+  assert.equal(numberFromInputForValidation("0"), 0);
+  assert.equal(numberFromInputForValidation("0."), 0);
+  assert.equal(numberFromInputForValidation("1,250,000.50"), 1_250_000.5);
+  assert.equal(numberFromInputForValidation("-0.5"), -0.5);
+  assert.equal(formatAmountInput("12."), "12.");
+  assert.equal(formatAmountInput("-.5"), "-0.5");
 });
 
 test("calculates the four-input transaction estimate", () => {

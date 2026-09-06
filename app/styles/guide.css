@@ -1,0 +1,10 @@
+.selling-guide .legal-page { max-width: 54rem; }
+.selling-guide h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.15; overflow-wrap: anywhere; }
+.selling-guide .legal-section { scroll-margin-top: 1.5rem; }
+.guide-contents { margin: 2rem 0; }
+.guide-contents ul { padding-inline-start: 1.25rem; }
+.guide-contents li { margin-block: .75rem; }
+.guide-calculator-link { display: inline-block; padding-block: .5rem; font-weight: 700; }
+.guide-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; padding-block: 1.5rem; }
+.guide-method { font-size: .875rem; }
+.selling-guide a:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }

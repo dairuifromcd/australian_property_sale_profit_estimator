@@ -286,3 +286,9 @@
     padding: 18px;
   }
 }
+
+.cost-entry-note {
+  margin: 20px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}

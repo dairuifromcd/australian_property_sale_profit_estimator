@@ -99,6 +99,9 @@ export const ko = {
     otherSellingCosts: "기타 매각 비용",
     otherSellingCostsHelp:
       "광고, 소유권 이전, 법률 및 기타 매각 비용입니다. 해당 비용이 없으면 0을 입력하세요.",
+    costEntryNote: "각 비용은 한 번만 입력하세요. 예를 들어 매각 전 수리비는 매각 준비 비용 또는 개조 및 개선 비용 중 한 곳에만 입력하고, 보유 비용에 다시 입력하지 마세요.",
+    loanDetailsTitle: "대출 상환 후 남는 현금 추정",
+    loanDetailsSummary: "별도 현금 추정을 위한 선택적 대출 상환액",
     transactionDetailsTitle: "거래 세부 정보 추가",
     transactionDetailsSummary: "매입, 매각 준비 및 개선 비용",
     addDetails: "세부 정보 추가",
@@ -112,8 +115,8 @@ export const ko = {
     renovations: "개조 및 개선 비용",
     renovationsHelp:
       "이번 거래 예상치에 포함하려는 개조 및 개선 지출입니다.",
-    holdingDetailsTitle: "보유 및 대출 세부 정보 추가",
-    holdingDetailsSummary: "선택적 종합 결과 및 정산 후 현금 예상치",
+    holdingDetailsTitle: "보유 비용 및 임대 수입 추가",
+    holdingDetailsSummary: "선택적 세전 종합 부동산 결과",
     holdingDetailsIntro:
       "이 금액들은 거래 이익, 손익분기 매각가 또는 목표 거래 이익에 필요한 매각가를 변경하지 않습니다.",
     holdingCosts: "지급한 총 보유 비용",
@@ -121,7 +124,7 @@ export const ko = {
       "포함하려는 이자(대출 원금 제외), Council rates(카운슬 요금), 보험, 공동주택 관리비, 임대 관리비, 유지비 및 기타 보유 비용입니다.",
     rentalIncome: "수령한 총 임대 수입",
     rentalIncomeHelp:
-      "보유 비용과 동일한 기간에 받은 총 임대료입니다. 임대 수입이 없으면 0을 입력하세요.",
+      "보유 비용과 동일한 기간에 받은 비용 차감 전 총 임대료입니다. 임대 수입이 없으면 0을 입력하세요.",
     loanPayout: "잔금 정산 시 예상 대출 상환액",
     loanPayoutHelp:
       "가능하면 대출기관의 상환 예상액을 사용하세요. 현재 대출 잔액과 다를 수 있으며 간소화된 현금 예상치에만 사용됩니다.",
@@ -145,7 +148,7 @@ export const ko = {
     transactionProfitTitle: "부동산 전체 거래 이익",
     transactionLossTitle: "부동산 전체 거래 손실",
     transactionIntro:
-      "보유 비용, 임대 수입, 대출 상환액 및 세금 차감 전입니다. 추가 금액을 입력하면 관련 결과가 별도로 표시됩니다.",
+      "매각가에서 매입가와 입력한 매각, 매입 및 개선 비용을 차감한 금액입니다. 보유 비용, 임대 수입, 대출 상환 및 세금 반영 전입니다.",
     expectedSalePrice: "예상 매각가",
     agentCommission: "중개 수수료",
     otherSellingCosts: "기타 매각 비용",
@@ -159,14 +162,14 @@ export const ko = {
     transactionCalculation:
       "예상 매각가에서 수수료, 기타 매각 및 준비 비용, 매입가, 매입 비용과 개선 비용을 뺍니다.",
     displayedAmountsNote:
-      "표시 금액은 센트 단위로 반올림되며, 예상치는 표시 전 입력값을 사용합니다.",
+      "표시 금액은 센트 단위로 반올림되며, 예상치는 표시를 위해 반올림하기 전의 입력값을 사용합니다.",
     holdingPeriodCashFlows: "보유 기간 현금 흐름",
     overallResultTitle: "부동산 종합 세전 결과",
     rentalIncome: "임대 수입",
     holdingCosts: "보유 비용",
     overallResult: "종합 세전 결과",
     overallResultNote:
-      "세전 결과입니다. 매입가가 이미 거래 이익에 포함되므로 대출 원금 상환액은 제외됩니다.",
+      "거래 결과에 입력한 임대 수입을 더하고 보유 비용을 차감합니다. 세전 결과입니다. 매입가가 이미 거래 이익에 포함되므로 대출 원금 상환액은 제외됩니다.",
     transactionPrecisionNote:
       "예상치는 표시 전 반올림되지 않은 거래 결과를 사용합니다.",
     settlementCashLabel: "간소화된 정산 후 현금",
@@ -176,24 +179,24 @@ export const ko = {
     estimatedCash: "예상 현금",
     estimatedCashShortfall: "예상 현금 부족액",
     settlementNote:
-      "세전이며 입력하지 않은 정산 조정 항목은 제외됩니다. 실제 상환액은 대출기관과 정산 담당 전문가에게 확인하세요.",
+      "매각가에서 입력한 매각 비용과 대출 상환액을 차감합니다. 세전이며 입력하지 않은 정산 조정 항목은 제외됩니다. 실제 상환액은 대출기관과 정산 담당 전문가에게 확인하세요.",
     settlementPrecisionNote:
-      "표시 금액은 센트 단위로 반올림되며, 예상치는 표시 전 값을 사용합니다.",
+      "표시 금액은 센트 단위로 반올림되며, 예상치는 표시를 위해 반올림하기 전의 값을 사용합니다.",
     breakEvenLabel: "입력한 거래 비용의 손익분기 매각가",
     breakEvenExplanation:
-      "고정 거래 비용을 1에서 수수료율을 뺀 값으로 나눈 뒤 다음 1달러 단위로 올림합니다.",
+      "고정 거래 비용을 1에서 수수료율을 뺀 값으로 나눈 뒤 정수 달러 단위로 올림합니다. 이미 정수 달러인 결과는 그대로 유지합니다.",
     roundedUp: "올림",
-    targetTitle: "목표 이익을 위한 매각가",
+    targetTitle: "목표 거래 이익을 위한 매각가",
     targetIntro:
-      "보유 현금 흐름, 대출 상환액 및 세금을 제외한 부동산 전체 거래 이익을 설정합니다. 필요한 매각가에서 수수료를 다시 계산하고 다음 1달러 단위로 올림합니다.",
+      "보유 현금 흐름, 대출 상환액 및 세금을 제외한 부동산 전체 거래 이익을 설정합니다. 필요한 매각가에서 수수료를 다시 계산하고 정수 달러 단위로 올림합니다. 이미 정수 달러인 결과는 그대로 유지합니다.",
     targetProfit: "목표 거래 이익",
     targetProfitHelp: "0을 입력하면 입력 비용 기준 손익분기 가격이 나옵니다.",
-    targetResultLabel: "이 목표에 필요한 매각가",
+    targetResultLabel: "이 목표 거래 이익에 필요한 매각가",
     targetMatches: "입력한 예상 매각가와 같습니다.",
     targetAbove: "입력한 예상 매각가 {salePrice}보다 {difference} 높습니다.",
     targetBelow: "입력한 예상 매각가 {salePrice}보다 {difference} 낮습니다.",
     targetCalculation:
-      "입력한 고정 거래 비용에 목표 이익을 더하고 1에서 수수료율을 뺀 값으로 나눈 뒤 다음 1달러 단위로 올림합니다.",
+      "입력한 고정 거래 비용에 목표 이익을 더하고 1에서 수수료율을 뺀 값으로 나눈 뒤 정수 달러 단위로 올림합니다. 이미 정수 달러인 결과는 그대로 유지합니다.",
     sensitivityTitle: "매각가 민감도",
     sensitivityIntro:
       "입력한 매각가보다 5% 낮고 높은 예시 시나리오이며 가격 예측이 아닙니다. 수수료는 다시 계산하고 다른 입력 비용은 그대로 유지합니다.",
@@ -208,7 +211,7 @@ export const ko = {
     commissionFormulaLabel: "수수료",
     fixedCostsFormulaLabel: "고정 비용",
     sensitivityPrecisionNote:
-      "표시 금액은 센트 단위로 반올림되며, 각 시나리오는 표시 전 값을 사용합니다.",
+      "표시 금액은 센트 단위로 반올림되며, 각 시나리오는 표시를 위해 반올림하기 전의 값을 사용합니다.",
   },
   validation: {
     amountGreaterThanZero: "0보다 큰 금액을 입력하세요.",

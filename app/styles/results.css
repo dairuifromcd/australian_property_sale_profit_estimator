@@ -508,3 +508,13 @@
     min-height: 280px;
   }
 }
+
+.supplementary-result + .result-breakdown {
+  margin-top: 24px;
+}
+
+@media screen {
+  .print-only-operands {
+    display: none;
+  }
+}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalculatorForm } from "./calculator-ui/calculator-form";
 import { ResultsPanel } from "./calculator-ui/results-panel";
 import { useCalculatorForm } from "./calculator-ui/use-calculator-form";
+import { GuideLink } from "./selling-costs-guide";
 import { LanguageSwitcher } from "./language-switcher";
 import { pathFor, type Locale } from "./i18n/routing";
 import type { CalculatorMessages } from "./i18n/messages/types";
@@ -116,6 +117,7 @@ export default function CalculatorPage({
         <div>
           <span className="step-label">{messages.home.explanationLabel}</span>
           <h2 id="what-counts-title">{messages.home.explanationTitle}</h2>
+          <p><GuideLink locale={locale} /></p>
         </div>
         <div className="explanation-grid">
           {messages.home.explanationCards.map((card, index) => (

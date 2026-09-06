@@ -34,7 +34,7 @@ export function formatAmountInput(value: string): string {
     amountParts(value);
   const normalizedWhole =
     wholePart.replace(/^0+(?=\d)/, "") ||
-    (hasDecimalPoint ? "0" : "");
+    (fractionPart ? "0" : "");
   const groupedWhole = normalizedWhole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   return `${isNegative ? "-" : ""}${groupedWhole}${
@@ -43,6 +43,12 @@ export function formatAmountInput(value: string): string {
 }
 
 export function numberFromInput(value: string): number {
-  const parsed = Number(value.replace(/,/g, ""));
+  const parsed = numberFromInputForValidation(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+// Empty optional fields mean omitted/zero. Nonblank unfinished drafts must
+// reach model validation as NaN, rather than silently becoming explicit zero.
+export function numberFromInputForValidation(value: string): number {
+  return Number(value.replace(/,/g, ""));
 }

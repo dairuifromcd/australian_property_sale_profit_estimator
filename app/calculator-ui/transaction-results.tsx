@@ -50,6 +50,18 @@ export function TransactionResults({
         </small>
       </div>
 
+      {showHoldingResult ? (
+        <HoldingResult inputs={inputs} result={result} messages={messages} />
+      ) : null}
+
+      {showSettlementCash ? (
+        <SettlementCashResult
+          inputs={inputs}
+          result={result}
+          messages={messages}
+        />
+      ) : null}
+
       <div className="result-breakdown">
         <ResultRow
           label={messages.expectedSalePrice}
@@ -123,18 +135,6 @@ export function TransactionResults({
         </code>
         <small>{messages.displayedAmountsNote}</small>
       </CalculationDetails>
-
-      {showHoldingResult ? (
-        <HoldingResult inputs={inputs} result={result} messages={messages} />
-      ) : null}
-
-      {showSettlementCash ? (
-        <SettlementCashResult
-          inputs={inputs}
-          result={result}
-          messages={messages}
-        />
-      ) : null}
     </>
   );
 }
@@ -149,6 +149,24 @@ function HoldingResult({
   messages: SiteMessages["results"];
 }) {
   const tone = toneFor(result.overallPreTaxPropertyResult);
+
+  const operands = (
+    <>
+      <ResultRow
+        label={messages.transactionProfit}
+        value={result.transactionProfit}
+      />
+      <ResultRow
+        label={messages.rentalIncome}
+        value={numberFromInput(inputs.totalRentalIncome)}
+      />
+      <ResultRow
+        label={messages.holdingCosts}
+        value={numberFromInput(inputs.totalHoldingCosts)}
+        subtract
+      />
+    </>
+  );
 
   return (
     <section
@@ -166,25 +184,15 @@ function HoldingResult({
           lossLabel={messages.lossStatus}
         />
       </div>
-      <ResultRow
-        label={messages.transactionProfit}
-        value={result.transactionProfit}
-      />
-      <ResultRow
-        label={messages.rentalIncome}
-        value={numberFromInput(inputs.totalRentalIncome)}
-      />
-      <ResultRow
-        label={messages.holdingCosts}
-        value={numberFromInput(inputs.totalHoldingCosts)}
-        subtract
-      />
       <div className="supplementary-total">
         <span>{messages.overallResult}</span>
         <strong>{aud.format(result.overallPreTaxPropertyResult)}</strong>
       </div>
       <small>{messages.overallResultNote}</small>
+      <div className="print-only-operands">{operands}</div>
       <CalculationDetails summary={messages.showCalculation}>
+        {operands}
+
         <code>
           {calculationAud.format(result.transactionProfit)} +{" "}
           {calculationAud.format(numberFromInput(inputs.totalRentalIncome))} −{" "}
@@ -208,6 +216,20 @@ function SettlementCashResult({
 }) {
   const tone = toneFor(result.estimatedCashAfterLoanPayout);
 
+  const operands = (
+    <>
+      <ResultRow
+        label={messages.amountAfterSellingCosts}
+        value={result.amountAfterSellingCosts}
+      />
+      <ResultRow
+        label={messages.estimatedLoanPayout}
+        value={numberFromInput(inputs.estimatedLoanPayout)}
+        subtract
+      />
+    </>
+  );
+
   return (
     <section
       className={`supplementary-result ${tone}`}
@@ -228,15 +250,6 @@ function SettlementCashResult({
           lossLabel={messages.shortfallStatus}
         />
       </div>
-      <ResultRow
-        label={messages.amountAfterSellingCosts}
-        value={result.amountAfterSellingCosts}
-      />
-      <ResultRow
-        label={messages.estimatedLoanPayout}
-        value={numberFromInput(inputs.estimatedLoanPayout)}
-        subtract
-      />
       <div className="supplementary-total">
         <span>
           {tone === "loss"
@@ -246,7 +259,10 @@ function SettlementCashResult({
         <strong>{aud.format(result.estimatedCashAfterLoanPayout)}</strong>
       </div>
       <small>{messages.settlementNote}</small>
+      <div className="print-only-operands">{operands}</div>
       <CalculationDetails summary={messages.showCalculation}>
+        {operands}
+
         <code>
           {calculationAud.format(result.amountAfterSellingCosts)} −{" "}
           {calculationAud.format(

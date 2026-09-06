@@ -182,7 +182,7 @@ test("sends only allow-listed anonymous events without calculator values", async
     { timeout: 15_000 },
   );
 
-  const inputValues = ["987654", "543210", "2.2", "7654"];
+  const inputValues = ["987654", "543210", "2.2", "7654", "321987"];
   const suspiciousRequests: string[] = [];
   page.on("request", (request) => {
     const requestContent = decodeURIComponent(
@@ -212,6 +212,10 @@ test("sends only allow-listed anonymous events without calculator values", async
   await page.locator(".transaction-details summary").click();
   await page.locator(".transaction-details summary").click();
   await page.locator(".transaction-details summary").click();
+  await page.locator(".loan-details summary").click();
+  await page.locator("#estimated-loan-payout").fill("321987");
+  await page.locator(".loan-details summary").click();
+  await page.locator(".loan-details summary").click();
   await page.locator(".holding-details summary").click();
   await page.locator("#target-profit").fill("100000");
   await page.evaluate(() => {

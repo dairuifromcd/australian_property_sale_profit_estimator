@@ -35,6 +35,9 @@ the first estimate to four inputs.
 - Print or save the result as a PDF
 - Responsive, accessible single-page calculator interface
 - No account, advertising analytics or server-side storage of calculator inputs
+- A localized selling-costs guide with fictional worked examples, result-scope
+  explanations and links back to the calculator; calculator help opens in a new
+  tab so entered figures remain available
 - Minimal anonymous usage events without calculator figures, application-generated
   identifiers or cookies
 - Persistent estimate-scope notice, privacy notice, material limitations and government
@@ -84,8 +87,9 @@ sale price required for target transaction profit =
    + target transaction profit)
   ÷ (1 − commission rate)
 
-Required break-even and target sale prices are rounded up to the next whole
-Australian dollar so the displayed price does not fall short.
+Required break-even and target sale prices are rounded up to a whole Australian
+dollar so the displayed price does not fall short. Exact whole-dollar results
+remain unchanged.
 
 sale-price sensitivity transaction profit =
   scenario sale price × (1 − commission rate)
@@ -203,6 +207,12 @@ The application also publishes:
 
 - `https://propertysaleprofit.au/robots.txt`
 - `https://propertysaleprofit.au/sitemap.xml`
+
+The `/selling-costs-guide`, `/zh-Hans/selling-costs-guide` and
+`/ko/selling-costs-guide` routes provide server-rendered explanatory content with
+their own canonical URLs and language alternates. These repository routes are
+part of the local growth/accuracy change; their production publication is not
+claimed here. See [the evidence, implementation and verification plan](docs/growth-accuracy-plan.md).
 
 After a production deployment, the domain owner must verify the domain with
 Google Search Console and Bing Webmaster Tools, then submit the sitemap.

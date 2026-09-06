@@ -101,6 +101,9 @@ export const enAU = {
     otherSellingCosts: "Other selling costs",
     otherSellingCostsHelp:
       "Advertising, conveyancing, legal and other selling costs. Enter 0 if none apply.",
+    costEntryNote: "Enter each cost once. For example, put a pre-sale repair in sale preparation or renovations, not both, and do not repeat it in holding costs.",
+    loanDetailsTitle: "Estimate cash after repaying your loan",
+    loanDetailsSummary: "Optional loan payout for a separate cash estimate",
     transactionDetailsTitle: "Add transaction details",
     transactionDetailsSummary: "Buying, preparation and improvement costs",
     addDetails: "Add details",
@@ -114,9 +117,8 @@ export const enAU = {
     renovations: "Renovations and improvements",
     renovationsHelp:
       "The renovation and improvement spending you want included in this transaction estimate.",
-    holdingDetailsTitle: "Add holding and loan details",
-    holdingDetailsSummary:
-      "Optional overall result and settlement cash estimates",
+    holdingDetailsTitle: "Add holding costs and rental income",
+    holdingDetailsSummary: "Optional overall pre-tax property result",
     holdingDetailsIntro:
       "These figures do not change transaction profit, break-even price or the sale price needed for a target transaction profit.",
     holdingCosts: "Total holding costs paid",
@@ -149,7 +151,7 @@ export const enAU = {
     transactionProfitTitle: "Whole-property transaction profit",
     transactionLossTitle: "Whole-property transaction loss",
     transactionIntro:
-      "Before holding costs, rental income, loan payout and tax. Additional results appear separately when you enter them.",
+      "Sale price less the purchase price and entered selling, buying and improvement costs. Before holding costs, rental income, loan payout and tax.",
     expectedSalePrice: "Expected sale price",
     agentCommission: "Agent commission",
     otherSellingCosts: "Other selling costs",
@@ -170,7 +172,7 @@ export const enAU = {
     holdingCosts: "Holding costs",
     overallResult: "Overall pre-tax result",
     overallResultNote:
-      "Before tax. Loan principal repayments are excluded because the purchase price is already counted in transaction profit.",
+      "Transaction result plus entered rent minus holding costs. Before tax. Loan principal repayments are excluded because the purchase price is already counted in transaction profit.",
     transactionPrecisionNote:
       "The estimate uses the transaction result before display rounding.",
     settlementCashLabel: "Simplified settlement cash",
@@ -181,28 +183,28 @@ export const enAU = {
     estimatedCash: "Estimated cash",
     estimatedCashShortfall: "Estimated cash shortfall",
     settlementNote:
-      "Before tax and unentered settlement adjustments. Confirm the actual payout with your lender and settlement professional.",
+      "Sale price less entered selling costs and loan payout. Before tax and unentered settlement adjustments. Confirm the actual payout with your lender and settlement professional.",
     settlementPrecisionNote:
       "Displayed amounts are rounded to cents; the estimate uses values before display rounding.",
     breakEvenLabel:
       "Break-even sale price for entered transaction costs",
     breakEvenExplanation:
-      "Fixed transaction costs divided by one minus the commission rate. Rounded up to the next dollar.",
+      "Fixed transaction costs divided by one minus the commission rate. Rounded up to a whole dollar; an exact whole-dollar result is unchanged.",
     roundedUp: "rounded up",
-    targetTitle: "Sale price for a target profit",
+    targetTitle: "Sale price for a target transaction profit",
     targetIntro:
-      "Set a whole-property transaction profit before holding cash flows, loan payout and tax. Commission is recalculated at the required sale price, which is rounded up to the next dollar.",
+      "Set a whole-property transaction profit before holding cash flows, loan payout and tax. Commission is recalculated at the required sale price, which is rounded up to a whole dollar; an exact whole-dollar result is unchanged.",
     targetProfit: "Target transaction profit",
     targetProfitHelp:
       "Enter 0 to reproduce the entered-cost break-even price.",
-    targetResultLabel: "Sale price needed for this target",
+    targetResultLabel: "Sale price needed for this target transaction profit",
     targetMatches: "Matches your expected sale price.",
     targetAbove:
       "{difference} above your expected sale price of {salePrice}.",
     targetBelow:
       "{difference} below your expected sale price of {salePrice}.",
     targetCalculation:
-      "Entered fixed transaction costs plus target profit, divided by one minus the commission rate. Rounded up to the next dollar.",
+      "Entered fixed transaction costs plus target profit, divided by one minus the commission rate. Rounded up to a whole dollar; an exact whole-dollar result is unchanged.",
     sensitivityTitle: "Sale price sensitivity",
     sensitivityIntro:
       "Illustrative scenarios 5% below and above your entered sale price—not a price prediction. Commission is recalculated; other entered costs stay fixed.",

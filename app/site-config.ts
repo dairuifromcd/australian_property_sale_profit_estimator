@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { guideSummary } from "./i18n/guide-summary";
 import {
   getMessages,
   openGraphLocale,
@@ -74,15 +75,15 @@ export function metadataForPage({
   page: SitePage;
 }): Metadata {
   const messages = getMessages(locale);
-  const pageMetadata = messages.metadata[page];
+  const pageMetadata = page === "guide" ? guideSummary[locale].metadata : messages.metadata[page];
   const title = pageMetadata.title;
   const description = pageMetadata.description;
   const openGraphTitle =
-    "openGraphTitle" in pageMetadata
+    "openGraphTitle" in pageMetadata && typeof pageMetadata.openGraphTitle === "string"
       ? pageMetadata.openGraphTitle
       : title;
   const openGraphDescription =
-    "openGraphDescription" in pageMetadata
+    "openGraphDescription" in pageMetadata && typeof pageMetadata.openGraphDescription === "string"
       ? pageMetadata.openGraphDescription
       : description;
   const path = pathFor(locale, page);

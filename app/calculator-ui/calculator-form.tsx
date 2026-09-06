@@ -16,6 +16,7 @@ export function CalculatorForm({
     inputs,
     transactionDetailsRef,
     holdingDetailsRef,
+    loanDetailsRef,
     errorFor,
     update,
     resetCalculator,
@@ -104,6 +105,8 @@ export function CalculatorForm({
         />
       </div>
 
+      <p className="cost-entry-note">{messages.costEntryNote}</p>
+
       <details
         className="details-block transaction-details"
         ref={transactionDetailsRef}
@@ -155,6 +158,38 @@ export function CalculatorForm({
       </details>
 
       <details
+        className="details-block loan-details"
+        ref={loanDetailsRef}
+        onToggle={(event) => {
+          if (event.currentTarget.open) {
+            trackUsageEvent("holding_details_opened");
+          }
+        }}
+      >
+        <summary>
+          <span>
+            <strong>{messages.loanDetailsTitle}</strong>
+            <small>{messages.loanDetailsSummary}</small>
+          </span>
+          <span className="summary-action">
+            <span className="summary-action-closed">{messages.addDetails}</span>
+            <span className="summary-action-open">{messages.hideDetails}</span>
+          </span>
+        </summary>
+        <div className="details-content field-grid">
+          <AmountField
+            id="estimated-loan-payout"
+            label={messages.loanPayout}
+            value={inputs.estimatedLoanPayout}
+            onChange={(value) => update("estimatedLoanPayout", value)}
+            placeholder="420,000"
+            error={errorFor("estimatedLoanPayout")}
+            help={messages.loanPayoutHelp}
+          />
+        </div>
+      </details>
+
+      <details
         className="details-block holding-details"
         ref={holdingDetailsRef}
         onToggle={(event) => {
@@ -194,15 +229,6 @@ export function CalculatorForm({
             placeholder="60,000"
             error={errorFor("totalRentalIncome")}
             help={messages.rentalIncomeHelp}
-          />
-          <AmountField
-            id="estimated-loan-payout"
-            label={messages.loanPayout}
-            value={inputs.estimatedLoanPayout}
-            onChange={(value) => update("estimatedLoanPayout", value)}
-            placeholder="420,000"
-            error={errorFor("estimatedLoanPayout")}
-            help={messages.loanPayoutHelp}
           />
         </div>
       </details>

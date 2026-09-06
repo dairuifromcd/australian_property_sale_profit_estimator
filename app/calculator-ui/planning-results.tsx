@@ -36,19 +36,20 @@ export function PlanningResults({
     targetProfit !== "" &&
     targetSalePrice.requiredSalePrice !== null &&
     targetSalePrice.differenceFromExpectedSalePrice !== null;
-  const roundedTargetDifference = Math.round(
-    targetSalePrice.differenceFromExpectedSalePrice ?? 0,
-  );
+  const targetDifference = targetSalePrice.differenceFromExpectedSalePrice ?? 0;
+  const expectedSalePrice = numberFromInput(inputs.salePrice);
+  const differenceFormatter = Number.isInteger(targetDifference) ? aud : calculationAud;
+  const expectedPriceFormatter = Number.isInteger(expectedSalePrice) ? aud : calculationAud;
   const targetDifferenceText =
-    roundedTargetDifference === 0
+    targetDifference === 0
       ? messages.targetMatches
       : interpolate(
-          roundedTargetDifference > 0
+          targetDifference > 0
             ? messages.targetAbove
             : messages.targetBelow,
           {
-            difference: aud.format(Math.abs(roundedTargetDifference)),
-            salePrice: aud.format(numberFromInput(inputs.salePrice)),
+            difference: differenceFormatter.format(Math.abs(targetDifference)),
+            salePrice: expectedPriceFormatter.format(expectedSalePrice),
           },
         );
 

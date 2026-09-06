@@ -149,7 +149,8 @@ test("rejects negative quick and detailed costs", async ({ page }) => {
 
   await page.locator("#purchase-costs").fill("0");
   await page.locator("#renovations-and-improvements").fill("0");
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("-3");
   await page.locator("#total-rental-income").fill("-4");
   await page.locator("#estimated-loan-payout").fill("-5");
@@ -276,7 +277,7 @@ test("calculates the sale price needed for a target transaction profit", async (
   });
 
   const targetPlanner = page.getByRole("region", {
-    name: "Sale price for a target profit",
+    name: "Sale price for a target transaction profit",
   });
   await expect(targetPlanner).toBeVisible();
 
@@ -365,7 +366,8 @@ test("keeps holding cash flows separate from transaction-profit planning", async
     commissionRate: "2",
     sellingCosts: "10000",
   });
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("55000");
   await page.locator("#total-rental-income").fill("90000");
 
@@ -383,7 +385,7 @@ test("keeps holding cash flows separate from transaction-profit planning", async
 
   await page.locator("#target-profit").fill("100000");
   await expect(
-    page.getByRole("region", { name: "Sale price for a target profit" }),
+    page.getByRole("region", { name: "Sale price for a target transaction profit" }),
   ).toContainText("$724,490");
 
   await page.locator("#total-holding-costs").fill("500000");
@@ -405,7 +407,8 @@ test("uses loan payout only for simplified settlement cash and labels a shortfal
     commissionRate: "2",
     sellingCosts: "10000",
   });
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#estimated-loan-payout").fill("450000");
 
   let settlementResult = page.getByRole("region", {
@@ -436,7 +439,8 @@ test("accepts explicit zero holding, rental and loan amounts", async ({
     commissionRate: "2",
     sellingCosts: "10000",
   });
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("0");
   await page.locator("#total-rental-income").fill("0");
   await page.locator("#estimated-loan-payout").fill("0");
@@ -458,7 +462,8 @@ test("shows substituted calculations for every derived result group", async ({
     commissionRate: "2",
     sellingCosts: "10000",
   });
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("55000");
   await page.locator("#total-rental-income").fill("90000");
   await page.locator("#estimated-loan-payout").fill("450000");
@@ -499,7 +504,8 @@ test("keeps every displayed calculation honest for cent inputs", async ({
   await page
     .locator("#renovations-and-improvements")
     .fill("25000.51");
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("85000.49");
   await page.locator("#total-rental-income").fill("60000.51");
   await page.locator("#estimated-loan-payout").fill("420000.49");
@@ -556,10 +562,11 @@ test("includes planning scenarios in the printable result", async ({
   await expect(sensitivity).toBeVisible();
   await page.locator("#target-profit").fill("100000");
   const targetPlanner = page.getByRole("region", {
-    name: "Sale price for a target profit",
+    name: "Sale price for a target transaction profit",
   });
   await expect(targetPlanner).toContainText("$724,490");
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#total-holding-costs").fill("55000");
   await page.locator("#total-rental-income").fill("90000");
   await page.locator("#estimated-loan-payout").fill("450000");
@@ -615,7 +622,8 @@ test("resets the calculator and avoids horizontal overflow on mobile", async ({
     }),
   ).toBeVisible();
   await page.locator("#purchase-costs").fill("30000");
-  await page.getByText("Add holding and loan details", { exact: true }).click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator(".loan-details > summary").click();
   await page.locator("#estimated-loan-payout").fill("250000");
 
   await page.getByRole("button", { name: "Reset" }).click();
@@ -665,7 +673,7 @@ test("keeps maximum supported calculations exact without 320px overflow", async 
 
   await page.locator("#target-profit").fill("1000000000000");
   await expect(
-    page.getByRole("region", { name: "Sale price for a target profit" }),
+    page.getByRole("region", { name: "Sale price for a target transaction profit" }),
   ).toContainText("$3,000,000,000,000,000");
 
   expect(
@@ -673,4 +681,139 @@ test("keeps maximum supported calculations exact without 320px overflow", async 
       () => document.documentElement.scrollWidth > window.innerWidth,
     ),
   ).toBe(false);
+});
+
+test("shows the first input in the desktop opening viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const bounds = await page.locator("#sale-price").boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds!.y).toBeGreaterThanOrEqual(0);
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(720);
+});
+
+test("never treats unfinished monetary drafts as explicit zero", async ({ page }) => {
+  await fillQuickInputs(page, { salePrice: "1000000", purchasePrice: "600000", commissionRate: "2", sellingCosts: "10000" });
+  await page.locator(".loan-details > summary").click();
+  await page.locator(".holding-details > summary").click();
+  await page.locator("#estimated-loan-payout").fill("400000");
+  await page.locator("#total-holding-costs").fill("10000");
+  const transaction = page.locator(".primary-result > strong");
+  const originalProfit = await transaction.innerText();
+  const cash = page.locator('[aria-labelledby="settlement-cash-title"]');
+  const overall = page.locator('[aria-labelledby="overall-result-title"]');
+
+  for (const draft of ["-", ".", "-."]) {
+    for (const [id, affected, unaffected] of [
+      ["estimated-loan-payout", cash, overall],
+      ["total-holding-costs", overall, cash],
+      ["total-rental-income", overall, cash],
+    ] as const) {
+      const field = page.locator(`#${id}`);
+      await field.fill(draft);
+      await field.press("Tab");
+      await expect(field).toHaveValue(draft);
+      await expect(field).toHaveAttribute("aria-invalid", "true");
+      await expect(affected).toHaveCount(0);
+      await expect(unaffected).toBeVisible();
+      await expect(transaction).toHaveText(originalProfit);
+      await field.fill("0");
+      await expect(affected).toBeVisible();
+    }
+
+    await page.locator("#target-profit").fill(draft);
+    await page.locator("#target-profit").press("Tab");
+    await expect(page.locator("#target-profit")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator(".target-sale-price-result")).toHaveCount(0);
+    await expect(transaction).toHaveText(originalProfit);
+    await page.locator("#target-profit").fill("0");
+    await expect(page.locator(".target-sale-price-result > strong")).toHaveText(
+      await page.locator(".secondary-metric > strong").innerText(),
+    );
+
+    await page.locator("#other-selling-costs").fill(draft);
+    await page.locator("#other-selling-costs").press("Tab");
+    await expect(page.locator("#other-selling-costs")).toHaveAttribute("aria-invalid", "true");
+    await expect(transaction).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Print or save as PDF" })).toBeDisabled();
+    await page.locator("#other-selling-costs").fill("10000");
+    await expect(transaction).toHaveText(originalProfit);
+  }
+});
+
+test("compares target sale prices without rounding away a cent shortfall or surplus", async ({ page }) => {
+  await fillQuickInputs(page, { salePrice: "100.75", purchasePrice: "100", commissionRate: "0", sellingCosts: "0" });
+  await page.locator("#target-profit").fill("1");
+  const target = page.locator(".target-sale-price-result");
+  await expect(target.locator("strong").first()).toHaveText("$101");
+  await expect(target).toContainText("$0.25 above your expected sale price of $100.75");
+  await expect(target).not.toContainText("Matches");
+  await page.locator("#sale-price").fill("101.25");
+  await expect(target).toContainText("$0.25 below your expected sale price of $101.25");
+  await page.locator("#sale-price").fill("101");
+  await expect(target).toContainText("Matches your expected sale price.");
+  await page.locator("#sale-price").fill("100.99");
+  await expect(target).toContainText("$0.01 above your expected sale price of $100.99");
+});
+
+test("keeps complete scenario summaries separate through invalid optional edits", async ({ page }) => {
+  await fillQuickInputs(page, {
+    salePrice: "850000",
+    purchasePrice: "600000",
+    commissionRate: "2.5",
+    sellingCosts: "9000",
+  });
+  await page.locator(".transaction-details > summary").click();
+  await page.locator("#sale-preparation-costs").fill("5000");
+  await page.locator("#purchase-costs").fill("30000");
+  await page.locator("#renovations-and-improvements").fill("35000");
+  await page.locator(".loan-details > summary").click();
+  await page.locator("#estimated-loan-payout").fill("350000");
+  await expect(page.locator("#total-holding-costs")).not.toBeVisible();
+  await page.locator(".holding-details > summary").click();
+  await page.locator("#total-holding-costs").fill("85000");
+  await page.locator("#total-rental-income").fill("115000");
+  await page.locator("#target-profit").fill("100000");
+
+  const transaction = page.locator(".primary-result > strong");
+  const overall = page.locator('[aria-labelledby="overall-result-title"]');
+  const cash = page.locator('[aria-labelledby="settlement-cash-title"]');
+  await expect(transaction).toHaveText("$149,750");
+  await expect(overall.locator(".supplementary-total strong")).toHaveText("$179,750");
+  await expect(cash.locator(".supplementary-total strong")).toHaveText("$464,750");
+  await expect(page.locator(".target-sale-price-result > strong")).toHaveText("$798,975");
+  await expect(page.locator(".secondary-metric > strong")).toHaveText("$696,411");
+  expect(await cash.evaluate((element) => Boolean(element.compareDocumentPosition(document.querySelector(".result-breakdown")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+
+  await page.locator("#estimated-loan-payout").fill("360000");
+  await expect(cash.locator(".supplementary-total strong")).toHaveText("$454,750");
+  await expect(transaction).toHaveText("$149,750");
+  await expect(overall.locator(".supplementary-total strong")).toHaveText("$179,750");
+  await page.locator("#estimated-loan-payout").fill("-1");
+  await expect(cash).toHaveCount(0);
+  await expect(transaction).toHaveText("$149,750");
+  await expect(overall).toBeVisible();
+  await page.locator("#estimated-loan-payout").fill("350000");
+  await page.locator("#total-holding-costs").fill("-1");
+  await expect(overall).toHaveCount(0);
+  await expect(transaction).toHaveText("$149,750");
+  await expect(cash.locator(".supplementary-total strong")).toHaveText("$464,750");
+  await page.locator("#total-holding-costs").fill("85000");
+  await page.emulateMedia({ media: "print" });
+  await expect(transaction).toBeVisible();
+  await expect(overall.locator(".supplementary-total strong")).toBeVisible();
+  await expect(cash.locator(".supplementary-total strong")).toBeVisible();
+  await expect(overall.locator(".print-only-operands")).toBeVisible();
+  await expect(overall.locator(".print-only-operands")).toContainText("$115,000");
+  await expect(overall.locator(".print-only-operands")).toContainText("−$85,000");
+  await expect(cash.locator(".print-only-operands")).toBeVisible();
+  await expect(cash.locator(".print-only-operands")).toContainText("$814,750");
+  await expect(cash.locator(".print-only-operands")).toContainText("−$350,000");
+  await page.emulateMedia({ media: "screen" });
+  await expect(cash.locator(".print-only-operands")).not.toBeVisible();
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
+  await expect(page.locator(".loan-details")).not.toHaveAttribute("open", "");
+  await expect(page.locator(".holding-details")).not.toHaveAttribute("open", "");
+  await expect(page.locator("#estimated-loan-payout")).toHaveValue("");
+  await expect(cash).toHaveCount(0);
+  await expect(overall).toHaveCount(0);
 });

@@ -24,8 +24,12 @@ The allow-listed events are:
   page visit
 - `transaction_details_opened`: the transaction-details section is first
   opened in a page visit
-- `holding_details_opened`: the holding-and-loan section is first opened in a
-  page visit
+- `holding_details_opened`: either the holding-cost/rental-income section or
+  the separate loan-payout section is first opened in a page visit. Opening
+  both, or reopening either, still sends this event at most once. Before the
+  2026-09-05 clarity change these inputs shared one section; the event continues
+  to represent interest in either kind of supplementary detail, not a count of
+  sections or distinct cash-versus-holding intent.
 - `target_profit_completed`: a valid target sale price is first calculated in
   a page visit
 - `print_selected`: print or save as PDF is first selected in a page visit

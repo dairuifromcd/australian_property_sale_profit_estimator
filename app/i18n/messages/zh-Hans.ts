@@ -98,6 +98,9 @@ export const zhHans = {
     otherSellingCosts: "其他出售成本",
     otherSellingCostsHelp:
       "广告、过户、法律及其他出售成本；如不适用请输入 0。",
+    costEntryNote: "每笔费用只输入一次。例如，售前维修费可计入“售前准备成本”或“翻新和改良支出”其中一项，不要重复计入，也不要再次计入持有成本。",
+    loanDetailsTitle: "估算偿还贷款后剩余的现金",
+    loanDetailsSummary: "可选贷款清偿金额，用于单独估算现金",
     transactionDetailsTitle: "添加交易明细",
     transactionDetailsSummary: "购买、售前准备和改良成本",
     addDetails: "添加明细",
@@ -109,19 +112,19 @@ export const zhHans = {
     purchaseCostsHelp: "您希望计入的印花税、过户及其他购买成本。",
     renovations: "翻新和改良支出",
     renovationsHelp: "您希望计入本次交易估算的翻新和改良支出。",
-    holdingDetailsTitle: "添加持有期和贷款明细",
-    holdingDetailsSummary: "可选的整体结果和交割现金估算",
+    holdingDetailsTitle: "添加持有成本和租金收入",
+    holdingDetailsSummary: "可选的整体税前房产结果",
     holdingDetailsIntro:
       "这些数据不会改变交易利润、保本售价或达到目标交易利润所需的售价。",
     holdingCosts: "已支付的持有成本总额",
     holdingCostsHelp:
-      "您希望计入的利息（不含贷款本金）、Council rates、保险、业主委员会费（body corporate）、房屋中介管理费、维护费及其他持有成本。",
+      "您希望计入的利息（不含贷款本金）、地方政府费（Council rates）、保险、业主法人团体（body corporate）费用、物业出租管理费、维护费及其他持有成本。",
     rentalIncome: "已收租金总额",
     rentalIncomeHelp:
-      "与持有成本相同期间内收到的租金总额；如没有租金收入请输入 0。",
+      "请输入与持有成本相同期间内收到的租金总额（扣除管理费等费用前）；如没有租金收入请输入 0。",
     loanPayout: "预计交割时贷款偿还额",
     loanPayoutHelp:
-      "如有条件，请使用贷款机构提供的 payout estimate。它可能与当前贷款余额不同，仅用于简化现金估算。",
+      "如有，请使用贷款机构提供的贷款清偿金额估算（payout estimate）。该金额可能与当前贷款余额不同，仅用于简化现金估算。",
   },
   results: {
     expandedEstimate: "详细估算",
@@ -142,7 +145,7 @@ export const zhHans = {
     transactionProfitTitle: "整套房产交易盈利",
     transactionLossTitle: "整套房产交易亏损",
     transactionIntro:
-      "尚未计入持有成本、租金收入、贷款偿还额和税款。输入其他数据后，相关结果会单独显示。",
+      "售价减去买价及已输入的出售、购买和改良成本。未计持有成本、租金收入、贷款清偿和税款。",
     expectedSalePrice: "预计售价",
     agentCommission: "中介佣金",
     otherSellingCosts: "其他出售成本",
@@ -163,7 +166,7 @@ export const zhHans = {
     holdingCosts: "持有成本",
     overallResult: "整体税前结果",
     overallResultNote:
-      "税前结果。由于买价已计入交易利润，因此不再将贷款本金偿还额作为持有成本。",
+      "交易结果加上已输入的租金，再减去持有成本。税前结果。由于买价已计入交易利润，因此不再将贷款本金偿还额作为持有成本。",
     transactionPrecisionNote: "估算使用显示前未经四舍五入的交易结果。",
     settlementCashLabel: "简化交割现金",
     settlementCashTitle: "偿还贷款后的预计现金",
@@ -172,24 +175,24 @@ export const zhHans = {
     estimatedCash: "预计现金",
     estimatedCashShortfall: "预计现金缺口",
     settlementNote:
-      "税前且不含未输入的交割调整项目。请向贷款机构和过户专业人士确认实际偿还额。",
+      "售价减去已输入的出售成本和贷款偿还额。税前且不含未输入的交割调整项目。请向贷款机构和过户专业人士确认实际偿还额。",
     settlementPrecisionNote:
       "显示金额四舍五入至分；估算使用显示前的数值。",
     breakEvenLabel: "覆盖所输入交易成本的保本售价",
     breakEvenExplanation:
-      "固定交易成本除以一减佣金率，再向上取整至下一澳元。",
+      "固定交易成本除以一减佣金率，再向上取整至整数澳元；结果已为整数澳元时保持不变。",
     roundedUp: "向上取整",
-    targetTitle: "达到目标利润所需的售价",
+    targetTitle: "达到目标交易利润所需的售价",
     targetIntro:
-      "设定整套房产的目标交易利润，不计持有期现金流、贷款偿还额和税款。系统会按所需售价重新计算佣金，并将售价向上取整至下一澳元。",
+      "设定整套房产的目标交易利润，不计持有期现金流、贷款偿还额和税款。系统会按所需售价重新计算佣金，并将售价向上取整至整数澳元；结果已为整数澳元时保持不变。",
     targetProfit: "目标交易利润",
     targetProfitHelp: "输入 0 可得出覆盖所输入成本的保本售价。",
-    targetResultLabel: "达到此目标所需的售价",
+    targetResultLabel: "达到此目标交易利润所需的售价",
     targetMatches: "与您的预计售价相同。",
     targetAbove: "比您的预计售价 {salePrice} 高 {difference}。",
     targetBelow: "比您的预计售价 {salePrice} 低 {difference}。",
     targetCalculation:
-      "所输入的固定交易成本加目标利润，除以一减佣金率，再向上取整至下一澳元。",
+      "所输入的固定交易成本加目标利润，除以一减佣金率，再向上取整至整数澳元；结果已为整数澳元时保持不变。",
     sensitivityTitle: "售价敏感度",
     sensitivityIntro:
       "仅展示比所输入预计售价低 5% 和高 5% 的示例情景，并非价格预测。佣金会重新计算，其他已输入成本保持不变。",

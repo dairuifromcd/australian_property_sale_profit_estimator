@@ -35,11 +35,27 @@ async function render(url = "http://localhost/") {
 
 function tagsWithAttributes(html, tagName, expectedAttributes) {
   const tags = html.match(new RegExp(`<${tagName}\\b[^>]*>`, "gi")) ?? [];
-  return tags.filter((tag) =>
-    Object.entries(expectedAttributes).every(([name, value]) =>
-      tag.includes(`${name}="${value}"`),
-    ),
-  );
+  return tags.filter((tag) => {
+    // HTML attribute names are case-insensitive. Compare URL meaning, including
+    // the equivalent empty/root pathname, without relaxing origin or path checks.
+    const attributes = Object.fromEntries(
+      [...tag.matchAll(/\s([^\s=/>]+)="([^"]*)"/g)].map(([, name, value]) =>
+        [name.toLowerCase(), value],
+      ),
+    );
+    return Object.entries(expectedAttributes).every(([name, value]) => {
+      const actual = attributes[name.toLowerCase()];
+      if (actual === undefined) return false;
+      if (/^https?:\/\//.test(value)) {
+        try {
+          return new URL(actual).href === new URL(value).href;
+        } catch {
+          return false;
+        }
+      }
+      return actual === value;
+    });
+  });
 }
 
 function assertTagAttributes(html, tagName, expectedAttributes) {
@@ -54,6 +70,23 @@ function assertTagAttributes(html, tagName, expectedAttributes) {
     `Expected a <${tagName}> tag with ${JSON.stringify(expectedAttributes)}`,
   );
 }
+
+test("metadata assertions accept equivalent HTML but reject wrong destinations", () => {
+  const expected = { rel: "alternate", hrefLang: "en-AU", href: "https://propertysaleprofit.au/" };
+  assert.equal(tagsWithAttributes('<link rel="alternate" hreflang="en-AU" href="https://propertysaleprofit.au">', "link", expected).length, 1);
+  for (const href of [
+    "http://propertysaleprofit.au/",
+    "https://propertysaleprofit.au.example/",
+    "https://preview.workers.dev/",
+    "https://propertysaleprofit.au/ko",
+    "https://propertysaleprofit.au/?preview=true",
+    "/",
+  ]) {
+    assert.equal(tagsWithAttributes(`<link rel="alternate" hreflang="en-AU" href="${href}">`, "link", expected).length, 0);
+  }
+  assert.equal(tagsWithAttributes('<link data-rel="alternate" hreflang="en-AU" href="https://propertysaleprofit.au/">', "link", expected).length, 0);
+  assert.equal(tagsWithAttributes('<link rel="canonical" href="https://propertysaleprofit.au/privacy/">', "link", { rel: "canonical", href: "https://propertysaleprofit.au/privacy" }).length, 0);
+});
 
 test("server-renders the property sale calculator", async () => {
   const response = await render();
@@ -454,6 +487,9 @@ test("serves a sitemap containing only canonical public URLs", async () => {
     "https://propertysaleprofit.au/disclaimer",
     "https://propertysaleprofit.au/zh-Hans/disclaimer",
     "https://propertysaleprofit.au/ko/disclaimer",
+    "https://propertysaleprofit.au/selling-costs-guide",
+    "https://propertysaleprofit.au/zh-Hans/selling-costs-guide",
+    "https://propertysaleprofit.au/ko/selling-costs-guide",
   ]);
   assert.doesNotMatch(body, /workers\.dev|localhost/i);
   assert.doesNotMatch(body, /<lastmod>/i);
@@ -471,10 +507,15 @@ test("keeps unknown production URLs out of the index", async () => {
     name: "robots",
     content: "noindex",
   });
-  assert.equal(
-    tagsWithAttributes(html, "meta", { name: "robots" }).length,
-    1,
-  );
+  // The framework injects noindex in addition to the app's noindex,nofollow.
+  // Every directive must remain restrictive; reject conflicting index tags.
+  const robotsTags = tagsWithAttributes(html, "meta", { name: "robots" });
+  for (const tag of robotsTags) {
+    const directives = tag.match(/\bcontent="([^"]*)"/i)?.[1]
+      .toLowerCase().split(/\s*,\s*/) ?? [];
+    assert.ok(directives.includes("noindex"));
+    assert.ok(!directives.includes("index"));
+  }
   assert.equal(
     tagsWithAttributes(html, "link", { rel: "canonical" }).length,
     0,
@@ -581,4 +622,67 @@ test("removes disposable starter preview code and metadata", async () => {
   await assert.rejects(
     access(new URL("../app/chatgpt-auth.ts", templateRoot)),
   );
+});
+
+test("guide is readable in server HTML with canonical locale alternates and host indexing gates", async () => {
+  const routes = [
+    ["en-AU", "/selling-costs-guide", "Australian property selling costs: profit and cash explained"],
+    ["zh-Hans", "/zh-Hans/selling-costs-guide", "澳洲卖房费用：交易利润与现金的区别"],
+    ["ko", "/ko/selling-costs-guide", "호주 부동산 매각 비용: 거래 이익과 현금 이해하기"],
+  ];
+  for (const [locale, path, heading] of routes) {
+    for (const host of ["propertysaleprofit.au", "example-property-profit-au.dairuifromcd.workers.dev"]) {
+      const response = await render(`https://${host}${path}`);
+      assert.equal(response.status, 200);
+      const html = await response.text();
+      assert.match(html, new RegExp(`<html[^>]+lang="${locale}"`));
+      assert.ok(html.includes(`<h1>${heading}</h1>`));
+      assertTagAttributes(html, "link", { rel: "canonical", href: `https://propertysaleprofit.au${path}` });
+      assertTagAttributes(html, "meta", { name: "robots", content: host === "propertysaleprofit.au" ? "index, follow" : "noindex, nofollow" });
+      for (const [alternate, alternatePath] of [...routes, ["x-default", "/selling-costs-guide"]]) {
+        assertTagAttributes(html, "link", { rel: "alternate", hrefLang: alternate, href: `https://propertysaleprofit.au${alternatePath}` });
+      }
+      for (const id of ["selling-costs", "profit-and-cash", "worked-example", "compare-quotes", "planning", "already-sold", "scope"]) {
+        assertTagAttributes(html, "section", { id });
+        assertTagAttributes(html, "a", { href: `#${id}` });
+      }
+      // Literal worked equations catch translated numerical drift, independent of model code.
+      assert.ok(html.includes("$973,000 − $650,000 = $323,000"));
+      assert.ok(html.includes("$973,000 − $400,000 = $573,000"));
+      assert.ok(html.includes("$22,000 + $5,000 = $27,000"));
+      const home = locale === "en-AU" ? "/" : `/${locale}`;
+      assertTagAttributes(html, "a", { href: home });
+      assertTagAttributes(html, "a", { href: `${home === "/" ? "" : home}/privacy` });
+      assertTagAttributes(html, "a", { href: `${home === "/" ? "" : home}/disclaimer` });
+      assert.doesNotMatch(html, /FAQPage|aggregateRating|reviewRating/);
+    }
+  }
+  for (const locale of ["fr", "zh", "en-AU"]) {
+    const response = await render(`https://propertysaleprofit.au/${locale}/selling-costs-guide`);
+    assert.equal(response.status, 404);
+    assertTagAttributes(await response.text(), "meta", { name: "robots", content: "noindex" });
+  }
+});
+
+test("guide dictionaries retain source shape, nonempty text and placeholders", async () => {
+  // Run through the Node TypeScript loader already used by the unit-test command.
+  const { guideMessages } = await import("../app/i18n/guide-messages.ts");
+  const { guideSummary } = await import("../app/i18n/guide-summary.ts");
+  const assertTranslation = (source, translated, path) => {
+    if (typeof source === "string") {
+      assert.equal(typeof translated, "string", path);
+      assert.ok(translated.trim(), path);
+      assert.deepEqual(translated.match(/\{[a-zA-Z][\w]*\}/g) ?? [], source.match(/\{[a-zA-Z][\w]*\}/g) ?? [], path);
+      return;
+    }
+    assert.deepEqual(Object.keys(translated), Object.keys(source), path);
+    for (const key of Object.keys(source)) assertTranslation(source[key], translated[key], `${path}.${key}`);
+  };
+  for (const dictionary of [guideMessages, guideSummary]) {
+    assert.deepEqual(Object.keys(dictionary), ["en-AU", "zh-Hans", "ko"]);
+    for (const locale of ["zh-Hans", "ko"]) assertTranslation(dictionary["en-AU"], dictionary[locale], locale);
+  }
+  for (const locale of ["zh-Hans", "ko"]) {
+    assert.deepEqual(guideMessages[locale].sections.map(section => section.id), guideMessages["en-AU"].sections.map(section => section.id));
+  }
 });
