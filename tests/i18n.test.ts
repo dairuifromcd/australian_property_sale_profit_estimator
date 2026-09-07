@@ -126,3 +126,14 @@ test("localized fragments form complete sentences around links", () => {
   assert.match(koreanQuestions, /support@propertysaleprofit\.au로 보내 주세요/);
   assert.doesNotMatch(koreanQuestions, /\.au\.\s*로/);
 });
+
+
+test("guide answers distinguish purchase costs from payout and request safe corrections", () => {
+  const answer = (locale: keyof typeof guideMessages) => guideMessages[locale].sections.find(section => section.id === "profit-and-cash")!.paragraphs[0];
+  assert.match(answer("en-AU"), /does not subtract the purchase price, buying costs or improvements again/);
+  assert.match(answer("zh-Hans"), /不再减去买价、购入费用或装修改善支出/);
+  assert.match(answer("ko"), /매입가, 매입 비용, 개조 및 개선 비용을 다시 차감하지 않습니다/);
+  assert.match(guideMessages["en-AU"].corrections, /do not send personal information or actual property, loan or calculator amounts/);
+  assert.match(guideMessages["zh-Hans"].corrections, /请勿发送个人信息或实际房产、贷款及计算器金额/);
+  assert.match(guideMessages.ko.corrections, /개인정보나 실제 부동산, 대출 또는 계산기 금액은 보내지 마세요/);
+});

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { shareCards, shareCardPath } from "./i18n/share-cards";
 import { guideSummary } from "./i18n/guide-summary";
 import {
   getMessages,
@@ -99,6 +100,10 @@ export function metadataForPage({
     title,
     description,
     robots: robotsForHost(host),
+    // Public verification tag supplied by the owner's Bing Webmaster Tools account.
+    ...(isProductionHost(host) && locale === "en-AU" && page === "home"
+      ? { verification: { other: { "msvalidate.01": "E319A70AFC92A835B6CBAF8FAA0717B8" } } }
+      : {}),
     alternates: {
       canonical: path,
       languages,
@@ -113,9 +118,11 @@ export function metadataForPage({
         .map((alternateLocale) => openGraphLocale[alternateLocale]),
       siteName: messages.common.siteName,
       url: path,
+      images: [{ url: `${SITE_ORIGIN}${shareCardPath(locale)}`, width: 1200, height: 630, type: "image/png", alt: shareCards[locale].alt }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
+      images: [{ url: `${SITE_ORIGIN}${shareCardPath(locale)}`, alt: shareCards[locale].alt }],
       title: openGraphTitle,
       description: openGraphDescription,
     },

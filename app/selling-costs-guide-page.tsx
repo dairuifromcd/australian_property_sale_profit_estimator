@@ -4,6 +4,7 @@ import { guideMessages } from "./i18n/guide-messages";
 import { pathFor, type Locale } from "./i18n/routing";
 import { LanguageSwitcher } from "./language-switcher";
 import "./styles/guide.css";
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "./site-config";
 
 export function SellingCostsGuide({ locale }: { locale: Locale }) {
   const content = guideMessages[locale];
@@ -32,7 +33,11 @@ export function SellingCostsGuide({ locale }: { locale: Locale }) {
             {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
           </section>
         ))}
-        <p className="guide-method">{content.updated}</p>
+        <div className="guide-method">
+          <p>{content.updated}</p>
+          <p>{content.maintainer}</p>
+          <p>{content.corrections} <a href={SUPPORT_MAILTO}>{SUPPORT_EMAIL}</a></p>
+        </div>
         <footer className="guide-footer">
           <a className="guide-calculator-link" href={pathFor(locale, "home")}>{content.calculator}</a>
           <a href={pathFor(locale, "privacy")}>{common.privacy}</a>

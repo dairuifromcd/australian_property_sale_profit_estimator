@@ -128,3 +128,25 @@ owner acceptance and publication authorisation for Preview version
 language-review records. The pending table above is preserved: no fluent-human
 qualification, professional review, signature, or permanent policy waiver is
 inferred. Subsequent SEO/AEO copy changes are a separate review scope.
+
+## SEO/AEO copy and share-card batch — 2026-09-06
+
+New three-language text adds a direct profit/cash distinction, generic project
+maintainer attribution, a correction contact instruction that excludes personal
+and actual financial details, and static share-card wording/alt text. No personal
+identity or professional endorsement is claimed. `calculation_audit` accepted
+the direct-answer semantics without findings; `release_audit` found no blocking
+source defect and visually inspected all three share cards.
+
+The final release-candidate run on 2026-09-07 passed `npm test` with 59 tests,
+lint, and all 40 local Chromium E2E tests. The authorised E2E run refreshed all
+eight calculator/guide/legal mobile screenshots after the new copy. The review
+HTML and source fingerprints were then regenerated. The three share PNGs were
+also generated and visually inspected. Prior owner acceptance covers the
+earlier Preview, not a fluent-human signoff of these new strings.
+
+On 2026-09-07 the owner explicitly instructed merging this SEO/AEO batch into
+`main` after Cloudflare Preview verification. Remote Preview browser tests and
+metadata/image assertions passed before that merge step. This records owner
+publication authorisation; the pending fluent-human qualification records are
+still not inferred or marked complete.

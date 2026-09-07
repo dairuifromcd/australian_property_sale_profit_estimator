@@ -164,7 +164,7 @@ test("indexes only the production host and always uses production canonicals", a
   });
   assertTagAttributes(productionHtml, "meta", {
     name: "twitter:card",
-    content: "summary",
+    content: "summary_large_image",
   });
   assert.equal(
     tagsWithAttributes(productionHtml, "meta", { name: "robots" }).length,
@@ -625,6 +625,7 @@ test("removes disposable starter preview code and metadata", async () => {
 });
 
 test("guide is readable in server HTML with canonical locale alternates and host indexing gates", async () => {
+  const { guideMessages } = await import("../app/i18n/guide-messages.ts");
   const routes = [
     ["en-AU", "/selling-costs-guide", "Australian property selling costs: profit and cash explained"],
     ["zh-Hans", "/zh-Hans/selling-costs-guide", "澳洲卖房费用：交易利润与现金的区别"],
@@ -646,6 +647,12 @@ test("guide is readable in server HTML with canonical locale alternates and host
         assertTagAttributes(html, "section", { id });
         assertTagAttributes(html, "a", { href: `#${id}` });
       }
+      assertTagAttributes(html, "a", { href: "mailto:support@propertysaleprofit.au" });
+      assert.ok(html.includes(guideMessages[locale].maintainer));
+      assert.ok(html.includes(guideMessages[locale].corrections));
+      const paragraphs = guideMessages[locale].sections.find(section => section.id === "profit-and-cash").paragraphs;
+      assert.ok(html.includes(paragraphs[0]));
+      assert.ok(html.indexOf(paragraphs[0]) < html.indexOf(paragraphs[1]));
       // Literal worked equations catch translated numerical drift, independent of model code.
       assert.ok(html.includes("$973,000 − $650,000 = $323,000"));
       assert.ok(html.includes("$973,000 − $400,000 = $573,000"));
@@ -678,11 +685,50 @@ test("guide dictionaries retain source shape, nonempty text and placeholders", a
     assert.deepEqual(Object.keys(translated), Object.keys(source), path);
     for (const key of Object.keys(source)) assertTranslation(source[key], translated[key], `${path}.${key}`);
   };
-  for (const dictionary of [guideMessages, guideSummary]) {
+  const { shareCards } = await import("../app/i18n/share-cards.ts");
+  for (const dictionary of [guideMessages, guideSummary, shareCards]) {
     assert.deepEqual(Object.keys(dictionary), ["en-AU", "zh-Hans", "ko"]);
     for (const locale of ["zh-Hans", "ko"]) assertTranslation(dictionary["en-AU"], dictionary[locale], locale);
   }
   for (const locale of ["zh-Hans", "ko"]) {
     assert.deepEqual(guideMessages[locale].sections.map(section => section.id), guideMessages["en-AU"].sections.map(section => section.id));
+  }
+});
+
+
+test("all localized pages publish complete production share-image metadata", async () => {
+  for (const [locale, prefix] of [["en-AU", ""], ["zh-Hans", "/zh-Hans"], ["ko", "/ko"]]) {
+    const imagePath = `/share/${locale}.png`;
+    const image = await readFile(new URL(`../public${imagePath}`, import.meta.url));
+    assert.equal(image.subarray(1, 4).toString(), "PNG");
+    assert.equal(image.readUInt32BE(16), 1200);
+    assert.equal(image.readUInt32BE(20), 630);
+    for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer"]) {
+      const html = await (await render(`https://preview.workers.dev${prefix + page || "/"}`)).text();
+      assertTagAttributes(html, "meta", { property: "og:image", content: `https://propertysaleprofit.au${imagePath}` });
+      assertTagAttributes(html, "meta", { property: "og:image:width", content: "1200" });
+      assertTagAttributes(html, "meta", { property: "og:image:height", content: "630" });
+      assertTagAttributes(html, "meta", { name: "twitter:card", content: "summary_large_image" });
+      assertTagAttributes(html, "meta", { name: "twitter:image", content: `https://propertysaleprofit.au${imagePath}` });
+      assert.match(html, /property="og:image:alt" content="[^"]+"|content="[^"]+" property="og:image:alt"/);
+    }
+  }
+});
+
+
+test("Bing verification appears exactly once only on the production English home", async () => {
+  for (const host of ["propertysaleprofit.au", "example-property-profit-au.dairuifromcd.workers.dev", "localhost:4173"]) {
+    for (const prefix of ["", "/zh-Hans", "/ko"]) {
+      for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer"]) {
+        const html = await (await render(`https://${host}${prefix + page || "/"}`)).text();
+        const verification = tagsWithAttributes(html, "meta", { name: "msvalidate.01" });
+        if (host === "propertysaleprofit.au" && !prefix && !page) {
+          assert.equal(verification.length, 1);
+          assertTagAttributes(html, "meta", { name: "msvalidate.01", content: "E319A70AFC92A835B6CBAF8FAA0717B8" });
+        } else {
+          assert.equal(verification.length, 0, `${host}${prefix}${page}`);
+        }
+      }
+    }
   }
 });

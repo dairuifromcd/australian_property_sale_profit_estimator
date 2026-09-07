@@ -32,8 +32,8 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
 - The repository configures anonymous events containing event type, locale,
   environment and Cloudflare timestamp, without calculator figures, cookies or
   application-generated identifiers.
-- No verified production event baseline or structured real-user feedback is
-  recorded in this repository.
+- Google Search Console has a verified search snapshot recorded below;
+  production usage-event counts and structured real-user feedback remain unknown.
 - No completed Chinese or Korean fluent-human review is recorded, although the
   declared translation process requires it.
 - `docs/mvp-without-cgt-decision.md` is a historical scope decision. Its
@@ -56,9 +56,9 @@ These are not validated user facts.
 
 ## Behaviour baseline
 
-Window: last 28 complete days
+Window: Search Console 2026-08-08 through 2026-09-04; usage events not queried
 Environment: production only
-Status: not yet verified
+Status: Google search verified 2026-09-06; usage-event baseline still Unknown
 
 | Evidence | en-AU | zh-Hans | ko | Interpretation |
 | --- | ---: | ---: | ---: | --- |
@@ -69,10 +69,23 @@ Status: not yet verified
 | `holding_details_opened` | Unknown | Unknown | Unknown | Holding/loan-detail interest |
 | `target_profit_completed` | Unknown | Unknown | Unknown | Planning-feature use |
 | `print_selected` | Unknown | Unknown | Unknown | Handoff or export intent |
-| Search impressions and clicks | Unknown | Unknown | Unknown | Search discovery |
+| Homepage search impressions / clicks | 29 / 0 | 4 / 0 | 1 / 0 | Google Web Search, observed 28-day window; not usage events |
 
 Ratios are directional only. Events cannot be linked to unique users or
 sessions, and automated visits may contribute.
+
+Search Console reports 34 impressions, zero clicks, 0% CTR and average position
+45.3 for the observed window. Its sitemap status is successful (last read
+2026-09-03, nine URLs). The indexing report dated 2026-08-28 shows five indexed
+pages and four discovered/unindexed legal pages. These snapshots predate the
+new release; see [search discovery](search-discovery.md) for precise sources,
+query rows, implementation status and remaining access/verification limits.
+
+The separate Google generative-AI Beta report shows two impressions for the
+Chinese homepage in that same window; it exposes no click metric in the viewed
+report. Do not add these impressions to Web Search totals or infer traffic
+uplift. Bing was added to the authenticated account and awaits verification
+after the real public meta tag is deployed.
 
 ## Real-user feedback
 
@@ -95,9 +108,12 @@ property-sale decision, and which result do they actually need?
 
 Implement the owner-authorised local clarity and explanatory-guide batch while
 deferring non-essential feature expansion (including quote A/B comparison).
-Production behaviour/search baselines remain Unknown and real-user comprehension
-research is still outstanding. Local implementation does not establish traffic
-benefit or production release readiness.
+The initial Google search baseline is now recorded above; production usage-event
+counts and real-user comprehension remain unknown. The existing Preview was
+pushed to remote `main` after a successful credential retry. The small SEO/AEO
+follow-up passed the full local release checks and remote Cloudflare Preview
+verification. These checks establish technical release evidence, not traffic
+benefit or real-user comprehension.
 
 ## Next learning experiment
 

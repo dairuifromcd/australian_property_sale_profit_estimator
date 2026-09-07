@@ -29,6 +29,8 @@ test("every guide fits a mobile viewport without storing or transmitting example
     await page.goto(`${prefix}/selling-costs-guide`);
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("article section")).toHaveCount(7);
+    await expect(page.locator('.guide-method a')).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
+    await expect(page.locator('.guide-method a')).toHaveText("support@propertysaleprofit.au");
     await captureTranslationReview(page, prefix.slice(1), "guide");
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await expect(page.locator(".guide-footer a").nth(1)).toHaveAttribute("href", `${prefix}/privacy`);
@@ -73,5 +75,18 @@ test("opening the guide preserves entered calculator figures in the original tab
     await expect(page.locator("#other-selling-costs")).toHaveValue("5,000");
     await expect(page.locator(".primary-result")).toContainText("$323,000");
     await popup.close();
+  }
+});
+
+
+test("localized share cards are served as usable static PNGs", async ({ request }) => {
+  for (const locale of ["en-AU", "zh-Hans", "ko"]) {
+    const response = await request.get(`/share/${locale}.png`);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/png");
+    const png = await response.body();
+    expect(png.subarray(1, 4).toString()).toBe("PNG");
+    expect(png.readUInt32BE(16)).toBe(1200);
+    expect(png.readUInt32BE(20)).toBe(630);
   }
 });

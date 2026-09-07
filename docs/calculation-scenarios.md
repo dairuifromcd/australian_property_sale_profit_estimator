@@ -67,6 +67,12 @@ Coverage labels are written as text so that they do not depend on colour.
 ## Explicitly outside the current model
 
 The localized `/selling-costs-guide` explains this same model, including a
+plain-language direct answer before the equations: transaction profit includes
+purchase and entered transaction costs; simplified cash uses sale price less
+selling costs and loan payout, without subtracting purchase/buying/improvement
+costs again. It does not imply `cash = profit - loan`. This explanation was
+independently accepted by `calculation_audit` on 2026-09-06; SSR tests check the
+answer and its ordering in all three locales. It retains the existing
 fictional 1,000,000 sale / 650,000 purchase / 2.2% commission / 5,000 other costs /
 400,000 payout example: transaction profit 323,000 and cash 573,000. It explicitly
 sets all other costs and holding cash flows to zero. Its alternative 1.8% plus

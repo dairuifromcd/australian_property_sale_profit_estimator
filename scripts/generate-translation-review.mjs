@@ -7,6 +7,7 @@ import { zhHans } from "../app/i18n/messages/zh-Hans.ts";
 import { ko } from "../app/i18n/messages/ko.ts";
 import { guideMessages } from "../app/i18n/guide-messages.ts";
 import { guideSummary } from "../app/i18n/guide-summary.ts";
+import { shareCards } from "../app/i18n/share-cards.ts";
 
 const output = new URL("../outputs/translation-review/", import.meta.url);
 const locales = ["en-AU", "zh-Hans", "ko"];
@@ -16,6 +17,7 @@ const groups = [
     title: `Calculator / ${key}`,
     values: locales.map(locale => dictionaries[locale][key]),
   })),
+  { title: "Share cards and image alt text", values: locales.map(locale => shareCards[locale]) },
   { title: "Guide body", values: locales.map(locale => guideMessages[locale]) },
   { title: "Guide metadata and link", values: locales.map(locale => guideSummary[locale]) },
 ];
@@ -30,7 +32,7 @@ function flatten(value, prefix = "") {
 }
 const sourceFiles = [
   "app/i18n/messages/en-AU.ts", "app/i18n/messages/zh-Hans.ts",
-  "app/i18n/messages/ko.ts", "app/i18n/guide-messages.ts", "app/i18n/guide-summary.ts",
+  "app/i18n/messages/ko.ts", "app/i18n/guide-messages.ts", "app/i18n/guide-summary.ts", "app/i18n/share-cards.ts",
 ];
 const hashes = [];
 for (const path of sourceFiles) {
