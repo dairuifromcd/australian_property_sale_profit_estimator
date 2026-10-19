@@ -4,7 +4,7 @@ import test from "node:test";
 
 const templateRoot = new URL("../", import.meta.url);
 
-async function fetchBuiltRoute(url, accept) {
+async function fetchBuiltRoute(url, accept, userAgent) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
@@ -15,6 +15,7 @@ async function fetchBuiltRoute(url, accept) {
       headers: {
         accept,
         host: requestUrl.host,
+        ...(userAgent ? { "user-agent": userAgent } : {}),
       },
     }),
     {
@@ -29,8 +30,8 @@ async function fetchBuiltRoute(url, accept) {
   );
 }
 
-async function render(url = "http://localhost/") {
-  return fetchBuiltRoute(url, "text/html");
+async function render(url = "http://localhost/", userAgent) {
+  return fetchBuiltRoute(url, "text/html", userAgent);
 }
 
 function tagsWithAttributes(html, tagName, expectedAttributes) {
@@ -96,11 +97,11 @@ test("server-renders the property sale calculator", async () => {
   const html = await response.text();
   assert.match(
     html,
-    /<title>Property Sale Profit \| Australian Property Sale Profit Estimator<\/title>/i,
+    /<title>Australian Property Sale Profit Calculator \| Property Sale Profit<\/title>/i,
   );
   assert.match(
     html,
-    /Estimate your property sale result and cash position\./,
+    /Australian property sale profit calculator/,
   );
   assert.doesNotMatch(html, /Important information\s+Important information/);
   assert.doesNotMatch(html, /Know what you could really make/i);
@@ -265,22 +266,22 @@ test("server-renders every locale with localized metadata and language links", a
     [
       "/",
       "en-AU",
-      "Property Sale Profit | Australian Property Sale Profit Estimator",
-      "Estimate your property sale result and cash position.",
+      "Australian Property Sale Profit Calculator | Property Sale Profit",
+      "Australian property sale profit calculator",
       "https://propertysaleprofit.au/",
     ],
     [
       "/zh-Hans",
       "zh-Hans",
-      "澳洲房产出售收益计算器 | Property Sale Profit",
-      "估算房产出售结果和现金状况。",
+      "澳洲卖房利润计算器 | Property Sale Profit",
+      "澳洲卖房利润计算器",
       "https://propertysaleprofit.au/zh-Hans",
     ],
     [
       "/ko",
       "ko",
-      "호주 부동산 매각 수익 계산기 | Property Sale Profit",
-      "부동산 매각 결과와 현금 상황을 추정해 보세요.",
+      "호주 부동산 매각 이익 계산기 | Property Sale Profit",
+      "호주 부동산 매각 이익 계산기",
       "https://propertysaleprofit.au/ko",
     ],
   ]) {
@@ -289,7 +290,7 @@ test("server-renders every locale with localized metadata and language links", a
     const html = await response.text();
 
     assert.match(html, new RegExp(`<html[^>]+lang="${lang}"`));
-    assert.match(html, new RegExp(`<title>${title}</title>`));
+    assert.ok(html.includes(`<title>${title}</title>`));
     assert.match(html, new RegExp(heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assertTagAttributes(html, "link", {
       rel: "canonical",
@@ -643,7 +644,7 @@ test("guide is readable in server HTML with canonical locale alternates and host
       for (const [alternate, alternatePath] of [...routes, ["x-default", "/selling-costs-guide"]]) {
         assertTagAttributes(html, "link", { rel: "alternate", hrefLang: alternate, href: `https://propertysaleprofit.au${alternatePath}` });
       }
-      for (const id of ["selling-costs", "profit-and-cash", "worked-example", "compare-quotes", "planning", "already-sold", "scope"]) {
+      for (const id of ["selling-costs", "profit-and-cash", "worked-example", "cash-with-loss", "prepare-figures", "compare-quotes", "planning", "already-sold", "scope"]) {
         assertTagAttributes(html, "section", { id });
         assertTagAttributes(html, "a", { href: `#${id}` });
       }
@@ -657,6 +658,18 @@ test("guide is readable in server HTML with canonical locale alternates and host
       assert.ok(html.includes("$973,000 − $650,000 = $323,000"));
       assert.ok(html.includes("$973,000 − $400,000 = $573,000"));
       assert.ok(html.includes("$22,000 + $5,000 = $27,000"));
+      assert.ok(html.includes("$700,000 − $20,000 = $680,000"));
+      assert.ok(html.includes("$680,000 − $750,000 = −$70,000"));
+      assert.ok(html.includes("$680,000 − $400,000 = $280,000"));
+      const comparison = guideMessages[locale].sections.find(section => section.id === "profit-and-cash").table;
+      assert.ok(html.includes(`<caption>${comparison.caption}</caption>`));
+      for (const row of comparison.rows) {
+        assert.ok(html.includes(`<th scope="row">${row.result}</th>`));
+        assert.ok(html.includes(row.includes));
+        assert.ok(html.includes(row.excludes));
+      }
+      const checklist = guideMessages[locale].sections.find(section => section.id === "prepare-figures").checklist;
+      for (const item of checklist) assert.ok(html.includes(`<li>${item}</li>`));
       const home = locale === "en-AU" ? "/" : `/${locale}`;
       assertTagAttributes(html, "a", { href: home });
       assertTagAttributes(html, "a", { href: `${home === "/" ? "" : home}/privacy` });
@@ -668,6 +681,50 @@ test("guide is readable in server HTML with canonical locale alternates and host
     const response = await render(`https://propertysaleprofit.au/${locale}/selling-costs-guide`);
     assert.equal(response.status, 404);
     assertTagAttributes(await response.text(), "meta", { name: "robots", content: "noindex" });
+  }
+});
+
+test("home exposes one crawlable guide link before the calculator in every locale", async () => {
+  for (const prefix of ["", "/zh-Hans", "/ko"]) {
+    const html = await (await render(`https://propertysaleprofit.au${prefix || "/"}`)).text();
+    const guidePath = `${prefix}/selling-costs-guide`;
+    const guideLinks = tagsWithAttributes(html, "a", { href: guidePath, target: "_blank", rel: "noopener noreferrer" });
+    assert.equal(guideLinks.length, 1);
+    assert.ok(html.indexOf(`href="${guidePath}"`) < html.indexOf('id="calculator-title"'));
+    assert.ok(html.includes('class="hero-guide"'));
+  }
+});
+
+test("metadata is in the initial head for browser and crawler user agents", async () => {
+  for (const userAgent of [
+    "Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    "PropertySiteVerification/1.0",
+  ]) {
+    for (const host of ["propertysaleprofit.au", "preview.workers.dev"]) {
+      for (const prefix of ["", "/zh-Hans", "/ko"]) {
+        for (const page of ["", "/selling-costs-guide"]) {
+          const path = prefix + page || "/";
+          const html = await (await render(`https://${host}${path}`, userAgent)).text();
+          const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1];
+          assert.ok(head, `${userAgent}: ${host}${path} head`);
+          assert.match(head, /<title>[^<]+<\/title>/);
+          assertTagAttributes(head, "meta", { name: "description" });
+          assertTagAttributes(head, "meta", { name: "robots", content: host === "propertysaleprofit.au" ? "index, follow" : "noindex, nofollow" });
+          assertTagAttributes(head, "link", { rel: "canonical", href: `https://propertysaleprofit.au${path}` });
+          assertTagAttributes(head, "link", { rel: "alternate", hrefLang: "x-default" });
+          assertTagAttributes(head, "meta", { property: "og:image" });
+          assertTagAttributes(head, "meta", { name: "twitter:card", content: "summary_large_image" });
+          if (host === "propertysaleprofit.au" && path === "/") {
+            assertTagAttributes(head, "meta", { name: "msvalidate.01", content: "E319A70AFC92A835B6CBAF8FAA0717B8" });
+          }
+          for (const [tag, attributes] of [["meta", { name: "description" }], ["meta", { name: "robots" }], ["link", { rel: "canonical" }]]) {
+            assert.equal(tagsWithAttributes(html, tag, attributes).length, 1);
+          }
+        }
+      }
+    }
   }
 });
 

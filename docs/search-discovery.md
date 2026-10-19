@@ -1,8 +1,45 @@
 # Search discovery and SEO/AEO implementation
 
-Observed 2026-09-06, Australia/Brisbane. Sources are the authenticated Google
-Search Console UI for `sc-domain:propertysaleprofit.au`, repository tests and
-the current local changes. No user identifiers or calculator amounts collected.
+Historical implementation snapshot observed 2026-09-06, Australia/Brisbane.
+Sources are the authenticated Google Search Console UI for
+`sc-domain:propertysaleprofit.au`, repository tests and local changes.
+The subsequent 7 September release reached production as `7730c5d`; recorded
+read-only production checks passed. Earlier references to pending release below
+describe that historical point, not the current deployment state.
+No user identifiers or calculator amounts were collected.
+
+## Current review — 19 October 2026
+
+The authenticated Web Search report for 20 September–17 October shows 31
+impressions, 1 click, 3.2% CTR and average position 30.6. The English homepage
+contributed 26 impressions and the one click; the Chinese homepage contributed
+5 impressions and no clicks. No guide rows appeared in that page report.
+
+The indexing report updated 12 October still shows 5 indexed and 7 discovered,
+not indexed, including all three guides with no last crawl. The sitemap was
+read successfully on 16 October and now reports all 12 URLs discovered. This
+confirms discovery, not indexing or a specific cause for the delay.
+
+The separate Google generative-AI Beta report for the same 28 days shows 0
+impressions. Keep this UI snapshot separate from Web totals; it does not measure
+all AI platforms or establish zero AI referrals. No search-attributed calculator
+completion metric is available from the existing anonymous event schema.
+
+The Bing tag was published with the September release, but subsequent Verify
+attempts returned a generic error. A fresh sign-in and manual add retry later
+returned a too-many-requests message. Current ownership verification remains
+Unknown; no successful verification or sitemap submission is claimed.
+
+The owner accepted a fixed 18 November target and authorised a focused local
+SEO change. See [the sprint plan, evidence and acceptance](seo-growth-sprint.md).
+Publication of this new batch is separate from the September release approval.
+
+At 20:05 Brisbane on 19 October the English guide's Search Console live test
+fetched successfully and reported crawling and indexing allowed, with the
+expected declared canonical. Its Google-selected canonical is not yet determined.
+One subsequent indexing request was accepted into the priority crawl queue.
+This is a successful request for the existing production page, not proof of
+indexing or publication of the new sprint content.
 
 ## Existing Preview integration
 

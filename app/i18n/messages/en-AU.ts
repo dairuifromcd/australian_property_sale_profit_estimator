@@ -23,11 +23,11 @@ export const enAU = {
   metadata: {
     home: {
       title:
-        "Property Sale Profit | Australian Property Sale Profit Estimator",
+        "Australian Property Sale Profit Calculator | Property Sale Profit",
       description:
-        "Estimate Australian property selling costs, transaction profit or loss, optional holding-period result, simplified settlement cash and target sale prices.",
+        "Calculate Australian property sale profit or loss after entered selling and buying costs. Separately estimate cash after loan payout and your break-even sale price.",
       openGraphTitle:
-        "Estimate your property sale result and cash position.",
+        "Australian property sale profit calculator",
       openGraphDescription:
         "Estimate selling costs, transaction result, optional holding cash flows and simplified cash after a loan payout privately in your browser.",
     },
@@ -44,9 +44,9 @@ export const enAU = {
   },
   home: {
     eyebrow: "Australian property sale calculator",
-    title: "Estimate your property sale result and cash position.",
+    title: "Australian property sale profit calculator",
     intro:
-      "Start with four numbers for a transaction estimate. Optionally add buying costs, holding cash flows and a loan payout without mixing those different results together.",
+      "Estimate your selling costs and transaction profit or loss with four numbers. Add optional costs, rental income or a loan payout to see separate overall pre-tax and cash results.",
     privacyBenefitsAria: "Privacy benefits",
     privateByDesign: "Private by design",
     noSignUp: "No sign-up",

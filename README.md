@@ -210,9 +210,10 @@ The application also publishes:
 
 The `/selling-costs-guide`, `/zh-Hans/selling-costs-guide` and
 `/ko/selling-costs-guide` routes provide server-rendered explanatory content with
-their own canonical URLs and language alternates. These repository routes are
-part of the local growth/accuracy change; their production publication is not
-claimed here. See [the evidence, implementation and verification plan](docs/growth-accuracy-plan.md).
+their own canonical URLs and language alternates. These routes were published
+with the 7 September 2026 release. See the
+[growth and accuracy record](docs/growth-accuracy-plan.md) and the
+[current SEO sprint](docs/seo-growth-sprint.md) for evidence and release status.
 
 After a production deployment, the domain owner must verify the domain with
 Google Search Console and Bing Webmaster Tools, then submit the sitemap.

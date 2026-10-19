@@ -28,7 +28,13 @@ test("every guide fits a mobile viewport without storing or transmitting example
   for (const prefix of ["", "/zh-Hans", "/ko"]) {
     await page.goto(`${prefix}/selling-costs-guide`);
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("article section")).toHaveCount(7);
+    await expect(page.locator("article section")).toHaveCount(9);
+    const comparison = page.getByRole("table");
+    await expect(comparison.getByRole("columnheader")).toHaveCount(3);
+    await expect(comparison.getByRole("rowheader")).toHaveCount(3);
+    await expect(page.locator("#cash-with-loss")).toContainText("$680,000 − $750,000 = −$70,000");
+    await expect(page.locator("#cash-with-loss")).toContainText("$680,000 − $400,000 = $280,000");
+    await expect(page.locator("#prepare-figures li")).toHaveCount(3);
     await expect(page.locator('.guide-method a')).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
     await expect(page.locator('.guide-method a')).toHaveText("support@propertysaleprofit.au");
     await captureTranslationReview(page, prefix.slice(1), "guide");
@@ -54,6 +60,7 @@ test("opening the guide preserves entered calculator figures in the original tab
     await page.locator("#commission-rate").fill("2.2");
     await page.locator("#other-selling-costs").fill("5000");
     const link = page.locator(`a[href="${prefix}/selling-costs-guide"]`);
+    await expect(page.locator(".hero-guide").getByRole("link")).toHaveCount(1);
     await expect(link).toContainText(announcement);
     await expect(link).toHaveAttribute("rel", "noopener noreferrer");
     await page.emulateMedia({ media: "print" });

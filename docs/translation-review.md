@@ -150,3 +150,41 @@ On 2026-09-07 the owner explicitly instructed merging this SEO/AEO batch into
 metadata/image assertions passed before that merge step. This records owner
 publication authorisation; the pending fluent-human qualification records are
 still not inferred or marked complete.
+
+## SEO discovery sprint copy — 2026-10-19, human review pending
+
+The homepage title, description, heading and introduction now identify the
+Australia-focused property sale profit calculator directly. The existing
+guide link moves into the hero and keeps its new-tab warning and input-preserving
+behaviour. All three languages receive the same guide additions: a semantic
+three-result comparison table, a fictional transaction-loss/positive-cash
+example, a records-and-quotes checklist and a more explicit calculator link.
+The method explanation date is updated to 19 October 2026. These are software
+model explanations; no market fee, professional review or new financial scope
+is claimed.
+
+English is the source. The Chinese and Korean wording in this batch remains
+pending fluent-human review in context, including the narrow mobile table and
+loss-versus-cash example. Automated parity, arithmetic, SSR and browser checks
+are evidence only; they do not supply reviewer identity, professional review or
+approval. Earlier owner publication authorisations cover earlier batches and
+are not a sign-off of these new strings. Regenerate the review packet and mobile
+images after final corrections.
+
+For this draft, `npm run lint` passed and `npm test` passed typechecking,
+production build and all 62 tests on 19 October 2026. The review HTML and source
+fingerprints were regenerated with
+`node --experimental-strip-types scripts/generate-translation-review.mjs`.
+Independent AI calculation and localization source reviews found no blocking
+semantic issue. The localization reviewer requested a check of the new
+three-column comparison at 375px; no updated screenshot review or fluent-human
+approval is claimed by this entry.
+
+Subsequent final verification on 19 October passed all 40 local Chromium E2E
+tests and regenerated eight mobile screenshots, after correcting hero spacing
+to preserve the existing desktop first-input requirement. The primary agent
+and independent release reviewer inspected the updated Chinese/Korean guide
+screenshots at their original 375px width: the table is dense but not clipped
+and the page does not overflow. The source packet was regenerated after this
+run. Coverage passed 34 tests and mutation killed 238/238 core mutants. These
+are software/visual checks only; the fluent-human records remain pending.

@@ -23,10 +23,10 @@ export const zhHans = {
   },
   metadata: {
     home: {
-      title: "澳洲房产出售收益计算器 | Property Sale Profit",
+      title: "澳洲卖房利润计算器 | Property Sale Profit",
       description:
-        "估算澳洲房产出售成本、交易盈亏、可选持有期结果、简化交割现金和目标售价。",
-      openGraphTitle: "估算房产出售结果和现金状况。",
+        "根据已输入的出售及购入费用，计算澳洲卖房交易利润或亏损。另可估算还贷后现金及保本售价。",
+      openGraphTitle: "澳洲卖房利润计算器",
       openGraphDescription:
         "在浏览器中私密估算出售成本、交易结果、可选持有期现金流，以及偿还贷款后的简化现金。",
     },
@@ -42,9 +42,9 @@ export const zhHans = {
   },
   home: {
     eyebrow: "澳洲房产出售计算器",
-    title: "估算房产出售结果和现金状况。",
+    title: "澳洲卖房利润计算器",
     intro:
-      "先输入四个数字估算交易结果；还可选择加入购买成本、持有期现金流和贷款偿还额，并将不同结果分开呈现。",
+      "输入四个数字，估算出售费用与交易利润或亏损。还可加入可选费用、租金收入或贷款清偿额，分别查看整体税前结果和现金结果。",
     privacyBenefitsAria: "隐私特点",
     privateByDesign: "隐私优先设计",
     noSignUp: "无需注册",
