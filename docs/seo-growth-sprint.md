@@ -198,8 +198,8 @@ Official advisory references:
 - https://github.com/advisories/GHSA-vcvr-r3jv-pc5j
 
 Independent review found no new calculation, privacy or SEO source blocker for
-the local candidate. Preview publication still needs this batch's owner
-approval and remote verification. Production approval, current dependency-risk
+the local candidate. At that review stage, Preview publication still needed
+owner approval and remote verification. Production approval, current dependency-risk
 disposition and the recorded fluent-human language review gate remain separate;
 the September publication approvals do not approve this new batch.
 
@@ -207,6 +207,52 @@ Final independent `release_reviewer` decision: **CONDITIONAL GO for the local
 candidate / an owner-approved Preview verification; production NO-GO until the
 stated publication and language-review gates are met**. The reviewer separately
 ran lint, 44 unit/dictionary/usage tests, 18 built-HTML tests and 34 coverage
-tests, all passing, and inspected the updated mobile guides. No remote Preview,
-production smoke, Linux CI, Safari/Firefox, real-device or fluent-human review
-is claimed for this batch.
+tests, all passing, and inspected the updated mobile guides. At that local review
+stage no remote Preview verification was claimed. Production smoke, Linux CI,
+Safari/Firefox, real-device and fluent-human review remain unperformed.
+
+## Approved Cloudflare Preview — 19 October 2026
+
+The owner explicitly approved this batch's Preview publication. Local Wrangler
+OAuth had expired and could not refresh. Instead of adding a new token or
+granting new access, the primary agent pushed only the existing feature branch
+to use the already configured GitHub–Cloudflare Workers Builds integration.
+
+- Source commit: `4506146f125c2ace27c05b0d7038bf33d0896530`.
+- Branch: `codex/seo-growth-sprint`.
+- Cloudflare build: `d950db32-159a-4dcd-93a7-fa7d9ae26425`.
+- Uploaded Worker version: `8eb25615-d924-49f8-91cb-52b56ded8b5a`.
+- Fixed URL: https://8eb25615-property-profit-au.dairuifromcd.workers.dev
+- Branch alias: https://codex-seo-growth-sprint-property-profit-au.dairuifromcd.workers.dev
+
+The public GitHub check reported `completed / success` and supplied those exact
+version URLs. The complete remote regression command was:
+
+```sh
+PLAYWRIGHT_BASE_URL=https://8eb25615-property-profit-au.dairuifromcd.workers.dev npm run test:e2e
+```
+
+Result: **40/40 passed**, 30.1 seconds. A browser view of the alias also displayed
+the new title, introduction and early guide link. Its local screenshot is
+`outputs/seo-sprint/cloudflare-preview.png` (ignored).
+
+`git ls-remote` confirmed remote `main` remains `7730c5d`; a read-only production
+homepage fetch still showed the September title and main heading. This is a
+Preview release only. No production promotion, DNS change or new credential
+was performed. Remaining production approval, language-review and dependency
+disposition gates are unchanged.
+
+A primary-agent HTTP check using an unknown verification User-Agent also
+confirmed the fixed Preview's initial head contains the new title, `noindex,
+nofollow` and production canonical, with no Bing ownership tag. Preview tags
+are valid self-closing HTML; assertions must accept both serializations.
+The primary agent's final parallel HTTP checks passed for all six localized
+home/guide pages and all three share PNGs: initial-head title/description,
+Preview noindex, one robots tag, production canonical, same-page hreflang,
+OG/Twitter metadata, absence of the Bing tag, early guide entry, semantic
+three-row result comparison, the 70,000 loss / 280,000 cash example and valid
+1200 x 630 PNG headers. The temporary command was
+`node /private/tmp/seo-preview-remote.mjs` (exit 0). This is remote response
+verification, not evidence of improved search indexing or traffic. Independent
+local release review remains applicable; an additional independent remote pass
+is not claimed until its actual results are available.
