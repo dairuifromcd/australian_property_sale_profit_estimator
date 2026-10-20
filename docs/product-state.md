@@ -1,6 +1,6 @@
 # Product State
 
-Last updated: 2026-09-06
+Last updated: 2026-10-20
 Stage: Public MVP
 Canonical product: https://propertysaleprofit.au
 
@@ -34,11 +34,13 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
   application-generated identifiers.
 - Google Search Console has a verified search snapshot recorded below;
   production usage-event counts and structured real-user feedback remain unknown.
-- No completed Chinese or Korean fluent-human review is recorded, although the
-  declared translation process requires it.
+- No completed Chinese or Korean fluent-human review is recorded. On 20 October
+  the owner removed it as a mandatory release gate; independent semantic and
+  rendered-layout review remain required, without claiming human approval.
 - `docs/mvp-without-cgt-decision.md` is a historical scope decision. Its
   "pending Preview" status and P2 feature list no longer match the current
-  implementation; the exact production release SHA and date are not recorded.
+  implementation. The SEO/AEO batch `7730c5d` was published on 2026-09-07;
+  its production read-only checks passed in the recorded conversation.
 
 ## Current hypotheses
 
@@ -106,20 +108,37 @@ property-sale decision, and which result do they actually need?
 
 ## Current decision
 
-Implement the owner-authorised local clarity and explanatory-guide batch while
-deferring non-essential feature expansion (including quote A/B comparison).
-The initial Google search baseline is now recorded above; production usage-event
-counts and real-user comprehension remain unknown. The existing Preview was
-pushed to remote `main` after a successful credential retry. The small SEO/AEO
-follow-up passed the full local release checks and remote Cloudflare Preview
-verification. These checks establish technical release evidence, not traffic
-benefit or real-user comprehension.
+**Continue — 20 October 2026.** Complete the existing bounded batch's dependency
+remediation and release checks, then merge when its review conditions are met.
+The owner has authorised acceptance and merge and explicitly removed the
+mandatory human language-review gate. Independent product and SEO source reviews found no
+evidence supporting additional pages or features before observing the guide's
+indexing. The deployed Preview passed all 40 remote browser tests. This is
+technical evidence, not evidence of a traffic improvement.
+
+The preceding **Change** decision on 19 October was to diagnose the existing
+guide's indexing state and improve search entry points before expanding page
+count. The latest
+observed 28 days (20 September–17 October) show 31 Web Search impressions and 1
+click. All three guides remain discovered but unindexed in the 12 October
+report, despite successful discovery of all 12 sitemap URLs on 16 October.
+This identifies a bottleneck, not its cause. The earlier 7 September release
+did not establish a sustained acquisition effect.
+
+The owner approved a stretch objective of 100 Web Search clicks, including 30
+guide/content-page clicks, in the latest complete processed 28 days at the
+18 November checkpoint. The deadline starts 19 October and includes development
+and indexing delays. It is a target, not a forecast. See the
+[SEO sprint evidence and acceptance criteria](seo-growth-sprint.md).
 
 ## Next learning experiment
 
-Run a five-participant, 20-minute moderated comprehension and jobs-to-be-done
-test using fictional property figures. Decide **Continue**, **Change**, **Stop**
-or **Insufficient evidence** after synthesizing the observations.
+The English guide's live Search Console test passed and one indexing request
+was accepted on 19 October. After publication, review crawl/indexing, Google's
+canonical and related query exposure at the fixed sprint checkpoints. Do not
+repeat the same indexing request. New content expansion depends on this evidence.
+The previously proposed five-participant comprehension study remains unrun;
+its participant count is zero and it is deferred from this search sprint.
 
 ## Decision log
 

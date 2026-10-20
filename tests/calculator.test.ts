@@ -160,6 +160,27 @@ test("applies every fixed optional transaction cost to sensitivity scenarios", (
   }
 });
 
+test("reproduces the guide's fictional transaction loss with positive cash", () => {
+  const scenario = input({
+    salePrice: 700_000,
+    purchasePrice: 750_000,
+    commissionRate: 2,
+    otherSellingCosts: 6_000,
+    estimatedLoanPayout: 400_000,
+  });
+  const result = calculateEstimate(scenario);
+  assert.deepEqual(result.validationErrors, []);
+  assert.equal(result.agentCommission, 14_000);
+  assert.equal(result.totalSellingCosts, 20_000);
+  assert.equal(result.amountAfterSellingCosts, 680_000);
+  assert.equal(result.transactionProfit, -70_000);
+  assert.equal(result.overallPreTaxPropertyResult, -70_000);
+  assert.equal(result.estimatedCashAfterLoanPayout, 280_000);
+  const differentPayout = calculateEstimate({ ...scenario, estimatedLoanPayout: 500_000 });
+  assert.equal(differentPayout.transactionProfit, -70_000);
+  assert.equal(differentPayout.estimatedCashAfterLoanPayout, 180_000);
+});
+
 test("reuses the exact transaction result in the unchanged sensitivity scenario", () => {
   const result = calculateEstimate(
     input({

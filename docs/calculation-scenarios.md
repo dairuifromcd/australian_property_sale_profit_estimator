@@ -80,6 +80,21 @@ sets all other costs and holding cash flows to zero. Its alternative 1.8% plus
 tests verify all locales, examples, metadata and links; browser guide tests
 verify that opening help preserves the calculator tab's entered figures.
 
+The 2026-10-19 discovery change adds a semantic comparison table for the same
+three separate results and a second fictional example: sale 700,000, purchase
+750,000, GST-inclusive commission 2%, other selling costs 6,000 and lender payout
+400,000; every other cost and holding cash flow is zero. Commission is 14,000,
+selling costs 20,000 and amount after selling costs 680,000. Transaction result
+is a 70,000 loss while simplified cash is positive 280,000. The text explains
+why cash is not profit and why changing payout does not change transaction
+profit. [Unit: `reproduces the guide's fictional transaction loss with positive
+cash`](../tests/calculator.test.ts) checks these independent expected values and
+a changed payout; [rendered HTML tests](../tests/rendered-html.test.mjs) lock the
+literal equations in each locale. [Guide E2E](../tests/e2e/guide.spec.ts) covers
+the accessible result table, example, materials checklist, mobile overflow and
+the relocated guide link preserving entered figures. The calculation engine,
+input semantics, result labels and supported financial scope are unchanged.
+
 | Scenario | Calculation | Automated test coverage |
 | --- | --- | --- |
 | Complete settlement statement | The optional cash estimate subtracts only the entered lender payout. Tax, rates adjustments, lender or discharge fees and other unentered settlement adjustments remain excluded. | **Disclosure E2E** — [`publishes material limitations and government non-affiliation`](../tests/e2e/compliance.spec.ts) |

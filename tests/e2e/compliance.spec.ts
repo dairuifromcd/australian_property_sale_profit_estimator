@@ -7,7 +7,7 @@ test("labels the estimate scope and avoids certainty claims", async ({ page }) =
     page.getByRole("link", { name: "Property Sale Profit home" }),
   ).toBeVisible();
   await expect(page).toHaveTitle(
-    "Property Sale Profit | Australian Property Sale Profit Estimator",
+    "Australian Property Sale Profit Calculator | Property Sale Profit",
   );
   await expect(
     page.getByLabel("Estimate scope notice").getByText("Indicative estimate", {
@@ -22,7 +22,7 @@ test("labels the estimate scope and avoids certainty claims", async ({ page }) =
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Estimate your property sale result and cash position.",
+      name: "Australian property sale profit calculator",
     }),
   ).toBeVisible();
   await expect(

@@ -8,3 +8,11 @@
 .guide-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; padding-block: 1.5rem; }
 .guide-method { font-size: .875rem; }
 .selling-guide a:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+.guide-comparison { width: 100%; table-layout: fixed; border-collapse: collapse; margin-block: 1.5rem; font-size: .875rem; }
+.guide-comparison caption { text-align: left; font-weight: 700; margin-bottom: .75rem; }
+.guide-comparison th, .guide-comparison td { vertical-align: top; padding: .75rem; border: 1px solid var(--line-strong); text-align: left; overflow-wrap: anywhere; }
+.guide-comparison thead { background: var(--eucalyptus-soft); }
+.guide-comparison th[scope="row"] { width: 25%; }
+@media (max-width: 480px) {
+  .guide-comparison th, .guide-comparison td { padding: .5rem; }
+}

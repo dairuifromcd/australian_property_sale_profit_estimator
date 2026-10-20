@@ -98,6 +98,7 @@ export default function CalculatorPage({
           <span>{messages.home.noSignUp}</span>
           <span>{messages.home.calculationsStay}</span>
         </div>
+        <p className="hero-guide"><GuideLink locale={locale} /></p>
       </section>
 
       <section className="calculator-shell" aria-labelledby="calculator-title">
@@ -117,7 +118,6 @@ export default function CalculatorPage({
         <div>
           <span className="step-label">{messages.home.explanationLabel}</span>
           <h2 id="what-counts-title">{messages.home.explanationTitle}</h2>
-          <p><GuideLink locale={locale} /></p>
         </div>
         <div className="explanation-grid">
           {messages.home.explanationCards.map((card, index) => (

@@ -31,6 +31,18 @@ export function SellingCostsGuide({ locale }: { locale: Locale }) {
           <section className="legal-section" id={section.id} key={section.id}>
             <h2>{section.title}</h2>
             {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+            {section.table && (
+              <table className="guide-comparison">
+                <caption>{section.table.caption}</caption>
+                <thead><tr>{section.table.columns.map(column => <th key={column} scope="col">{column}</th>)}</tr></thead>
+                <tbody>{section.table.rows.map(row => (
+                  <tr key={row.result}>
+                    <th scope="row">{row.result}</th><td>{row.includes}</td><td>{row.excludes}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            )}
+            {section.checklist && <ul>{section.checklist.map(item => <li key={item}>{item}</li>)}</ul>}
           </section>
         ))}
         <div className="guide-method">
