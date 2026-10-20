@@ -34,11 +34,26 @@ advice, a valuation, a guaranteed result or a tax calculation.
   GST, Council rates and conveyancing are retained or explained rather than
   replaced with another jurisdiction's concepts.
 
-## Human review gate
+## Current review policy — 20 October 2026
 
-The current Chinese and Korean text is an implementation draft and has been
+The owner explicitly instructed removing the mandatory human-review requirement
+for Chinese and Korean copy. Fluent-human approval is therefore no longer a
+production release gate. This revises the earlier policy below; it does not
+retroactively turn an AI review into a human review or fill in reviewer records.
+
+English remains the source of truth. All locales must change together and
+preserve calculation scope, privacy and exclusions. Independent semantic review,
+dictionary/SSR/browser checks and rendered mobile inspection remain the quality
+controls for this batch. Record actual findings and limitations truthfully.
+Qualified professional review is still required for any future tax, legal,
+accounting, valuation or settlement-scope expansion; this language-policy change
+does not authorise such an expansion.
+
+## Historical human review gate — superseded 20 October 2026
+
+Under the previous policy, the Chinese and Korean text was an implementation draft and had been
 checked structurally and adversarially against the English source. Before
-merging to production, a fluent reviewer for each language should read the
+merging to production, a fluent reviewer for each language was to read the
 calculator, privacy notice and important-information page in context.
 
 For each language, record:
@@ -118,6 +133,8 @@ calculation reviewer accepted the explanation changes without findings.
 Only an actual fluent reviewer can supply their name, date and decision. The
 owner may provide those records after review, or explicitly revise the project's
 release policy; an AI agent must not invent or silently waive human approval.
+The owner subsequently revised that policy on 20 October 2026 as recorded above;
+the historical table is preserved without fabricated signatures.
 
 ## Owner acceptance of the reviewed Preview — 2026-09-06
 

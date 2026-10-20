@@ -1,6 +1,6 @@
 # Product State
 
-Last updated: 2026-10-19
+Last updated: 2026-10-20
 Stage: Public MVP
 Canonical product: https://propertysaleprofit.au
 
@@ -34,8 +34,9 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
   application-generated identifiers.
 - Google Search Console has a verified search snapshot recorded below;
   production usage-event counts and structured real-user feedback remain unknown.
-- No completed Chinese or Korean fluent-human review is recorded, although the
-  declared translation process requires it.
+- No completed Chinese or Korean fluent-human review is recorded. On 20 October
+  the owner removed it as a mandatory release gate; independent semantic and
+  rendered-layout review remain required, without claiming human approval.
 - `docs/mvp-without-cgt-decision.md` is a historical scope decision. Its
   "pending Preview" status and P2 feature list no longer match the current
   implementation. The SEO/AEO batch `7730c5d` was published on 2026-09-07;
@@ -107,8 +108,17 @@ property-sale decision, and which result do they actually need?
 
 ## Current decision
 
-**Change — 19 October 2026.** Diagnose the existing guide's indexing state and
-improve the existing search entry points before expanding page count. The latest
+**Continue — 20 October 2026.** Complete the existing bounded batch's dependency
+remediation and release checks, then merge when its review conditions are met.
+The owner has authorised acceptance and merge and explicitly removed the
+mandatory human language-review gate. Independent product and SEO source reviews found no
+evidence supporting additional pages or features before observing the guide's
+indexing. The deployed Preview passed all 40 remote browser tests. This is
+technical evidence, not evidence of a traffic improvement.
+
+The preceding **Change** decision on 19 October was to diagnose the existing
+guide's indexing state and improve search entry points before expanding page
+count. The latest
 observed 28 days (20 September–17 October) show 31 Web Search impressions and 1
 click. All three guides remain discovered but unindexed in the 12 October
 report, despite successful discovery of all 12 sitemap URLs on 16 October.
@@ -123,9 +133,10 @@ and indexing delays. It is a target, not a forecast. See the
 
 ## Next learning experiment
 
-Use one live Search Console URL test and, after it passes, one indexing request
-for the existing English guide. Review crawl/indexing and related exposure at
-the fixed sprint checkpoints. New content expansion depends on this evidence.
+The English guide's live Search Console test passed and one indexing request
+was accepted on 19 October. After publication, review crawl/indexing, Google's
+canonical and related query exposure at the fixed sprint checkpoints. Do not
+repeat the same indexing request. New content expansion depends on this evidence.
 The previously proposed five-participant comprehension study remains unrun;
 its participant count is zero and it is deferred from this search sprint.
 

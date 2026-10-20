@@ -149,8 +149,9 @@ not a scheduled automation or permission to publish outreach.
   375px Chinese/Korean guide screenshots: no clipped table/page overflow was
   observed; the three-column table is relatively dense. This is not fluent-human
   language approval or a real-device audit.
-- `git diff --check`: passed. Remote Preview E2E and post-release production
-  checks have **not** been executed for this batch.
+- `git diff --check`: passed. At this local verification stage, remote Preview
+  E2E and post-release production checks had not been executed. The subsequent
+  completed Preview verification is recorded below; production remains pending.
 
 ## Publication smoke and rollback
 
@@ -256,3 +257,84 @@ three-row result comparison, the 70,000 loss / 280,000 cash example and valid
 verification, not evidence of improved search indexing or traffic. Independent
 local release review remains applicable; an additional independent remote pass
 is not claimed until its actual results are available.
+
+## Completion decision and authorisation — 20 October 2026
+
+The owner instructed the team to finish the justified changes, perform
+acceptance checks and merge. This authorises the eventual merge to `main` and
+its configured production deployment; another merge-permission request is not
+needed. The owner subsequently explicitly instructed removing the mandatory
+human-review requirement for Chinese and Korean copy. This revises the release
+policy, rather than supplying reviewer identities or human approval. Independent
+semantic and rendered-layout review and automated checks remain applicable; no
+professional review or financial-scope expansion is inferred. The current policy
+and preserved historical records are in `docs/translation-review.md`.
+
+Independent product-evidence review recommends **Continue** with the existing
+bounded batch. A separate read-only SEO source audit found no concrete remaining
+canonical, hreflang, robots, sitemap, initial-head or link-discovery defect. No
+additional routes, speculative schema, tracking or outreach are justified by
+the current 31-impression / 1-click baseline. The guide's unindexed state and
+its cause remain distinct: the state is observed; the cause is Unknown.
+
+The remaining implementation work is compatible remediation of the dependency
+findings, followed by a clean release-candidate suite and independent review.
+Record its actual results before deciding release readiness. The one search
+experiment and the 18 November traffic thresholds above remain unchanged. Code
+acceptance and publication cannot establish that the traffic objective has
+already been achieved.
+
+### Dependency disposition and rollback baseline
+
+Compatible updates reduce the current full audit from 17 entries to **8 high
+entries**, all from the same unpatched `braces` development-tool advisory.
+Production-only audit is **0**. The exact versions, advisory and trusted-build
+controls are recorded in `docs/dependency-remediation.md`; this is not a claim
+that the full audit is clean.
+
+A separate read-only dependency reviewer inspected the new 237-file artifact,
+92 source maps and the server import graph. No affected braces/glob/lint/build
+plugin source was found in the deployment, and no request-to-glob path was found
+in the application. External imports were Node built-ins and
+`cloudflare:workers`, with no global `require()` calls. The reviewer gave
+**CONDITIONAL GO** for this bounded dependency-risk disposition, subject to the
+full release checks and trusted-source/build controls. The primary agent accepts
+that documented residual development-tool risk for this batch; no public glob
+API, dependency suppression or claim of a patched upstream release is introduced.
+
+After the owner explicitly authorised the terms acknowledgement, Cloudflare's
+dashboard sign-in was restored without creating a token. Immediately before
+release preparation the active deployment still showed **`a5442ecd` at 100%**,
+associated with source `7730c5de61eab2cd4998a11e94b5993ba0eb7e19` and the
+previously recorded full version ID
+`a5442ecd-4a7c-42a0-9af7-3e4a52899772`. The dashboard showed the new Preview as
+ready with no production allocation. Evidence:
+`outputs/seo-sprint/cloudflare-before-release-2026-10-20.png` (local, ignored).
+
+Bing's existing Google sign-in was restored and the account again supplied the
+same public verification tag. A production HTTP fetch with an ordinary curl
+User-Agent found that tag after the initial head in the old streamed response.
+Wait for this batch's metadata change to reach production before its next Verify
+action. This observation does not establish the cause of Bing's prior failure.
+
+### Final local release-candidate checks — 20 October
+
+All of these checks ran on the compatible dependency candidate, with the same
+application source and locale strings reviewed above:
+
+| Command | Actual result |
+| --- | --- |
+| `npm ci --cache /private/tmp/property-profit-npm-cache` | Exit 0; 591 packages installed from the lockfile. |
+| `npm run lint` | Exit 0. |
+| `npm test` | Exit 0; typecheck, production build and 62/62 tests passed. |
+| `npm run test:coverage` | Exit 0; 34/34 tests, 100% lines/branches/functions for `calculator.ts` and `input-format.ts` only. |
+| `npm run test:mutation` | First sandbox attempt could not bind its logging port (`EPERM`); authorised retry exit 0, 238/238 mutants killed, no survivors/timeouts/errors. |
+| `CAPTURE_TRANSLATION_REVIEW=1 npm run test:e2e` | First sandbox attempt could not bind localhost:4173 (`EPERM`); authorised retry exit 0, 40/40 Chromium tests passed in 32.4 s and eight mobile review screenshots refreshed. |
+| `node --experimental-strip-types scripts/generate-translation-review.mjs` | Exit 0; current source packet and fingerprints regenerated. |
+| `git diff --check` | Exit 0. |
+
+The browser run started a fresh local server; no existing process was listening
+on port 4173. Vinext/RSC emits existing source-map warnings; these checks did not
+establish source-map perfection or real-device/Safari/Firefox coverage. The
+remaining 8 audit entries are disclosed above. Updated remote Preview and Linux
+CI acceptance are subsequent steps and are not claimed by this local table.
