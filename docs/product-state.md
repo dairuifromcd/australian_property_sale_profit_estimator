@@ -29,6 +29,15 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
   after-tax return.
 - Calculator figures remain in the browser.
 - Production supports English, Simplified Chinese and Korean.
+- The 20 October search-entry/guide/metadata sprint was merged through PR #24 as
+  `ef72ad2` and published. Updated Preview E2E passed 40/40, Linux CI passed and
+  independent release review gave GO. Production HTTP checks passed for 12 pages,
+  robots, sitemap and share images; the first new Worker version `b7ff061f`
+  received 100% of traffic. This is release evidence, not traffic-effect evidence.
+- Bing ownership verification succeeded on 20 October. Crawl/indexing and Bing
+  performance remain Unknown; earlier verification failures are historical.
+  The sitemap submission in this workflow was accepted and is Processing, with no crawl
+  date or discovered-URL count observed yet.
 - The repository configures anonymous events containing event type, locale,
   environment and Cloudflare timestamp, without calculator figures, cookies or
   application-generated identifiers.
@@ -108,10 +117,14 @@ property-sale decision, and which result do they actually need?
 
 ## Current decision
 
-**Continue — 20 October 2026.** Complete the existing bounded batch's dependency
-remediation and release checks, then merge when its review conditions are met.
-The owner has authorised acceptance and merge and explicitly removed the
-mandatory human language-review gate. Independent product and SEO source reviews found no
+**Continue — 20 October 2026.** The bounded batch's compatible dependency
+remediation, release checks, merge and production HTTP acceptance are complete.
+Observe the English guide's indexing before expanding the page count. Full npm
+audit retains 8 high entries from one unpatched development-tool advisory;
+production-only audit is 0 and independent review accepted the documented
+trusted-build controls for this release. The owner authorised acceptance and
+merge and explicitly removed the mandatory human language-review gate.
+Independent product and SEO source reviews found no
 evidence supporting additional pages or features before observing the guide's
 indexing. The deployed Preview passed all 40 remote browser tests. This is
 technical evidence, not evidence of a traffic improvement.

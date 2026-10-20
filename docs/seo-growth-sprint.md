@@ -376,3 +376,45 @@ disclosed unpatched development-tool risk, dense mobile table and untested
 Safari/Firefox/real-device limitations. This acceptance-record follow-up changes
 documentation only; wait for its new HEAD CI before merging. The actual
 production deployment and post-publication results are not claimed in advance.
+
+### Actual merge and first production acceptance — 20 October
+
+PR #24 merged successfully into `main` as
+`ef72ad26b4e87df99c104fc025dd297181e6fc70`. Both final-head checks had passed
+before merge: the documentation-only head was `b5fff13`, whose Linux run was
+`39349410719` and Cloudflare Preview version was
+`a269dba8-9f0b-4f61-9ea0-d982fabcd177`. Its diff from the remotely tested
+candidate changed only this acceptance document.
+
+The merged commit's Linux verify run `39350719689` and Cloudflare production
+build `1a7446fd-9390-419b-8036-5f1a787c624d` both completed successfully. The
+Cloudflare dashboard showed the resulting version
+`b7ff061f-3876-4474-bc34-75f6a9ad56b4` at **100%** of production traffic.
+Screenshot: `outputs/seo-sprint/cloudflare-production-2026-10-20.png` (local,
+ignored). The previous confirmed `a5442ecd` baseline was not needed for rollback.
+
+`SEO_BASE_URL=https://propertysaleprofit.au node /private/tmp/seo-release-smoke.mjs`
+exited 0 at 11:01 Brisbane. It fetched all 12 localized pages, three share PNGs,
+robots and sitemap without running client scripts or entering calculator values.
+Production index/follow, a single robots tag and expected initial-head metadata,
+canonical/hreflang, initial-head Bing
+tag scope, early guide link, semantic comparison and fictional example all
+passed. The sitemap contains exactly the 12 canonical public URLs. A second
+homepage request with an unknown verification User-Agent also found the title,
+index/follow and Bing tag in the initial head. Machine proof:
+`/private/tmp/seo-release-production-smoke.json`.
+
+The authenticated Bing HTML-meta-tag Verify action subsequently succeeded for
+the domain. The success panel was saved to
+`outputs/seo-sprint/bing-verified-2026-10-20.png` (local, ignored). This completes
+the previously unsuccessful ownership verification; it does not prove indexing,
+traffic growth or the cause of earlier failures. The fixed Google checkpoint
+dates, reporting windows and 100 / 30 click thresholds remain unchanged.
+
+Bing's sitemap page initially had zero rows. One submission of the verified
+production sitemap was accepted, with a success notification and one known
+sitemap listed as **Processing**, no crawl date or discovered-URL count yet.
+Screenshot: `outputs/seo-sprint/bing-sitemap-submitted-2026-10-20.png` (local,
+ignored). Do not equate accepted submission with completed crawl or indexing.
+These post-release records modify documentation only; no application or
+configuration change follows the accepted runtime.

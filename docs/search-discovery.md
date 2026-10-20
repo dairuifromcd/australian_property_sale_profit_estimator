@@ -8,6 +8,35 @@ read-only production checks passed. Earlier references to pending release below
 describe that historical point, not the current deployment state.
 No user identifiers or calculator amounts were collected.
 
+## Published sprint — 20 October 2026
+
+PR #24 was merged into `main` as
+`ef72ad26b4e87df99c104fc025dd297181e6fc70` after the updated Preview, Linux CI
+and independent release review passed. Cloudflare's production build succeeded;
+the dashboard then showed version `b7ff061f-3876-4474-bc34-75f6a9ad56b4`
+receiving 100% of traffic. Read-only HTTP acceptance passed for all 12 localized
+pages, robots, the 12-URL sitemap and three share images. It confirmed production
+index/follow, canonical/hreflang, the guide's new content and the Bing tag in the
+initial head, including for an unknown verification User-Agent. No production
+calculator interaction or artificial search click was used.
+
+The authenticated Bing Verify action then succeeded, displaying
+"Congratulations! Site addition successful" for the production domain. Evidence:
+`outputs/seo-sprint/bing-verified-2026-10-20.png` (local, ignored). This supersedes
+the historical unknown ownership state below. Verification alone does not prove
+that Bing has crawled or indexed any page, or that traffic has improved.
+
+Bing's sitemap list initially contained zero rows. A single submission of
+`https://propertysaleprofit.au/sitemap.xml` was then accepted with a success
+message; the list showed one known sitemap in **Processing** state, no crawl
+date and no discovered-URL count yet. Evidence:
+`outputs/seo-sprint/bing-sitemap-submitted-2026-10-20.png` (local, ignored).
+Submission is complete; successful processing and indexing remain unverified.
+
+The Google baseline and the 18 November 100-click / 30-content-click target are
+unchanged. Review crawl/indexing and related queries on 26 October and 2 November;
+the 19 October Google indexing request should not be repeated.
+
 ## Current review — 19 October 2026
 
 The authenticated Web Search report for 20 September–17 October shows 31
