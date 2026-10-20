@@ -338,3 +338,41 @@ on port 4173. Vinext/RSC emits existing source-map warnings; these checks did no
 establish source-map perfection or real-device/Safari/Firefox coverage. The
 remaining 8 audit entries are disclosed above. Updated remote Preview and Linux
 CI acceptance are subsequent steps and are not claimed by this local table.
+
+### Updated Preview and Linux acceptance — 20 October
+
+The compatible dependency candidate is source commit
+`85a82dc592c2fd1b28348a4af6674db40ddb4a42`, proposed in
+https://github.com/dairuifromcd/australian_property_sale_profit_estimator/pull/24.
+Its Cloudflare build `8127315b-e60d-4721-a408-5dacee2044f9` completed successfully
+and uploaded version `2baa53ee-503a-4aeb-9c90-942621127d53` at
+https://2baa53ee-property-profit-au.dairuifromcd.workers.dev.
+
+`PLAYWRIGHT_BASE_URL=https://2baa53ee-property-profit-au.dairuifromcd.workers.dev npm run test:e2e`
+passed **40/40** remote Chromium tests (32.5 s). The separate read-only command
+`SEO_BASE_URL=https://2baa53ee-property-profit-au.dairuifromcd.workers.dev node /private/tmp/seo-release-smoke.mjs`
+passed for all six localized home/guide HTML pages and three share PNGs,
+including unknown-verifier initial-head metadata, Preview noindex,
+canonical/hreflang, guide entry, semantic table and loss-versus-cash example.
+These tests use Preview; no production calculation events are generated.
+
+GitHub's `verify` check for the same commit completed with **success** on Linux:
+https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/runs/39348017756.
+This executes the repository's clean install, lint, tests, coverage, mutation
+and browser workflow. The Cloudflare Workers Builds check also reports success.
+The temporary JSON evidence is `seo-release-preview-smoke.json` and
+`seo-final-check-runs.json` under `/private/tmp/`.
+
+The primary agent will run only read-only HTTP checks after the authorised merge
+and publication, then verify the active deployment allocation and retry Bing
+ownership. Technical release acceptance does not satisfy or predict the fixed
+18 November search-click thresholds.
+
+The independent `release_reviewer` read the machine proofs, checked their exact
+commit/version correspondence, inspected the HTTP assertions and reran
+`git diff --check`. Final decision: **GO** for source candidate `85a82dc` and
+Preview `2baa53ee`; no material blocker remained. The review retains the
+disclosed unpatched development-tool risk, dense mobile table and untested
+Safari/Firefox/real-device limitations. This acceptance-record follow-up changes
+documentation only; wait for its new HEAD CI before merging. The actual
+production deployment and post-publication results are not claimed in advance.
