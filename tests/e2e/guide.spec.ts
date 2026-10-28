@@ -39,7 +39,11 @@ test("every guide fits a mobile viewport without storing or transmitting example
     await expect(page.locator('.guide-method a')).toHaveText("support@propertysaleprofit.au");
     await captureTranslationReview(page, prefix.slice(1), "guide");
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
-    await expect(page.locator(".guide-footer a").nth(1)).toHaveAttribute("href", `${prefix}/privacy`);
+    await expect(page.locator(`.guide-footer a[href="${prefix}/privacy"]`)).toHaveAttribute("href", `${prefix}/privacy`);
+    await expect(page.locator(`.guide-footer a[href="${prefix}/disclaimer"]`)).toHaveAttribute("href", `${prefix}/disclaimer`);
+    const commissionLink = page.locator(`.guide-footer a[href="${prefix}/real-estate-agent-commission-calculator"]`);
+    await expect(commissionLink).toHaveAttribute("target", "_blank");
+    await expect(commissionLink).toHaveAttribute("rel", "noopener noreferrer");
     expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual({ local: {}, session: {} });
   }
   expect(await page.context().cookies()).toEqual([]);

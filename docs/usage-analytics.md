@@ -6,6 +6,13 @@ they using its optional planning features?
 
 ## Event schema
 
+The independent agent commission tool does not load the anonymous-usage hook
+or emit these events. In particular, its valid two-input result must not be
+counted as `estimate_completed`, which continues to describe the full
+four-input calculator. No event names, fields or input transmission are added
+by the commission feature. Search discovery can be observed separately through
+Search Console's aggregate page reports after an approved publication.
+
 The dataset is `property_sale_profit_usage`.
 
 | Analytics Engine field | Value |

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { shareCards, shareCardPath } from "./i18n/share-cards";
 import { guideSummary } from "./i18n/guide-summary";
+import { commissionMessages } from "./i18n/commission-messages";
 import {
   getMessages,
   openGraphLocale,
@@ -76,7 +77,7 @@ export function metadataForPage({
   page: SitePage;
 }): Metadata {
   const messages = getMessages(locale);
-  const pageMetadata = page === "guide" ? guideSummary[locale].metadata : messages.metadata[page];
+  const pageMetadata = page === "guide" ? guideSummary[locale].metadata : page === "commission" ? commissionMessages[locale].metadata : messages.metadata[page];
   const title = pageMetadata.title;
   const description = pageMetadata.description;
   const openGraphTitle =

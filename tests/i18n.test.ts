@@ -6,6 +6,7 @@ import { enAU } from "../app/i18n/messages/en-AU.ts";
 import { ko } from "../app/i18n/messages/ko.ts";
 import { zhHans } from "../app/i18n/messages/zh-Hans.ts";
 import { guideMessages } from "../app/i18n/guide-messages.ts";
+import { commissionMessages } from "../app/i18n/commission-messages.ts";
 import {
   locales,
   pathFor,
@@ -79,6 +80,25 @@ test("locale routes preserve the English URLs and localize every page", () => {
   assert.equal(pathFor("zh-Hans", "home"), "/zh-Hans");
   assert.equal(pathFor("zh-Hans", "privacy"), "/zh-Hans/privacy");
   assert.equal(pathFor("ko", "disclaimer"), "/ko/disclaimer");
+  assert.equal(pathFor("en-AU", "commission"), "/real-estate-agent-commission-calculator");
+  assert.equal(pathFor("zh-Hans", "commission"), "/zh-Hans/real-estate-agent-commission-calculator");
+  assert.equal(pathFor("ko", "commission"), "/ko/real-estate-agent-commission-calculator");
+});
+
+test("commission translations preserve source shape, placeholders and fee scope", () => {
+  const source = entries(commissionMessages["en-AU"]);
+  for (const locale of ["zh-Hans", "ko"] as const) {
+    const translated = entries(commissionMessages[locale]);
+    assert.deepEqual(translated.map(([key]) => key), source.map(([key]) => key));
+    for (let index = 0; index < source.length; index += 1) {
+      assert.ok(translated[index][1].trim());
+      assert.deepEqual(placeholders(translated[index][1]), placeholders(source[index][1]));
+    }
+  }
+  assert.match(commissionMessages["en-AU"].rateHelp, /GST is not added again/);
+  assert.match(commissionMessages["zh-Hans"].rateHelp, /不会再次加算 GST/);
+  assert.match(commissionMessages.ko.rateHelp, /GST를 다시 더하지 않습니다/);
+  for (const locale of locales) assert.ok(commissionMessages[locale].example.includes("$22,000.00"));
 });
 
 test("localized source text preserves key scope and privacy boundaries", () => {

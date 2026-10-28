@@ -1,5 +1,24 @@
 # Search discovery and SEO/AEO implementation
 
+## Commission task branch — 27 October 2026
+
+The owner authorised an independent, directly usable commission calculator
+topic in three languages at `/real-estate-agent-commission-calculator` and the
+Chinese/Korean equivalents. This source branch has 15 sitemap URLs, with
+task-specific titles, descriptions, canonicals and language alternates. The
+existing production-only robots and English-home-only Bing tag rules apply.
+Home and guide pages link to the matching tool; the tool links back to the
+full calculator and guide. Branch implementation is not a deployment, indexed
+page or measured traffic gain.
+
+The hypothesis is that requiring just price and the user's quoted inclusive
+rate better serves a commission-only task. After an approved publication,
+record its actual date and inspect relevant queries, impressions and natural
+clicks for these three URLs. Search demand remains unverified. The existing
+30-guide-click goal allowlist is unchanged.
+
+## Prior release record
+
 Historical implementation snapshot observed 2026-09-06, Australia/Brisbane.
 Sources are the authenticated Google Search Console UI for
 `sc-domain:propertysaleprofit.au`, repository tests and local changes.

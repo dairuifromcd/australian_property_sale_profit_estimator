@@ -19,6 +19,9 @@ the first estimate to four inputs.
 
 ## Current features
 
+- A standalone three-language agent commission calculator requiring only sale
+  price and the user's quoted GST-inclusive percentage, with a cents-level
+  result and worked formula; it does not emit usage events
 - Live estimate from expected sale price, purchase price, agent commission and
   other selling costs
 - Optional sale preparation costs, purchase costs, renovations and improvements
@@ -214,6 +217,12 @@ their own canonical URLs and language alternates. These routes were published
 with the 7 September 2026 release. See the
 [growth and accuracy record](docs/growth-accuracy-plan.md) and the
 [current SEO sprint](docs/seo-growth-sprint.md) for evidence and release status.
+
+The new commission task uses `/real-estate-agent-commission-calculator` and the
+same Chinese and Korean prefixes, with its own canonical and language
+alternates. The feature-branch source inventory contains 15 URLs. These routes
+are not claimed to be published or indexed before an approved deployment.
+See the [commission implementation plan](docs/commission-calculator-plan.md).
 
 After a production deployment, the domain owner must verify the domain with
 Google Search Console and Bing Webmaster Tools, then submit the sitemap.

@@ -1,6 +1,6 @@
 # Product State
 
-Last updated: 2026-10-20
+Last updated: 2026-10-28
 Stage: Public MVP
 Canonical product: https://propertysaleprofit.au
 
@@ -18,6 +18,14 @@ Never label AI-generated personas, inferred motives, competitor copy or
 simulated interviews as real feedback. Use **Unknown** when evidence is absent.
 
 ## Current facts
+
+- On 27 October the owner authorised `codex/agent-commission-calculator` for a
+  focused two-input commission task in all three languages. Its local source
+  uses the existing calculation/validation rules and adds no usage events or
+  storage. The three new routes are not yet claimed to be deployed or indexed;
+  commission-search demand and traffic uplift remain hypotheses. The original
+  three-guide allowlist for the 30-content-click objective is unchanged. See
+  [the implementation plan](commission-calculator-plan.md).
 
 - The product is an Australia-focused property-sale calculator deployed as a
   public MVP.
