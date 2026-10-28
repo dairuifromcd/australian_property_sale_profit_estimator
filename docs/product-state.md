@@ -19,13 +19,27 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
 
 ## Current facts
 
-- On 27 October the owner authorised `codex/agent-commission-calculator` for a
-  focused two-input commission task in all three languages. Its local source
-  uses the existing calculation/validation rules and adds no usage events or
-  storage. The three new routes are not yet claimed to be deployed or indexed;
-  commission-search demand and traffic uplift remain hypotheses. The original
-  three-guide allowlist for the 30-content-click objective is unchanged. See
-  [the implementation plan](commission-calculator-plan.md).
+- The owner authorised the commission feature branch on 27 October and its
+  push/merge/publication on 28 October. The two-input tool is now published in
+  all three languages; the sitemap contains 15 canonical URLs. PR #26 merged
+  as `f50eb52386f8747f2284ad4c7b1288935e552811`. Its first runtime Worker,
+  `d3f62894-4470-48db-ae00-c7556f970eb5`, was verified at 100% traffic on
+  28 October. This records that first rollout, not a permanently active Worker;
+  a later documentation-only deployment may have a newer version.
+- The final clean candidate passed lint, 68 application/SSR tests, 38 focused
+  coverage tests (100% only for the calculation/input modules), 258 killed
+  mutants, 47 local Chromium tests and 47 remote Preview tests. Main Linux CI
+  succeeded; production HTTP acceptance passed 20 requests / 908 assertions.
+  Independent calculation, AI localization, dependency-artifact and release
+  reviews accepted it, including final production acceptance GO. Full audit
+  retains 3 moderate Satori development-chain entries; production-only audit
+  is zero. See [the implementation and release record](commission-calculator-plan.md).
+- The commission task uses the existing financial scope and validation, adds
+  no usage events or storage, and keeps entries out of URLs. Production
+  acceptance did not enter figures, run browser JavaScript or submit indexing
+  requests. Its search indexing and acquisition effect remain **Unknown**;
+  successful HTTP responses do not establish them. The original three-guide
+  allowlist for the 30-content-click objective is unchanged.
 
 - The product is an Australia-focused property-sale calculator deployed as a
   public MVP.
@@ -42,10 +56,10 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
   independent release review gave GO. Production HTTP checks passed for 12 pages,
   robots, sitemap and share images; the first new Worker version `b7ff061f`
   received 100% of traffic. This is release evidence, not traffic-effect evidence.
-- Bing ownership verification succeeded on 20 October. Crawl/indexing and Bing
-  performance remain Unknown; earlier verification failures are historical.
-  The sitemap submission in this workflow was accepted and is Processing, with no crawl
-  date or discovered-URL count observed yet.
+- Bing ownership verification succeeded on 20 October. The submission's
+  initial Processing/no-crawl/no-discovery record was a 20 October snapshot,
+  not a current index-status assertion. This commission publication did not
+  query Bing indexing or performance for the new tool; those remain Unknown.
 - The repository configures anonymous events containing event type, locale,
   environment and Cloudflare timestamp, without calculator figures, cookies or
   application-generated identifiers.
@@ -68,8 +82,7 @@ simulated interviews as real feedback. Use **Unknown** when evidence is absent.
 3. Privacy and no sign-up materially increase willingness to use the tool.
 4. Comparing agent quotes may be more valuable than adding more calculation
    fields.
-5. Chinese and Korean versions may create useful additional demand after
-   fluent-human review.
+5. Chinese and Korean versions may create useful additional demand.
 
 These are not validated user facts.
 
@@ -125,6 +138,16 @@ property-sale decision, and which result do they actually need?
 
 ## Current decision
 
+**Continue — 28 October 2026.** The owner-approved commission task and compatible
+security remediation have passed their independent acceptance and reached
+production. Observe the three new tool URLs for actual indexing, relevant query
+impressions and natural clicks, with dated complete reporting windows. Neither
+publication nor technical acceptance proves the acquisition hypothesis or
+achievement of the unchanged 18 November 100/30 click target. No post-release
+commission search metrics or real-user feedback were obtained in this release.
+
+### Historical decision — 20 October 2026
+
 **Continue — 20 October 2026.** The bounded batch's compatible dependency
 remediation, release checks, merge and production HTTP acceptance are complete.
 Observe the English guide's indexing before expanding the page count. Full npm
@@ -154,10 +177,17 @@ and indexing delays. It is a target, not a forecast. See the
 
 ## Next learning experiment
 
-The English guide's live Search Console test passed and one indexing request
-was accepted on 19 October. After publication, review crawl/indexing, Google's
-canonical and related query exposure at the fixed sprint checkpoints. Do not
-repeat the same indexing request. New content expansion depends on this evidence.
+At the existing 2 November checkpoint, inspect the three commission-tool URLs
+alongside the guides, recording canonical/index status and relevant queries,
+impressions and natural clicks separately. Keep the 28 October publication
+date explicit. New tool clicks may contribute to total Google Web clicks but
+do not enter the unchanged three-guide content subtotal. This is an observation
+plan, not another automation, indexing request or claim of traffic growth.
+
+The earlier English-guide live Search Console test passed and one indexing
+request was accepted on 19 October. Keep its recorded results and do not repeat
+that same indexing request. The initial guide-indexing observation plan is
+historical; it does not imply that the 28 October tool remains unpublished.
 The previously proposed five-participant comprehension study remains unrun;
 its participant count is zero and it is deferred from this search sprint.
 

@@ -1,6 +1,39 @@
 # Search discovery and SEO/AEO implementation
 
-## Commission task branch — 27 October 2026
+## Published commission task — 28 October 2026
+
+The three commission-calculator routes are published at the English
+`/real-estate-agent-commission-calculator` path and its `/zh-Hans` and `/ko`
+equivalents. The canonical sitemap now contains 15 URLs. PR #26 merged as
+`f50eb52386f8747f2284ad4c7b1288935e552811`; successful Cloudflare build
+`9c0cbc7c-cf52-42cd-b17f-7d9733461ee4` first rolled out Worker
+`d3f62894-4470-48db-ae00-c7556f970eb5`, verified in active-version and rollout
+views at 100% traffic. Main Linux CI run `40641529648` succeeded.
+
+The final candidate passed clean install, lint, 68 application/SSR tests,
+38 focused tests with 100% coverage of calculation/input modules only,
+258 killed mutants, 47 local browser tests (37.5 s) and 47 tests against the
+fixed `3f80111d` Cloudflare Preview (32.9 s). Production read-only HTTP checks
+passed **20 requests / 908 assertions / 0 failures**. New artifact review and
+independent production release acceptance gave GO with 3 moderate Satori
+development-chain audit entries documented and production-only audit zero.
+
+The initial production robots check failed one overly broad QA assertion:
+Cloudflare's specific training-crawler denies were mistaken for wildcard
+denial. UA-group-aware parsing and 35 offline positive/negative fixtures fixed
+the temporary checker. The final checks confirm wildcard/Googlebot/Bingbot
+access to all 15 public paths; no site robots or Cloudflare configuration was
+changed. No production calculator interaction, browser JavaScript, new
+analytics, index request or synthetic search click was used.
+
+These are publication and HTTP-discovery facts. Search indexing, rankings and
+new-tool traffic are still **Unknown**. The three-guide allowlist for the
+30-content-click goal is unchanged. Source/Worker IDs here identify the first
+runtime release; a subsequent documentation-only commit may automatically
+deploy a newer Worker. See [the complete acceptance record](commission-calculator-plan.md)
+for commands, evidence and limits.
+
+## Historical commission branch preparation — 27 October 2026
 
 The owner authorised an independent, directly usable commission calculator
 topic in three languages at `/real-estate-agent-commission-calculator` and the

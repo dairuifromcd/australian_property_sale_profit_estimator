@@ -1,5 +1,79 @@
 # Independent commission calculator — 27 October 2026
 
+## Published acceptance — 28 October 2026
+
+The owner-authorised batch is published in English, Simplified Chinese and
+Korean. The commission routes are `/real-estate-agent-commission-calculator`,
+`/zh-Hans/real-estate-agent-commission-calculator` and
+`/ko/real-estate-agent-commission-calculator`; the production sitemap contains
+15 canonical URLs.
+
+- [PR #26](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/pull/26)
+  merged into `main` as `f50eb52386f8747f2284ad4c7b1288935e552811`.
+- The first production runtime Worker was
+  `d3f62894-4470-48db-ae00-c7556f970eb5`. Cloudflare build
+  `9c0cbc7c-cf52-42cd-b17f-7d9733461ee4` succeeded; the dashboard's active version
+  and rollout history both showed that Worker receiving **100%** of traffic.
+- [Main Linux CI run 40641529648](https://github.com/dairuifromcd/australian_property_sale_profit_estimator/actions/runs/40641529648)
+  succeeded. The reviewed fixed Preview was
+  `https://3f80111d-property-profit-au.dairuifromcd.workers.dev`.
+
+The following results concern the final security-patched candidate and approved
+publication, not only the earlier local feature branch:
+
+| Check | Actual result |
+| --- | --- |
+| Clean `npm ci --offline --no-audit --cache /private/tmp/property-profit-npm-cache` | Exit 0; locked dependency install succeeded. |
+| `npm run lint` | Exit 0. |
+| `npm test` | Exit 0; typecheck, build and **68/68 tests** passed. |
+| `npm run test:coverage` | **38 tests** passed; 100% lines, branches and functions for `calculator.ts` and `input-format.ts` only. |
+| `npm run test:mutation` | **258/258 killed**, no survivors or timeouts. |
+| `CAPTURE_TRANSLATION_REVIEW=1 npm run test:e2e` | **47/47 local Chromium tests**, **37.5 seconds**; ten mobile review images refreshed. |
+| `PLAYWRIGHT_BASE_URL=https://3f80111d-property-profit-au.dairuifromcd.workers.dev npm run test:e2e` | **47/47 remote Preview tests**, **32.9 seconds**. |
+| Preview HTTP-only smoke | **20 requests / 864 assertions / 0 failures**, exit 0. |
+| `node --experimental-strip-types /private/tmp/commission-release-smoke.mjs https://propertysaleprofit.au production` | **20 requests / 908 assertions / 0 failures**, exit 0. |
+| Full / production-only npm audit | **3 moderate / 0 findings**; zero high or critical entries. |
+
+Independent calculation and AI source/rendered localization reviews accepted
+the scope and implementation. The renewed dependency-artifact assessment found
+no deployed Satori path in the new build; independent release review gave
+**GO**, including the documented residual vinext → @vercel/og → Satori
+development chain. The complete audit is not zero. This is software/risk
+review, not human-language or professional financial approval.
+
+After the actual production checks, `release_reviewer` independently gave
+**production acceptance GO**, verifying 20 requests / 908 assertions / zero
+failures and rerunning all 35 offline robots fixtures.
+
+The first production HTTP run had **one failed assertion**: the temporary QA
+script looked for any `Disallow: /` across the whole robots.txt. Cloudflare's
+managed text restricts specific training crawlers while permitting ordinary
+search. The corrected script selects the most specific UA group, merges equal
+groups and applies longest-path rules with Allow winning a tie. **35 offline
+positive/negative fixture checks passed**, including explicit Googlebot and
+wildcard denies, repeated groups and training-only denies. The successful
+production rerun verifies wildcard, Googlebot and Bingbot access to all 15
+public paths. No application robots rule or Cloudflare configuration was
+changed to resolve the test failure.
+
+Local ignored evidence is under `outputs/commission-release/`, including
+`preview-smoke.json`, `production-smoke.json`, the audit reports,
+`risk-artifact.json` and `production-cloudflare.png`. Production acceptance
+used HTTP only: no calculator amounts were entered, no production browser
+JavaScript/E2E ran, no new tracking or index requests were added, and no
+artificial search clicks were created. Safari/Firefox and real-device tests
+remain unperformed.
+
+Publication and crawlable responses do not establish search indexing, ranking
+or acquisition. New-tool indexing and traffic remain **Unknown**. The original
+100 Google Web / 30 guide-click objective and its three-guide allowlist remain
+unchanged; commission-tool clicks are not automatically content-page clicks.
+
+These source/build/Worker IDs record the **first runtime publication**. A
+subsequent documentation-only commit may trigger another automatic deployment;
+this record does not claim that the first Worker remains permanently active.
+Check the current rollout before any later active-version or rollback claim.
+
 ## Outcome and hypothesis
 
 An Australian seller can enter only a sale price and the GST-inclusive
@@ -41,7 +115,7 @@ traffic uplift remain unverified; no simulated users are evidence of demand.
 
 ## Evaluation and release boundary
 
-After an explicitly authorised publication, record its actual date. Evaluate
+Following the 28 October publication recorded above, evaluate
 the three new task URLs using Search Console indexing, related query
 impressions and natural clicks, with complete reporting dates and filters.
 These are directional signals, not unique users or completed calculations.
@@ -52,11 +126,15 @@ in the property total but are not added to that content-page allowlist.
 
 The original implementation approval was branch-only. On 28 October the owner
 explicitly authorised pushing, merging and publishing this commission batch.
-That authorisation does not make pending checks successful; the fresh
-dependency findings below require a new verified candidate and independent
-review before publication. No outreach or tracking change is authorised.
+That authorisation did not make pending checks successful: the fresh
+dependency findings below required a newly verified candidate and independent
+review, completed in the published acceptance above. No outreach or tracking
+change is authorised.
 
-## Implementation checks — 27–28 October 2026
+## Historical local implementation checks — 27–28 October 2026
+
+This section preserves the earlier local-only stage, before the security patch
+and published acceptance above; its pending/untested statements are historical.
 
 - `npm run lint`: passed.
 - Latest `npm test`: typecheck and production build passed; **68/68 tests
@@ -111,7 +189,7 @@ dependency and release evidence is recorded separately below.
 The 20 October policy still applies: independent semantic and rendered-layout
 reviews are required; fluent-human language sign-off is not a release gate.
 
-## Pre-publication dependency safety update — 28 October 2026
+## Historical pre-publication dependency safety update — 28 October 2026
 
 A fresh audit after publication authorisation found 12 affected package
 entries (1 critical, 3 high, 8 moderate), including 1 production-only critical

@@ -2,13 +2,26 @@
 
 ## Owner-approved objective and measurement
 
-On 27 October the owner authorised a separate feature branch for an independent
-commission-calculator task in all three languages. The branch adds three
-configured routes; it is not yet a publication or measured acquisition effect.
-Its implementation and acceptance are recorded in
-[the commission plan](commission-calculator-plan.md). New tool clicks may count
-in the domain-wide Web total after publication, but the three-guide content
-allowlist below is unchanged.
+On 27 October the owner authorised a feature branch for an independent
+commission-calculator task in all three languages. It was explicitly approved
+for publication and deployed on **28 October** through merged PR #26,
+`main` source `f50eb52386f8747f2284ad4c7b1288935e552811`. The first runtime
+Worker `d3f62894-4470-48db-ae00-c7556f970eb5` was confirmed at 100% traffic;
+these are initial-rollout facts and a later docs-only deployment may use a
+newer Worker. The sitemap now contains 15 URLs.
+
+The final patched candidate passed clean install, 68 application tests,
+38 focused tests at 100% calculation/input-module coverage, 258 killed
+mutants, 47 local and 47 remote Preview browser tests, Linux CI, independent
+risk/release review and production HTTP acceptance (20 requests / 908 checks,
+zero failures). Full audit retains 3 moderate development-chain entries;
+production-only audit is zero. Implementation, exact commands, the temporary
+robots QA correction and evidence are recorded in
+[the commission plan](commission-calculator-plan.md).
+
+New-tool indexing and traffic remain **Unknown**; publication is not evidence
+that this growth hypothesis succeeded. New tool clicks may count in the
+domain-wide Web total, but the three-guide content allowlist below is unchanged.
 
 The owner accepted this challenge on 19 October 2026 and authorised beginning
 the changes. By **18 November 2026**, Google Search Console's latest complete,
