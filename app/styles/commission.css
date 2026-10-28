@@ -1,0 +1,24 @@
+.commission-shell { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.commission-shell .calculator-inputs { padding: 32px; }
+.commission-shell h2 { margin-top: 0; }
+.commission-shell .field-grid { grid-template-columns: 1fr; }
+.commission-reset { margin-top: 24px; }
+.commission-result { min-width: 0; padding: 32px; border-left: 1px solid var(--line); background: #f3f7f2; }
+.commission-result p { line-height: 1.65; }
+.commission-amount { margin: 24px 0; font-size: clamp(1.5rem, 4vw, 2.7rem); font-weight: 700; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.commission-equation { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.commission-empty { padding: 20px 0; color: var(--muted); }
+.commission-explanation { max-width: 900px; margin: 48px auto; padding: 0 24px; line-height: 1.75; }
+.commission-explanation section { margin-bottom: 32px; }
+.commission-explanation h2 { font-size: 1.4rem; }
+.commission-links { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+.commission-updated { color: var(--muted); font-size: 0.875rem; }
+.related-tool { max-width: 1120px; margin: 24px auto 0; padding: 20px 24px; border: 1px solid var(--line); border-radius: 16px; }
+.related-tool h2 { font-size: 1.15rem; margin: 0 0 8px; }
+.related-tool p { margin: 0; line-height: 1.6; }
+@media (max-width: 700px) {
+  .commission-shell { grid-template-columns: 1fr; }
+  .commission-shell .calculator-inputs, .commission-result { padding: 24px; }
+  .commission-result { border-left: 0; border-top: 1px solid var(--line); }
+  .related-tool { margin-inline: 20px; }
+}

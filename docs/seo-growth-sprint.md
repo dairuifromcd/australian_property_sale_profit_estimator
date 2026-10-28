@@ -2,6 +2,14 @@
 
 ## Owner-approved objective and measurement
 
+On 27 October the owner authorised a separate feature branch for an independent
+commission-calculator task in all three languages. The branch adds three
+configured routes; it is not yet a publication or measured acquisition effect.
+Its implementation and acceptance are recorded in
+[the commission plan](commission-calculator-plan.md). New tool clicks may count
+in the domain-wide Web total after publication, but the three-guide content
+allowlist below is unchanged.
+
 The owner accepted this challenge on 19 October 2026 and authorised beginning
 the changes. By **18 November 2026**, Google Search Console's latest complete,
 processed, consecutive 28 days must show **at least 100 Web Search clicks** for

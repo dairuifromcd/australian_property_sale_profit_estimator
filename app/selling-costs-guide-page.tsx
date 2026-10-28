@@ -5,6 +5,7 @@ import { pathFor, type Locale } from "./i18n/routing";
 import { LanguageSwitcher } from "./language-switcher";
 import "./styles/guide.css";
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from "./site-config";
+import { CommissionLink } from "./commission-link";
 
 export function SellingCostsGuide({ locale }: { locale: Locale }) {
   const content = guideMessages[locale];
@@ -52,6 +53,7 @@ export function SellingCostsGuide({ locale }: { locale: Locale }) {
         </div>
         <footer className="guide-footer">
           <a className="guide-calculator-link" href={pathFor(locale, "home")}>{content.calculator}</a>
+          <CommissionLink locale={locale} />
           <a href={pathFor(locale, "privacy")}>{common.privacy}</a>
           <a href={pathFor(locale, "disclaimer")}>{common.importantInformation}</a>
         </footer>

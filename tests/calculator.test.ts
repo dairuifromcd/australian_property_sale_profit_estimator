@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  calculateAgentCommission,
   calculateEstimate,
   calculateRequiredSalePrice,
   type CalculatorInput,
@@ -12,6 +13,7 @@ import {
   numberFromInput,
   numberFromInputForValidation,
 } from "../app/input-format.ts";
+import { calculationAud } from "../app/calculator-ui/format.ts";
 
 function input(
   overrides: Partial<CalculatorInput> = {},
@@ -30,6 +32,75 @@ function input(
     ...overrides,
   };
 }
+
+test("calculates standalone commission from two inputs without adding GST", () => {
+  for (const [salePrice, commissionRate, expected, display] of [
+    [1_000_000, 2.2, 22_000, "$22,000.00"],
+    [750_000, 2, 15_000, "$15,000.00"],
+    [1_000_000, 0, 0, "$0.00"],
+    [1_000_000, -0, 0, "$0.00"],
+    [1_000_000_000_000, 99.9, 999_000_000_000, "$999,000,000,000.00"],
+  ] as const) {
+    const result = calculateAgentCommission({ salePrice, commissionRate });
+    assert.deepEqual(result.validationErrors, []);
+    assert.ok(Math.abs(result.commission! - expected) <= Math.max(1e-10, expected * 1e-15));
+    assert.equal(calculationAud.format(result.commission!), display);
+    assert.equal(Object.is(result.commission, -0), false);
+    assert.equal(result.commission, calculateEstimate(input({ salePrice, commissionRate })).agentCommission);
+  }
+});
+
+test("keeps standalone commission precision and rounds only its AUD display", () => {
+  const precise = calculateAgentCommission({ salePrice: 1_000_001.49, commissionRate: 2.37 });
+  assert.ok(Math.abs(precise.commission! - 23_700.035313) < 0.0000001);
+  assert.equal(calculationAud.format(precise.commission!), "$23,700.04");
+  const halfCent = calculateAgentCommission({ salePrice: 1, commissionRate: 0.5 });
+  assert.equal(halfCent.commission, 0.005);
+  assert.equal(calculationAud.format(halfCent.commission!), "$0.01");
+  assert.ok(Math.abs(calculateAgentCommission({ salePrice: 0.01, commissionRate: 0.0000001 }).commission! - 0.00000000001) < 1e-24);
+});
+
+test("rejects invalid standalone prices and rates instead of returning a zero result", () => {
+  for (const salePrice of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 1_000_000_000_001]) {
+    assert.deepEqual(calculateAgentCommission({ salePrice, commissionRate: 2.2 }), {
+      commission: null,
+      validationErrors: [{ field: "salePrice", code: salePrice > 1e12 && Number.isFinite(salePrice) ? "amountMaxTrillion" : "amountGreaterThanZero" }],
+    });
+  }
+  for (const commissionRate of [-1, 99.91, 100, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    assert.deepEqual(calculateAgentCommission({ salePrice: 1_000_000, commissionRate }), {
+      commission: null,
+      validationErrors: [{ field: "commissionRate", code: "commissionRange" }],
+    });
+  }
+  assert.deepEqual(calculateAgentCommission({ salePrice: Number.NaN, commissionRate: Number.NaN }), {
+    commission: null,
+    validationErrors: [{ field: "salePrice", code: "amountGreaterThanZero" }, { field: "commissionRate", code: "commissionRange" }],
+  });
+});
+
+test("preserves main-calculator numeric fallbacks while invalid standalone commission stays unavailable", () => {
+  // The main model historically returns finite sanitised intermediate numbers
+  // alongside validation errors. They are never a valid displayed estimate.
+  for (const [commissionRate, expectedCommission] of [
+    [-1, 0],
+    [Number.NaN, 0],
+    [Number.POSITIVE_INFINITY, 0],
+    [100, 1_000_000],
+  ]) {
+    const estimate = calculateEstimate(input({ commissionRate }));
+    assert.equal(estimate.agentCommission, expectedCommission);
+    assert.equal(Number.isFinite(estimate.agentCommission), true);
+    assert.equal(estimate.hasTransactionErrors, true);
+    assert.equal(estimate.hasCalculationErrors, true);
+    assert.equal(estimate.breakEvenSalePrice, 0);
+    assert.deepEqual(estimate.salePriceSensitivity, []);
+    assert.deepEqual(calculateAgentCommission({ salePrice: 1_000_000, commissionRate }), {
+      commission: null,
+      validationErrors: [{ field: "commissionRate", code: "commissionRange" }],
+    });
+  }
+});
 
 test("formats monetary input with grouping separators", () => {
   assert.equal(formatAmountInput("650000"), "650,000");

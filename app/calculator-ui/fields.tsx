@@ -170,6 +170,7 @@ export function AmountField({
 type PercentageFieldProps = FieldProps & {
   help?: string;
   max?: number;
+  step?: string;
 };
 
 export function PercentageField({
@@ -181,6 +182,7 @@ export function PercentageField({
   help,
   error,
   max = 100,
+  step = "0.1",
   required = false,
   requiredLabel = "Required",
 }: PercentageFieldProps) {
@@ -200,7 +202,7 @@ export function PercentageField({
           type="number"
           min="0"
           max={max}
-          step="0.1"
+          step={step}
           inputMode="decimal"
           value={value}
           onChange={(event) => onChange(event.target.value)}

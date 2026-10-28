@@ -28,6 +28,13 @@ export interface CalculatorInput {
   totalRentalIncome: number;
 }
 
+export type CommissionInput = Pick<CalculatorInput, "salePrice" | "commissionRate">;
+
+export interface CommissionResult {
+  commission: number | null;
+  validationErrors: CalculatorValidationError[];
+}
+
 export interface SalePriceSensitivityScenario {
   changePercent: -5 | 0 | 5;
   salePrice: number;
@@ -72,6 +79,33 @@ function nonNegative(value: number): number {
 
 function percentage(value: number): number {
   return nonNegative(value) / 100;
+}
+
+function positiveMoneyError(value: number): ValidationErrorCode | null {
+  if (!Number.isFinite(value) || value <= 0) return "amountGreaterThanZero";
+  if (value > MAX_MONEY_INPUT) return "amountMaxTrillion";
+  return null;
+}
+
+function commissionRateError(value: number): ValidationErrorCode | null {
+  return !Number.isFinite(value) || value < 0 || value > MAX_COMMISSION_RATE
+    ? "commissionRange"
+    : null;
+}
+
+export function calculateAgentCommission(input: CommissionInput): CommissionResult {
+  const validationErrors: CalculatorValidationError[] = [];
+  const salePriceError = positiveMoneyError(input.salePrice);
+  const rateError = commissionRateError(input.commissionRate);
+  if (salePriceError) validationErrors.push({ field: "salePrice", code: salePriceError });
+  if (rateError) validationErrors.push({ field: "commissionRate", code: rateError });
+
+  return {
+    commission: validationErrors.length > 0
+      ? null
+      : input.salePrice * percentage(input.commissionRate),
+    validationErrors,
+  };
 }
 
 function fixedTransactionCosts(input: CalculatorInput): number {
@@ -151,12 +185,8 @@ function validateTransactionInput(
   ) => errors.push({ field, code });
 
   for (const field of ["salePrice", "purchasePrice"] as const) {
-    const value = rawInput[field];
-    if (!Number.isFinite(value) || value <= 0) {
-      addError(field, "amountGreaterThanZero");
-    } else if (value > MAX_MONEY_INPUT) {
-      addError(field, "amountMaxTrillion");
-    }
+    const code = positiveMoneyError(rawInput[field]);
+    if (code) addError(field, code);
   }
 
   for (const field of [
@@ -173,13 +203,8 @@ function validateTransactionInput(
     }
   }
 
-  if (
-    !Number.isFinite(rawInput.commissionRate) ||
-    rawInput.commissionRate < 0 ||
-    rawInput.commissionRate > MAX_COMMISSION_RATE
-  ) {
-    addError("commissionRate", "commissionRange");
-  }
+  const rateError = commissionRateError(rawInput.commissionRate);
+  if (rateError) addError("commissionRate", rateError);
 
   return errors;
 }
@@ -231,7 +256,9 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
   const estimatedLoanPayout = nonNegative(rawInput.estimatedLoanPayout);
   const totalHoldingCosts = nonNegative(rawInput.totalHoldingCosts);
   const totalRentalIncome = nonNegative(rawInput.totalRentalIncome);
-  const agentCommission = salePrice * commissionRate;
+  // Retain the legacy finite fallback for invalid main-form inputs; neither
+  // interface displays a result until its required inputs pass validation.
+  const agentCommission = calculateAgentCommission(rawInput).commission ?? salePrice * commissionRate;
   const totalSellingCosts =
     agentCommission + otherSellingCosts + salePreparationCosts;
   const amountAfterSellingCosts = salePrice - totalSellingCosts;

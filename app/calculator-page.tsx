@@ -6,6 +6,8 @@ import { CalculatorForm } from "./calculator-ui/calculator-form";
 import { ResultsPanel } from "./calculator-ui/results-panel";
 import { useCalculatorForm } from "./calculator-ui/use-calculator-form";
 import { GuideLink } from "./selling-costs-guide";
+import { CommissionLink } from "./commission-link";
+import { commissionMessages } from "./i18n/commission-messages";
 import { LanguageSwitcher } from "./language-switcher";
 import { pathFor, type Locale } from "./i18n/routing";
 import type { CalculatorMessages } from "./i18n/messages/types";
@@ -112,6 +114,11 @@ export default function CalculatorPage({
           messages={messages}
           trackUsageEvent={trackUsageEvent}
         />
+      </section>
+
+      <section className="related-tool no-print" aria-labelledby="commission-tool-title">
+        <h2 id="commission-tool-title">{commissionMessages[locale].relatedTitle}</h2>
+        <p>{commissionMessages[locale].relatedBody} <CommissionLink locale={locale} /></p>
       </section>
 
       <section className="explanation" aria-labelledby="what-counts-title">

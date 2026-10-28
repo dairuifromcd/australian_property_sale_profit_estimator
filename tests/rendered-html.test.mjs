@@ -491,6 +491,9 @@ test("serves a sitemap containing only canonical public URLs", async () => {
     "https://propertysaleprofit.au/selling-costs-guide",
     "https://propertysaleprofit.au/zh-Hans/selling-costs-guide",
     "https://propertysaleprofit.au/ko/selling-costs-guide",
+    "https://propertysaleprofit.au/real-estate-agent-commission-calculator",
+    "https://propertysaleprofit.au/zh-Hans/real-estate-agent-commission-calculator",
+    "https://propertysaleprofit.au/ko/real-estate-agent-commission-calculator",
   ]);
   assert.doesNotMatch(body, /workers\.dev|localhost/i);
   assert.doesNotMatch(body, /<lastmod>/i);
@@ -684,6 +687,48 @@ test("guide is readable in server HTML with canonical locale alternates and host
   }
 });
 
+test("commission tools render two required inputs, useful explanation and task-specific locale metadata", async () => {
+  const { commissionMessages } = await import("../app/i18n/commission-messages.ts");
+  const suffix = "/real-estate-agent-commission-calculator";
+  for (const [locale, prefix] of [["en-AU", ""], ["zh-Hans", "/zh-Hans"], ["ko", "/ko"]]) {
+    const content = commissionMessages[locale];
+    for (const host of ["propertysaleprofit.au", "preview.workers.dev"]) {
+      const html = await (await render(`https://${host}${prefix}${suffix}`)).text();
+      assert.ok(html.includes(`<h1>${content.title}</h1>`));
+      assert.ok(html.includes(`<title>${content.metadata.title}</title>`));
+      for (const text of [content.method, content.example, content.rateHelp, content.exclusions, content.privacy]) {
+        const escaped = text.replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" })[character]);
+        assert.ok(html.includes(escaped), `${locale}: ${text}`);
+      }
+      assertTagAttributes(html, "meta", { name: "description", content: content.metadata.description });
+      assertTagAttributes(html, "meta", { property: "og:title", content: content.metadata.title });
+      assertTagAttributes(html, "meta", { property: "og:description", content: content.metadata.description });
+      assertTagAttributes(html, "meta", { property: "og:url", content: `https://propertysaleprofit.au${prefix}${suffix}` });
+      assertTagAttributes(html, "link", { rel: "canonical", href: `https://propertysaleprofit.au${prefix}${suffix}` });
+      assertTagAttributes(html, "meta", { name: "robots", content: host === "propertysaleprofit.au" ? "index, follow" : "noindex, nofollow" });
+      for (const [alternate, alternatePrefix] of [["en-AU", ""], ["zh-Hans", "/zh-Hans"], ["ko", "/ko"], ["x-default", ""]]) {
+        assertTagAttributes(html, "link", { rel: "alternate", hrefLang: alternate, href: `https://propertysaleprofit.au${alternatePrefix}${suffix}` });
+      }
+      assert.equal((html.match(/<input\b/g) ?? []).length, 2);
+      assert.match(html, /id="commission-sale-price"[^>]*required/);
+      assert.match(html, /id="standalone-commission-rate"[^>]*step="any"[^>]*required/);
+      assert.doesNotMatch(html, /id="purchase-price"|id="estimated-loan-payout"|data-testid="commission-amount"/);
+      assertTagAttributes(html, "a", { href: prefix || "/", target: "_blank", rel: "noopener noreferrer" });
+      assertTagAttributes(html, "a", { href: `${prefix}/selling-costs-guide`, target: "_blank", rel: "noopener noreferrer" });
+      for (const alternatePrefix of ["", "/zh-Hans", "/ko"]) assertTagAttributes(html, "a", { href: `${alternatePrefix}${suffix}` });
+    }
+    for (const entryPath of [prefix || "/", `${prefix}/selling-costs-guide`]) {
+      const html = await (await render(`https://propertysaleprofit.au${entryPath}`)).text();
+      assertTagAttributes(html, "a", { href: `${prefix}${suffix}`, target: "_blank", rel: "noopener noreferrer" });
+    }
+  }
+  for (const prefix of ["/fr", "/zh", "/en-AU"]) {
+    const response = await render(`https://propertysaleprofit.au${prefix}${suffix}`);
+    assert.equal(response.status, 404);
+    assertTagAttributes(await response.text(), "meta", { name: "robots", content: "noindex" });
+  }
+});
+
 test("home exposes one crawlable guide link before the calculator in every locale", async () => {
   for (const prefix of ["", "/zh-Hans", "/ko"]) {
     const html = await (await render(`https://propertysaleprofit.au${prefix || "/"}`)).text();
@@ -704,7 +749,7 @@ test("metadata is in the initial head for browser and crawler user agents", asyn
   ]) {
     for (const host of ["propertysaleprofit.au", "preview.workers.dev"]) {
       for (const prefix of ["", "/zh-Hans", "/ko"]) {
-        for (const page of ["", "/selling-costs-guide"]) {
+        for (const page of ["", "/selling-costs-guide", "/real-estate-agent-commission-calculator"]) {
           const path = prefix + page || "/";
           const html = await (await render(`https://${host}${path}`, userAgent)).text();
           const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1];
@@ -760,7 +805,7 @@ test("all localized pages publish complete production share-image metadata", asy
     assert.equal(image.subarray(1, 4).toString(), "PNG");
     assert.equal(image.readUInt32BE(16), 1200);
     assert.equal(image.readUInt32BE(20), 630);
-    for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer"]) {
+    for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer", "/real-estate-agent-commission-calculator"]) {
       const html = await (await render(`https://preview.workers.dev${prefix + page || "/"}`)).text();
       assertTagAttributes(html, "meta", { property: "og:image", content: `https://propertysaleprofit.au${imagePath}` });
       assertTagAttributes(html, "meta", { property: "og:image:width", content: "1200" });
@@ -776,7 +821,7 @@ test("all localized pages publish complete production share-image metadata", asy
 test("Bing verification appears exactly once only on the production English home", async () => {
   for (const host of ["propertysaleprofit.au", "example-property-profit-au.dairuifromcd.workers.dev", "localhost:4173"]) {
     for (const prefix of ["", "/zh-Hans", "/ko"]) {
-      for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer"]) {
+      for (const page of ["", "/selling-costs-guide", "/privacy", "/disclaimer", "/real-estate-agent-commission-calculator"]) {
         const html = await (await render(`https://${host}${prefix + page || "/"}`)).text();
         const verification = tagsWithAttributes(html, "meta", { name: "msvalidate.01" });
         if (host === "propertysaleprofit.au" && !prefix && !page) {
