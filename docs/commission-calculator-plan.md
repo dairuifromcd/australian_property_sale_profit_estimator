@@ -50,8 +50,11 @@ The 18 November objective remains 100 Google Web clicks including 30 clicks to
 the existing three selling-costs guides. New commission-tool clicks may count
 in the property total but are not added to that content-page allowlist.
 
-This branch work does not authorise pushing, Preview publication, production
-deployment, merging, outreach or changing tracking.
+The original implementation approval was branch-only. On 28 October the owner
+explicitly authorised pushing, merging and publishing this commission batch.
+That authorisation does not make pending checks successful; the fresh
+dependency findings below require a new verified candidate and independent
+review before publication. No outreach or tracking change is authorised.
 
 ## Implementation checks — 27–28 October 2026
 
@@ -100,9 +103,35 @@ Build warnings about framework sourcemaps and dynamic route classification
 remain non-fatal; no new dependency was installed. No
 publication or traffic effect is claimed.
 
-This batch did not run `npm ci`, remote Preview verification, Linux CI,
-Safari/Firefox checks, real-device testing or production HTTP smoke checks.
-Repeat the release-candidate checks from a clean install and perform the
-applicable remote checks when preparing a separately authorised publication.
+At that initial local acceptance, `npm ci`, remote Preview verification,
+Linux CI, Safari/Firefox checks, real-device testing and production HTTP smoke
+checks had not yet run. Release-candidate checks from a clean install and the
+applicable remote checks were still required for publication; subsequent
+dependency and release evidence is recorded separately below.
 The 20 October policy still applies: independent semantic and rendered-layout
 reviews are required; fluent-human language sign-off is not a release gate.
+
+## Pre-publication dependency safety update — 28 October 2026
+
+A fresh audit after publication authorisation found 12 affected package
+entries (1 critical, 3 high, 8 moderate), including 1 production-only critical
+entry. Before merging or promoting, the candidate updates Next and its lint
+config to 16.4.3, Vite to 8.1.6, the existing qs override to 6.16.1, transitive
+Zod to 4.6.6 and the exact Undici 7.29.1 dependency to 7.30.1. React, vinext
+and Cloudflare package versions remain unchanged. No commission calculation,
+privacy behaviour or production dependency is added by this safety update.
+
+The compatible candidate's audit is 3 moderate entries from the existing
+vinext → @vercel/og → Satori development chain; production-only audit is zero.
+The old braces advisory was withdrawn upstream on 23 October, not repaired by
+this branch. The original local GO and the 68/38/258/47 test record above
+describe the preceding dependency state. Repeat regression, artifact/remote
+checks and independent release review for the final safety candidate; do not
+carry the previous GO forward automatically.
+
+Two clean installations succeeded. The final exact-version Undici override
+also passes the targeted and complete `npm ls` checks, after replacing a
+parent-scoped override that npm marked invalid when hoisted. Detailed
+versions, commands, residual-risk evidence and actual audit results are in
+[dependency remediation](dependency-remediation.md). No production publication
+is claimed by these local dependency checks.

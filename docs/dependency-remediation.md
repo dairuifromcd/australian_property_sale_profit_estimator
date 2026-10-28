@@ -1,6 +1,117 @@
 # Dependency audit remediation
 
-## Current update — 20 October 2026 (Australia/Brisbane)
+## Current update — 28 October 2026 (Australia/Brisbane)
+
+The clean-install check before the commission-tool release found **12 affected
+package entries: 1 critical, 3 high and 8 moderate**. Production-only audit had
+**1 critical** entry. These are current package/parent-chain counts, not twelve
+independently reachable application flaws. The owner authorised pushing,
+merging and deploying this batch on 28 October; the new audit findings require
+fresh validation and independent risk/release review before that publication.
+
+### Minimal compatible safety patch
+
+| Package | Previous lock | Candidate lock | Scope |
+| --- | --- | --- | --- |
+| `next` / `eslint-config-next` | 16.3.8 | 16.4.3 | Matched Next 16 security patch and lint config; existing React/DOM 19.2.8 satisfy the declared `^19.0.0` peer range. |
+| `vite` | 8.1.5 | 8.1.6 | First compatible patch resolving the five reported Vite/editor advisories; unchanged Node engine and Rolldown range. |
+| Existing `qs` override | 6.16.0 | 6.16.1 | Fixes the reported stringify denial of service. |
+| Transitive `zod` | 4.4.3 | 4.6.6 | Patched version retained in the lockfile within its existing `^4` dependency ranges; not a new direct dependency or permanent Zod override. |
+| Miniflare's `undici` | 7.29.1 | 7.30.1 | Same-major security patch, compatible with the existing Node 22 engine; exact-version override `"undici@7.29.1": "7.30.1"`. Miniflare is the only Undici consumer in this lock. |
+
+React/React DOM/RSC 19.2.8, vinext 1.0.0-beta.9,
+`@cloudflare/vite-plugin` 1.64.0, Wrangler 4.151.0 and Miniflare
+5.20261012.0-beta remain unchanged. The patch changes no calculator formulas,
+locale copy, privacy behaviour or Cloudflare production configuration. It
+does not add a direct production dependency, downgrade the Cloudflare plugin,
+force a Satori pre-1.0 minor jump, suppress audit entries or use
+`npm audit fix --force`.
+
+Official package/advisory references independently checked by
+`dependency_risk_review`:
+
+- [Next 16.4.3 package and React peer declarations](https://raw.githubusercontent.com/vercel/next.js/v16.4.3/packages/next/package.json),
+  [Next image-optimisation advisory](https://github.com/advisories/GHSA-2464-fhr4-w9xw),
+  [Next Server Actions advisory](https://github.com/advisories/GHSA-p3m5-59mp-jv5r),
+  [Next typed-array cache advisory](https://github.com/advisories/GHSA-673q-mjm6-r5xr).
+- [Vite 8.1.6 package and unchanged engine/toolchain ranges](https://raw.githubusercontent.com/vitejs/vite/v8.1.6/packages/vite/package.json).
+- [qs stringify advisory](https://github.com/advisories/GHSA-6pq8-jhm2-2vcw),
+  [Zod collection-validation advisory](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5).
+- [Undici 7.30.1 package and Node engine](https://raw.githubusercontent.com/nodejs/undici/v7.30.1/package.json).
+
+### Audit outcome and remaining development chain
+
+After the compatible lock update and clean installation, full audit reports
+**3 moderate entries, 0 high and 0 critical**: `vinext` → `@vercel/og` →
+`satori`, all from [the Satori SVG escaping advisory](https://github.com/advisories/GHSA-wx4j-mvgx-mqwp).
+Production-only audit reports **0 findings**. A clean production-only audit
+does not by itself prove that a build-time dependency cannot reach the Worker.
+
+The application uses trusted, locally generated static share PNGs with escaped
+SVG source and does not expose an application `ImageResponse` or dynamic OG
+route. The previously inspected artifact had no reachable Satori chain. The
+updated artifact must be checked again, with an explicit independent decision
+about the residual moderate chain; the implementer does not accept its own
+risk. Do not claim that the complete audit is zero.
+
+The old `braces` [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+was officially withdrawn on 23 October. Its disappearance from the audit is
+upstream withdrawal, not a fix performed by this branch. The 20 October record
+below accurately describes the advisory state at that earlier date.
+
+### Commands, actual results and pending checks
+
+- `npm install --package-lock-only --ignore-scripts --cache /private/tmp/property-profit-npm-cache --fetch-retries=0 --fetch-timeout=15000`:
+  exit 0, generated the compatible lock using official registry metadata with
+  Zod temporarily pinned to its specific patched version.
+- `npm install --package-lock-only --ignore-scripts --offline --cache /private/tmp/property-profit-npm-cache --no-audit`:
+  exit 0 after removing the temporary Zod pin; Zod 4.6.6 remains a normal
+  transitive lock entry.
+- `npm ci --cache /private/tmp/property-profit-npm-cache --fetch-retries=0 --fetch-timeout=15000`:
+  exit 0; 591 packages installed, 592 audited in 20 seconds.
+- `npm audit --json --cache /private/tmp/property-profit-npm-cache --fetch-retries=0 --fetch-timeout=15000`:
+  exit 1, exactly 3 moderate entries from the Satori chain.
+- `npm audit --omit=dev --json --cache /private/tmp/property-profit-npm-cache --fetch-retries=0 --fetch-timeout=15000`:
+  exit 0, no production-only findings.
+
+The initial parent-scoped Miniflare override installed the requested Undici
+7.30.1 and cleared its audit findings, but `npm ls` reported that hoisted leaf
+as invalid against the parent's original exact 7.29.1 declaration. Replacing
+that parent-scoped override with the exact vulnerable-version selector
+`"undici@7.29.1": "7.30.1"` resolved the graph without changing installed
+versions or adding a broad override for every Undici version.
+
+- Final `npm install --package-lock-only --ignore-scripts --offline --cache /private/tmp/property-profit-npm-cache --no-audit`:
+  exit 0 with the exact Undici selector.
+- Final `npm ci --offline --no-audit --cache /private/tmp/property-profit-npm-cache`:
+  exit 0, 591 packages installed in 20 seconds, including normal install scripts.
+- `npm ls next eslint-config-next vite qs zod undici miniflare --depth=4 --cache /private/tmp/property-profit-npm-cache`:
+  exit 0; all requested versions present and Undici 7.30.1 correctly marked
+  overridden.
+- `npm ls --all --json --cache /private/tmp/property-profit-npm-cache`:
+  exit 0, no invalid or missing required dependency. Seven optional WASM
+  installation artifacts are listed as extraneous: the six previously
+  documented package families plus a nested `@emnapi/runtime` under
+  `@img/sharp-wasm32`. They remain reproducible after clean install and were
+  not deleted or hidden to make the graph appear clean.
+
+Both official audit commands above were repeated after the final exact-version
+override and second clean install: full audit again exited 1 with the same
+3 moderate entries, and production-only audit again exited 0 with no findings.
+The returned JSON was identical to the saved candidate reports.
+
+Audit JSON evidence is saved locally at
+`/private/tmp/commission-audit-after-2026-10-28.json` and
+`/private/tmp/commission-audit-after-2026-10-28-prod.json`, with copies under
+`outputs/commission-release/` (ignored). The original 12-entry baseline is
+`/private/tmp/commission-audit-2026-10-28.json`.
+
+The earlier 68-test, coverage, mutation, browser and local GO records used the
+previous dependency lock. Regression checks, new artifact inspection,
+Preview acceptance and independent release review for this patched candidate
+are owned by the primary task and remain to be recorded with actual results.
+
+## Historical update — 20 October 2026 (Australia/Brisbane)
 
 The October release candidate had **17 affected package entries: 1 critical,
 15 high and 1 moderate**. The compatible updates below reduce the full audit
