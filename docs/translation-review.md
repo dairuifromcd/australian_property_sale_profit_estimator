@@ -1,5 +1,92 @@
 # Translation review
 
+## Decimal correctness and monetary exponent drafts — 29 October 2026
+
+This local repair changes calculation/display arithmetic and money-input
+validation; it adds no source or translated dictionary strings. English,
+Chinese and Korean retain the same financial scope, result labels, existing
+validation messages and privacy disclosures. Exact zero no longer appears as a
+false loss/shortfall, decimal half cents round once for display, and exponent
+money drafts stay visible but invalid until corrected. Native percentage
+exponents remain supported.
+
+On the combined frozen source,
+`CAPTURE_TRANSLATION_REVIEW=1 npm run test:e2e` passed **53/53** local Chromium
+tests in **26.2s**, refreshing **12** mobile review screenshots under ignored
+`outputs/translation-review/`. The three-language scenarios exercise main and
+standalone calculations, exact-zero status labels, exponent money rejection
+through blur, correction recovery and optional/target result isolation.
+`npm test` passed typechecking/build and **79/79** application/SSR tests.
+
+The independent calculation reviewer gave **GO** for arithmetic and the input
+repair. The independent release reviewer read the final combined logs and
+actually viewed four refreshed Chinese/Korean calculator and commission
+screenshots, finding no truncation or missing content. It gave **GO for local
+acceptance**, with no blocking finding. These are independent AI reviews and
+automated software checks, not fluent-human or professional
+approval, physical-device testing or a screen-reader assessment. No new
+dictionary translation or production publication is claimed. See
+[`calculation-correctness-audit.md`](calculation-correctness-audit.md) for exact
+commands, numerical evidence, mutation-stage history and remaining limitations.
+
+## Homepage tool discovery and readability — 29 October 2026
+
+The local `codex/home-tool-discovery-readability` branch reuses the existing
+English, Chinese and Korean `CommissionLink` label and explicit new-tab warning
+in the homepage help area before the full calculator. The guide shortcut and
+lower commission shortcut remain available. No dictionary strings, calculation
+explanations, formulas, GST treatment, profit/cash labels or privacy claims were
+changed. The new links open the same-language task separately and preserve the
+original full calculator's inputs and result without putting amounts in URLs.
+
+Readability changes darken muted text to `#52656d`, increase field help from
+12px to 13px, loosen Chinese/Korean heading line spacing, wrap Korean page
+titles and navigation at word boundaries, and keep reset labels on one line.
+Desktop homepage whitespace was reduced to keep the entire first money-control
+border in the opening 1280×720 viewport; mobile hero spacing is unchanged. The
+existing guide comparison table was retained after independent original-size
+inspection found it dense but complete and readable.
+
+On 29 October the independent readability reviewer gave **GO for local
+semantic/rendered-layout acceptance**, with no blocking finding. It compared
+source semantics and actually viewed six refreshed original-size Chromium
+screenshots: Korean home at 320px; English home at 1280px and 375px; Chinese
+home at 375px; Korean guide at 375px; and Chinese commission tool at 320px.
+It confirmed intact Korean navigation words, a single-line reset label, the
+complete English input border, discoverable localized top shortcuts, the Korean
+guide title and unchanged Chinese commission scope. An apparent repeated yellow
+banner in an earlier capture disappeared on stable recapture; the final pages
+each had one static banner. The existing GST, profit and cash meanings remain
+equivalent across the three languages.
+
+The independent `release_reviewer` actually inspected the final Korean 320px
+and English 1280px images and gave **GO for this local branch**. These are
+independent AI source/Chromium screenshot reviews, not fluent-human or
+professional approval, physical-device testing or a screen-reader assessment.
+
+Final primary-thread checks passed `npm run lint` (exit 0), `npm test` (exit 0;
+typecheck, production build and **68/68** application/SSR tests), and
+`CAPTURE_TRANSLATION_REVIEW=1 npm run test:e2e` (exit 0; **47/47** tests in
+**20.4 seconds**). The browser tests protect keyboard activation, full-estimate
+retention, same-language destination and safe new-tab attributes. Their desktop
+assertion now waits for fonts and measures the full money-control wrapper:
+bottom 715.40625px in English and 643.484375px in Chinese/Korean. It no longer
+relies on only the inner text input, which had missed the lower border.
+
+Local CLI capture retained 21 after screenshots and nine 640px reflow checks;
+all 30 observations had no horizontal overflow. Before/after PNGs and exact
+final logs are under ignored `outputs/home-discovery-review/`. The opt-in E2E
+capture refreshed 12 local images under `outputs/translation-review/`, including
+the Chinese/Korean `home-discovery-mobile.png` views. No source dictionary
+fingerprint changed in this batch.
+
+Safari/Firefox, real devices, screen readers, fresh clean-install release checks,
+remote Preview and Linux CI acceptance were not run for this local batch. No
+push, deployment or outreach email is claimed. The local review decisions do
+not claim publication or measured traffic improvement. See
+`docs/home-discovery-readability-plan.md` for the initial assertion failures,
+their corrections and the final acceptance record.
+
 ## Independent commission tool — 27 October 2026
 
 The feature branch adds a dedicated English source and typed Chinese/Korean

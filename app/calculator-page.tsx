@@ -88,7 +88,7 @@ export default function CalculatorPage({
         </nav>
       </header>
 
-      <section className="hero" id="top">
+      <section className="hero home-hero" id="top">
         <div className="eyebrow">{messages.home.eyebrow}</div>
         <h1>{messages.home.title}</h1>
         <p className="hero-copy">{messages.home.intro}</p>
@@ -100,7 +100,10 @@ export default function CalculatorPage({
           <span>{messages.home.noSignUp}</span>
           <span>{messages.home.calculationsStay}</span>
         </div>
-        <p className="hero-guide"><GuideLink locale={locale} /></p>
+        <div className="hero-help">
+          <p className="hero-guide"><GuideLink locale={locale} /></p>
+          <p className="hero-commission no-print"><CommissionLink locale={locale} /></p>
+        </div>
       </section>
 
       <section className="calculator-shell" aria-labelledby="calculator-title">

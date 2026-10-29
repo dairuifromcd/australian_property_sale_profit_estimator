@@ -4,8 +4,8 @@ import type {
 } from "../calculator";
 import { numberFromInput } from "../input-format";
 import { AmountInput } from "./fields";
-import { aud, calculationAud } from "./format";
-import { CalculationDetails, toneFor } from "./result-primitives";
+import { aud, calculationAud, exactAud, exactIsInteger, exactTone } from "./format";
+import { CalculationDetails } from "./result-primitives";
 import type { InputState } from "./use-calculator-form";
 import type { SiteMessages } from "../i18n/messages/types";
 import { interpolate } from "../i18n/interpolate";
@@ -36,19 +36,18 @@ export function PlanningResults({
     targetProfit !== "" &&
     targetSalePrice.requiredSalePrice !== null &&
     targetSalePrice.differenceFromExpectedSalePrice !== null;
-  const targetDifference = targetSalePrice.differenceFromExpectedSalePrice ?? 0;
+  const targetDifference = targetSalePrice.exactDifferenceFromExpectedSalePrice ?? "0";
   const expectedSalePrice = numberFromInput(inputs.salePrice);
-  const differenceFormatter = Number.isInteger(targetDifference) ? aud : calculationAud;
   const expectedPriceFormatter = Number.isInteger(expectedSalePrice) ? aud : calculationAud;
   const targetDifferenceText =
-    targetDifference === 0
+    targetDifference === "0"
       ? messages.targetMatches
       : interpolate(
-          targetDifference > 0
+          exactTone(targetDifference) === "gain"
             ? messages.targetAbove
             : messages.targetBelow,
           {
-            difference: differenceFormatter.format(Math.abs(targetDifference)),
+            difference: exactAud(targetDifference.replace(/^-/, ""), exactIsInteger(targetDifference) ? 0 : 2),
             salePrice: expectedPriceFormatter.format(expectedSalePrice),
           },
         );
@@ -61,7 +60,7 @@ export function PlanningResults({
           <CalculationDetails summary={messages.showCalculation}>
             <p>{messages.breakEvenExplanation}</p>
             <code>
-              {calculationAud.format(result.fixedTransactionCosts)} ÷ (1 −{" "}
+              {exactAud(result.exact.fixedTransactionCosts, 2)} ÷ (1 −{" "}
               {numberFromInput(inputs.commissionRate)}%) →{" "}
               {messages.roundedUp} ={" "}
               {aud.format(result.breakEvenSalePrice)}
@@ -133,7 +132,7 @@ export function PlanningResults({
             <CalculationDetails summary={messages.showCalculation}>
               <p>{messages.targetCalculation}</p>
               <code>
-                ({calculationAud.format(result.fixedTransactionCosts)} +{" "}
+                ({exactAud(result.exact.fixedTransactionCosts, 2)} +{" "}
                 {calculationAud.format(numberFromInput(targetProfit))}) ÷ (1 −{" "}
                 {numberFromInput(inputs.commissionRate)}%) →{" "}
                 {messages.roundedUp} ={" "}
@@ -162,7 +161,7 @@ export function PlanningResults({
           </thead>
           <tbody>
             {result.salePriceSensitivity.map((scenario) => {
-              const scenarioTone = toneFor(scenario.transactionProfit);
+              const scenarioTone = exactTone(scenario.exact.transactionProfit);
               const scenarioLabel =
                 scenario.changePercent === 0
                   ? messages.current
@@ -180,10 +179,10 @@ export function PlanningResults({
                   key={scenario.changePercent}
                 >
                   <th scope="row">{scenarioLabel}</th>
-                  <td>{aud.format(scenario.salePrice)}</td>
+                  <td>{exactAud(scenario.exact.salePrice)}</td>
                   <td>
                     <strong className={scenarioTone}>
-                      {aud.format(scenario.transactionProfit)}
+                      {exactAud(scenario.exact.transactionProfit)}
                     </strong>
                     <small>
                       {scenarioTone === "loss"
@@ -200,12 +199,12 @@ export function PlanningResults({
           <p>{messages.sensitivityCalculation}</p>
           {result.salePriceSensitivity.map((scenario) => (
             <code key={scenario.changePercent}>
-              {calculationAud.format(scenario.salePrice)} −{" "}
-              {calculationAud.format(scenario.agentCommission)}{" "}
+              {exactAud(scenario.exact.salePrice, 2)} −{" "}
+              {exactAud(scenario.exact.agentCommission, 2)}{" "}
               {messages.commissionFormulaLabel} −{" "}
-              {calculationAud.format(result.fixedTransactionCosts)}{" "}
+              {exactAud(result.exact.fixedTransactionCosts, 2)}{" "}
               {messages.fixedCostsFormulaLabel} ≈{" "}
-              {calculationAud.format(scenario.transactionProfit)}
+              {exactAud(scenario.exact.transactionProfit, 2)}
             </code>
           ))}
           <small>{messages.sensitivityPrecisionNote}</small>

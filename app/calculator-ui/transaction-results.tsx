@@ -1,11 +1,10 @@
 import type { CalculatorResult } from "../calculator";
 import { numberFromInput } from "../input-format";
-import { aud, calculationAud } from "./format";
+import { calculationAud, exactAud, exactTone } from "./format";
 import {
   CalculationDetails,
   OutcomeStatus,
   ResultRow,
-  toneFor,
 } from "./result-primitives";
 import type { InputState } from "./use-calculator-form";
 import type { SiteMessages } from "../i18n/messages/types";
@@ -23,7 +22,7 @@ export function TransactionResults({
   showSettlementCash: boolean;
   messages: SiteMessages["results"];
 }) {
-  const transactionTone = toneFor(result.transactionProfit);
+  const transactionTone = exactTone(result.exact.transactionProfit);
 
   return (
     <>
@@ -44,7 +43,7 @@ export function TransactionResults({
             lossLabel={messages.lossStatus}
           />
         </div>
-        <strong>{aud.format(result.transactionProfit)}</strong>
+        <strong>{exactAud(result.exact.transactionProfit)}</strong>
         <small>
           {messages.transactionIntro}
         </small>
@@ -70,6 +69,7 @@ export function TransactionResults({
         <ResultRow
           label={messages.agentCommission}
           value={result.agentCommission}
+          exact={result.exact.agentCommission}
           subtract
         />
         <ResultRow
@@ -88,6 +88,7 @@ export function TransactionResults({
         <ResultRow
           label={messages.amountAfterSellingCosts}
           value={result.amountAfterSellingCosts}
+          exact={result.exact.amountAfterSellingCosts}
         />
         <ResultRow
           label={messages.purchasePrice}
@@ -116,6 +117,7 @@ export function TransactionResults({
               : messages.transactionProfit
           }
           value={result.transactionProfit}
+          exact={result.exact.transactionProfit}
         />
       </div>
 
@@ -123,7 +125,7 @@ export function TransactionResults({
         <p>{messages.transactionCalculation}</p>
         <code>
           {calculationAud.format(numberFromInput(inputs.salePrice))} −{" "}
-          {calculationAud.format(result.agentCommission)} −{" "}
+          {exactAud(result.exact.agentCommission, 2)} −{" "}
           {calculationAud.format(numberFromInput(inputs.otherSellingCosts))} −{" "}
           {calculationAud.format(numberFromInput(inputs.salePreparationCosts))}{" "}
           − {calculationAud.format(numberFromInput(inputs.purchasePrice))} −{" "}
@@ -131,7 +133,7 @@ export function TransactionResults({
           {calculationAud.format(
             numberFromInput(inputs.renovationsAndImprovements),
           )}{" "}
-          ≈ {calculationAud.format(result.transactionProfit)}
+          ≈ {exactAud(result.exact.transactionProfit, 2)}
         </code>
         <small>{messages.displayedAmountsNote}</small>
       </CalculationDetails>
@@ -148,13 +150,14 @@ function HoldingResult({
   result: CalculatorResult;
   messages: SiteMessages["results"];
 }) {
-  const tone = toneFor(result.overallPreTaxPropertyResult);
+  const tone = exactTone(result.exact.overallPreTaxPropertyResult);
 
   const operands = (
     <>
       <ResultRow
         label={messages.transactionProfit}
         value={result.transactionProfit}
+        exact={result.exact.transactionProfit}
       />
       <ResultRow
         label={messages.rentalIncome}
@@ -186,7 +189,7 @@ function HoldingResult({
       </div>
       <div className="supplementary-total">
         <span>{messages.overallResult}</span>
-        <strong>{aud.format(result.overallPreTaxPropertyResult)}</strong>
+        <strong>{exactAud(result.exact.overallPreTaxPropertyResult)}</strong>
       </div>
       <small>{messages.overallResultNote}</small>
       <div className="print-only-operands">{operands}</div>
@@ -194,10 +197,10 @@ function HoldingResult({
         {operands}
 
         <code>
-          {calculationAud.format(result.transactionProfit)} +{" "}
+          {exactAud(result.exact.transactionProfit, 2)} +{" "}
           {calculationAud.format(numberFromInput(inputs.totalRentalIncome))} −{" "}
           {calculationAud.format(numberFromInput(inputs.totalHoldingCosts))} ≈{" "}
-          {calculationAud.format(result.overallPreTaxPropertyResult)}
+          {exactAud(result.exact.overallPreTaxPropertyResult, 2)}
         </code>
         <small>{messages.transactionPrecisionNote}</small>
       </CalculationDetails>
@@ -214,13 +217,14 @@ function SettlementCashResult({
   result: CalculatorResult;
   messages: SiteMessages["results"];
 }) {
-  const tone = toneFor(result.estimatedCashAfterLoanPayout);
+  const tone = exactTone(result.exact.estimatedCashAfterLoanPayout);
 
   const operands = (
     <>
       <ResultRow
         label={messages.amountAfterSellingCosts}
         value={result.amountAfterSellingCosts}
+        exact={result.exact.amountAfterSellingCosts}
       />
       <ResultRow
         label={messages.estimatedLoanPayout}
@@ -256,7 +260,7 @@ function SettlementCashResult({
             ? messages.estimatedCashShortfall
             : messages.estimatedCash}
         </span>
-        <strong>{aud.format(result.estimatedCashAfterLoanPayout)}</strong>
+        <strong>{exactAud(result.exact.estimatedCashAfterLoanPayout)}</strong>
       </div>
       <small>{messages.settlementNote}</small>
       <div className="print-only-operands">{operands}</div>
@@ -264,11 +268,11 @@ function SettlementCashResult({
         {operands}
 
         <code>
-          {calculationAud.format(result.amountAfterSellingCosts)} −{" "}
+          {exactAud(result.exact.amountAfterSellingCosts, 2)} −{" "}
           {calculationAud.format(
             numberFromInput(inputs.estimatedLoanPayout),
           )}{" "}
-          ≈ {calculationAud.format(result.estimatedCashAfterLoanPayout)}
+          ≈ {exactAud(result.exact.estimatedCashAfterLoanPayout, 2)}
         </code>
         <small>{messages.settlementPrecisionNote}</small>
       </CalculationDetails>

@@ -7,7 +7,7 @@
 :root {
   --ink: #102a38;
   --ink-soft: #38515e;
-  --muted: #6d7d83;
+  --muted: #52656d;
   --eucalyptus: #2f7868;
   --eucalyptus-dark: #245f54;
   --eucalyptus-soft: #e0eee9;
@@ -144,6 +144,32 @@ main {
     "Noto Serif KR", "Nanum Myeongjo", AppleMyungjo, Batang, Georgia, serif;
 }
 
+:lang(zh-Hans) .hero h1,
+:lang(ko) .hero h1 {
+  line-height: 1.15;
+}
+
+:lang(zh-Hans) .section-heading h2,
+:lang(ko) .section-heading h2,
+:lang(zh-Hans) .explanation h2,
+:lang(ko) .explanation h2 {
+  line-height: 1.2;
+}
+
+:lang(ko) .hero h1,
+:lang(ko) .legal-page h1 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+:lang(ko) .header-nav {
+  flex-wrap: wrap;
+}
+
+:lang(ko) .header-nav a {
+  word-break: keep-all;
+}
+
 .site-header {
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
@@ -197,6 +223,10 @@ main {
   text-align: center;
 }
 
+.home-hero {
+  padding-block: 8px 4px;
+}
+
 .eyebrow,
 .step-label {
   color: var(--eucalyptus-dark);
@@ -248,10 +278,28 @@ main {
   content: "";
 }
 
-.hero-guide {
+.hero-help {
   margin: 14px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
   font-size: 14px;
   font-weight: 650;
+}
+
+.hero-help p {
+  margin: 0;
+}
+
+.hero-commission a {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--eucalyptus-soft);
+  font-weight: 750;
 }
 
 .explanation {
@@ -462,6 +510,11 @@ footer p {
   }
 
   .trust-line {
+    justify-content: flex-start;
+  }
+
+  .hero-help {
+    align-items: flex-start;
     justify-content: flex-start;
   }
 

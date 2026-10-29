@@ -12,8 +12,9 @@ import {
   normaliseAmountInputDraft,
   numberFromInput,
   numberFromInputForValidation,
+  numberFromMoneyInputForValidation,
 } from "../app/input-format.ts";
-import { calculationAud } from "../app/calculator-ui/format.ts";
+import { aud, calculationAud, exactAud, exactIsInteger, exactTone } from "../app/calculator-ui/format.ts";
 
 function input(
   overrides: Partial<CalculatorInput> = {},
@@ -60,21 +61,166 @@ test("keeps standalone commission precision and rounds only its AUD display", ()
   assert.ok(Math.abs(calculateAgentCommission({ salePrice: 0.01, commissionRate: 0.0000001 }).commission! - 0.00000000001) < 1e-24);
 });
 
+test("decimal commission keeps literal half-cent values before display rounding", () => {
+  for (const [salePrice, commissionRate, exact, display] of [
+    [1.15, 10, 0.115, "$0.12"],
+    [11, 1.5, 0.165, "$0.17"],
+  ] as const) {
+    const standalone = calculateAgentCommission({ salePrice, commissionRate });
+    assert.equal(standalone.commission, exact);
+    assert.equal(calculationAud.format(standalone.commission!), display);
+    assert.equal(calculateEstimate(input({ salePrice, commissionRate })).agentCommission, exact);
+  }
+  const result = calculateEstimate(input({ salePrice: 1.15, purchasePrice: 1, commissionRate: 10, otherSellingCosts: 0 }));
+  assert.equal(result.transactionProfit, 0.035);
+  assert.equal(calculationAud.format(result.transactionProfit), "$0.04");
+});
+
+test("decimal cancellation preserves exact zero across profit holding cash and current sensitivity", () => {
+  const scenario = input({ salePrice: 1_000_000.07, purchasePrice: 990_000.06, commissionRate: 0, otherSellingCosts: 10_000.01, estimatedLoanPayout: 990_000.06, totalRentalIncome: 123.45, totalHoldingCosts: 123.45 });
+  const result = calculateEstimate(scenario);
+  for (const value of [result.transactionProfit, result.overallPreTaxPropertyResult, result.estimatedCashAfterLoanPayout, result.salePriceSensitivity[1].transactionProfit]) {
+    assert.equal(value, 0);
+    assert.equal(Object.is(value, -0), false);
+    assert.equal(calculationAud.format(value), "$0.00");
+  }
+  assert.equal(calculateRequiredSalePrice(scenario, 0).differenceFromExpectedSalePrice, 0.93);
+  assert.equal(calculateEstimate({ ...scenario, otherSellingCosts: 10_000.02 }).transactionProfit, -0.01);
+  assert.equal(calculateEstimate({ ...scenario, estimatedLoanPayout: 990_000.07 }).estimatedCashAfterLoanPayout, -0.01);
+});
+
+test("exact zero metadata is canonical for deduction rows signs and matching target prices", () => {
+  // UI deduction rows and the target-match branch compare with the literal "0";
+  // numeric equality alone would accept "", "0.00" or "-0.00" incorrectly.
+  const scenario = input({ salePrice: 1_000_000.07, purchasePrice: 990_000.06, commissionRate: -0, otherSellingCosts: 10_000.01, estimatedLoanPayout: 990_000.06, totalRentalIncome: 123.45, totalHoldingCosts: 123.45 });
+  const result = calculateEstimate(scenario);
+  for (const value of [result.exact.agentCommission, result.exact.transactionProfit, result.exact.overallPreTaxPropertyResult, result.exact.estimatedCashAfterLoanPayout, result.salePriceSensitivity[1].exact.transactionProfit, ...result.salePriceSensitivity.map(row => row.exact.agentCommission)]) {
+    assert.equal(value, "0");
+    assert.equal(exactTone(value), "gain");
+    assert.equal(exactAud(value), "$0");
+    assert.equal(exactAud(value, 2), "$0.00");
+  }
+  assert.equal(calculateAgentCommission(scenario).exactCommission, "0");
+
+  const matching = input({ salePrice: 100, purchasePrice: 100, commissionRate: 0, otherSellingCosts: 0 });
+  assert.equal(calculateEstimate(matching).exact.totalSellingCosts, "0");
+  assert.equal(calculateRequiredSalePrice(matching, 0).exactDifferenceFromExpectedSalePrice, "0");
+  const allProceedsSpent = input({ salePrice: 100.01, commissionRate: 0, otherSellingCosts: 100.01 });
+  assert.equal(calculateEstimate(allProceedsSpent).exact.amountAfterSellingCosts, "0");
+});
+
+test("AUD summary formatting retains the currency sign and whole-dollar rounding", () => {
+  for (const [amount, expected] of [
+    [0, "$0"],
+    [1234.49, "$1,234"],
+    [1234.5, "$1,235"],
+    [-1234.5, "-$1,235"],
+  ] as const) {
+    assert.equal(aud.format(amount), expected);
+  }
+});
+
+test("decimal intermediates preserve genuine sub-cent losses without rounding the fee first", () => {
+  const result = calculateEstimate(input({ salePrice: 1.15, purchasePrice: 1.04, commissionRate: 10, otherSellingCosts: 0, estimatedLoanPayout: 1.04, totalHoldingCosts: 0.01, totalRentalIncome: 0.02 }));
+  assert.equal(result.agentCommission, 0.115);
+  assert.equal(result.transactionProfit, -0.005);
+  assert.equal(result.estimatedCashAfterLoanPayout, -0.005);
+  assert.equal(result.overallPreTaxPropertyResult, 0.005);
+  assert.equal(calculationAud.format(result.transactionProfit), "-$0.01");
+});
+
+test("decimal sensitivity and maximum-price proceeds retain exact intermediate precision", () => {
+  const maximum = calculateEstimate(input({ salePrice: 1_000_000_000_000, purchasePrice: 1, commissionRate: 99.9, otherSellingCosts: 0 }));
+  assert.equal(maximum.amountAfterSellingCosts, 1_000_000_000);
+  assert.equal(maximum.transactionProfit, 999_999_999);
+  const small = calculateEstimate(input({ salePrice: 0.03, purchasePrice: 0.01, commissionRate: 2.2, otherSellingCosts: 0.01, salePreparationCosts: 0.01, purchaseCosts: 0.01, renovationsAndImprovements: 0.01 }));
+  assert.deepEqual(small.salePriceSensitivity.map(row => [row.salePrice, row.agentCommission, row.transactionProfit]), [
+    [0.0285, 0.000627, -0.022127],
+    [0.03, 0.00066, -0.02066],
+    [0.0315, 0.000693, -0.019193],
+  ]);
+});
+
+test("exact AUD formatting rounds decimal ties and their neighbours without a Number conversion", () => {
+  for (const [value, cents, whole] of [
+    ["0", "$0.00", "$0"],
+    ["0.004999999999999999", "$0.00", "$0"],
+    ["0.005", "$0.01", "$0"],
+    ["0.005000000000000001", "$0.01", "$0"],
+    ["-0.005", "-$0.01", "-$0"],
+    ["-0.004999999999999999", "-$0.00", "-$0"],
+    ["0.5", "$0.50", "$1"],
+    ["-0.5", "-$0.50", "-$1"],
+    ["1234", "$1,234.00", "$1,234"],
+    ["1000.999", "$1,001.00", "$1,001"],
+  ]) {
+    assert.equal(exactAud(value, 2), cents);
+    assert.equal(exactAud(value), whole);
+    assert.equal(exactTone(value), value.startsWith("-") ? "loss" : "gain");
+  }
+  assert.equal(exactIsInteger("123"), true);
+  assert.equal(exactIsInteger("-123.0000"), true);
+  assert.equal(exactIsInteger("0.0001"), false);
+});
+
+test("exact result displays preserve half-cent profit and genuine underflow loss signs", () => {
+  const positive = calculateEstimate(input({ salePrice: 1.15, purchasePrice: 1.03, commissionRate: 10, otherSellingCosts: 0 }));
+  assert.equal(positive.exact.transactionProfit, "0.0050");
+  assert.equal(exactAud(positive.exact.transactionProfit, 2), "$0.01");
+  const negative = calculateEstimate(input({ salePrice: 1.15, purchasePrice: 1.04, commissionRate: 10, otherSellingCosts: 0 }));
+  assert.equal(negative.exact.transactionProfit, "-0.0050");
+  assert.equal(exactAud(negative.exact.transactionProfit, 2), "-$0.01");
+  assert.equal(exactTone(negative.exact.transactionProfit), "loss");
+
+  const underflow = calculateEstimate(input({ salePrice: 1, purchasePrice: 1, commissionRate: 5e-324, otherSellingCosts: 0, estimatedLoanPayout: 1 }));
+  const exactLoss = `-0.${"0".repeat(325)}5`;
+  assert.equal(underflow.exact.transactionProfit, exactLoss);
+  assert.equal(underflow.exact.estimatedCashAfterLoanPayout, exactLoss);
+  assert.equal(exactTone(underflow.exact.transactionProfit), "loss");
+  assert.equal(exactTone(underflow.exact.estimatedCashAfterLoanPayout), "loss");
+  assert.equal(exactAud(underflow.exact.transactionProfit, 2), "-$0.00");
+});
+
+test("exact display keeps high-value half-cent boundaries and target differences beyond Number precision", () => {
+  const result = calculateEstimate(input({ salePrice: 509_787_197_923.29, purchasePrice: 344_346_527_243.03, commissionRate: 90.6571, otherSellingCosts: 873_196_952_743.45, salePreparationCosts: 263_872_644_165.53, purchaseCosts: 212_052_843_067.8, renovationsAndImprovements: 738_404_131_261.63, estimatedLoanPayout: 171_345_414_128.16, totalHoldingCosts: 832_099_994_644.52, totalRentalIncome: 878_354_679_560.29 }));
+  assert.equal(result.exact.transactionProfit, "-2384244190366.66493859");
+  assert.equal(exactAud(result.exact.transactionProfit, 2), "-$2,384,244,190,366.66");
+  assert.equal(exactAud(result.exact.estimatedCashAfterLoanPayout, 2), "-$1,260,786,102,922.36");
+  const maximum = input({ salePrice: 0.01, purchasePrice: 1e12, commissionRate: 99.9, otherSellingCosts: 1e12, salePreparationCosts: 1e12, purchaseCosts: 1e12, renovationsAndImprovements: 1e12 });
+  const target = calculateRequiredSalePrice(maximum, 1e12);
+  assert.equal(target.requiredSalePrice, 6_000_000_000_000_000);
+  assert.equal(target.exactDifferenceFromExpectedSalePrice, "5999999999999999.99");
+  assert.equal(exactIsInteger(target.exactDifferenceFromExpectedSalePrice!), false);
+  assert.equal(exactAud(target.exactDifferenceFromExpectedSalePrice!, 2), "$5,999,999,999,999,999.99");
+});
+
+test("exact internal arithmetic preserves sanitized invalid exponent-form fallbacks", () => {
+  const result = calculateEstimate(input({ salePrice: 1e21 }));
+  assert.equal(result.hasTransactionErrors, true);
+  assert.equal(result.agentCommission, 20_000_000_000_000_000_000);
+  assert.equal(result.exact.agentCommission, "20000000000000000000");
+  assert.equal(result.breakEvenSalePrice, 0);
+  assert.deepEqual(result.salePriceSensitivity, []);
+});
+
 test("rejects invalid standalone prices and rates instead of returning a zero result", () => {
   for (const salePrice of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 1_000_000_000_001]) {
     assert.deepEqual(calculateAgentCommission({ salePrice, commissionRate: 2.2 }), {
       commission: null,
+      exactCommission: null,
       validationErrors: [{ field: "salePrice", code: salePrice > 1e12 && Number.isFinite(salePrice) ? "amountMaxTrillion" : "amountGreaterThanZero" }],
     });
   }
   for (const commissionRate of [-1, 99.91, 100, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
     assert.deepEqual(calculateAgentCommission({ salePrice: 1_000_000, commissionRate }), {
       commission: null,
+      exactCommission: null,
       validationErrors: [{ field: "commissionRate", code: "commissionRange" }],
     });
   }
   assert.deepEqual(calculateAgentCommission({ salePrice: Number.NaN, commissionRate: Number.NaN }), {
     commission: null,
+      exactCommission: null,
     validationErrors: [{ field: "salePrice", code: "amountGreaterThanZero" }, { field: "commissionRate", code: "commissionRange" }],
   });
 });
@@ -97,6 +243,7 @@ test("preserves main-calculator numeric fallbacks while invalid standalone commi
     assert.deepEqual(estimate.salePriceSensitivity, []);
     assert.deepEqual(calculateAgentCommission({ salePrice: 1_000_000, commissionRate }), {
       commission: null,
+      exactCommission: null,
       validationErrors: [{ field: "commissionRate", code: "commissionRange" }],
     });
   }
@@ -157,6 +304,35 @@ test("keeps unfinished monetary drafts invalid through formatting and model vali
   assert.equal(formatAmountInput("-.5"), "-0.5");
 });
 
+test("preserves exponent money drafts for correction and rejects them without changing percentage parsing", () => {
+  for (const draft of ["1e6", "1E6", "1e+6", "1e-6", "1.e6", ".5E-3", "1e", "1e+", "1e-", "0e0", "-1.25e3", "$ 1,234.56e2"]) {
+    assert.equal(normaliseAmountInputDraft(draft), draft);
+    assert.equal(formatAmountInput(draft), draft);
+    const amount = numberFromMoneyInputForValidation(draft);
+    assert.ok(Number.isNaN(amount), draft);
+    assert.equal(calculateEstimate(input({ salePrice: amount })).hasTransactionErrors, true);
+    assert.equal(calculateEstimate(input({ otherSellingCosts: amount })).hasTransactionErrors, true);
+    assert.equal(calculateEstimate(input({ estimatedLoanPayout: amount })).hasSupplementaryErrors, true);
+    assert.equal(calculateRequiredSalePrice(input(), amount).requiredSalePrice, null);
+    assert.equal(calculateAgentCommission({ salePrice: amount, commissionRate: 2 }).commission, null);
+  }
+  for (const [draft, expected] of [["", 0], ["0", 0], ["1,234.56", 1234.56], ["-0.5", -0.5]] as const) {
+    assert.equal(numberFromMoneyInputForValidation(draft), expected);
+  }
+  for (const draft of ["-", ".", "-."]) {
+    assert.ok(Number.isNaN(numberFromMoneyInputForValidation(draft)));
+  }
+  for (const draft of ["$ 1,234.56", "AUD 1,234.56"]) {
+    assert.equal(normaliseAmountInputDraft(draft), "1234.56");
+    assert.equal(formatAmountInput(draft), "1,234.56");
+    assert.equal(numberFromMoneyInputForValidation(normaliseAmountInputDraft(draft)), 1234.56);
+  }
+  for (const rate of ["1e-7", "5e-324"]) {
+    assert.equal(numberFromInputForValidation(rate), Number(rate));
+    assert.deepEqual(calculateAgentCommission({ salePrice: 1, commissionRate: numberFromInputForValidation(rate) }).validationErrors, []);
+  }
+});
+
 test("calculates the four-input transaction estimate", () => {
   const result = calculateEstimate(input());
 
@@ -185,18 +361,21 @@ test("calculates sale-price sensitivity with scenario commission", () => {
       salePrice: 950_000,
       agentCommission: 19_000,
       transactionProfit: 321_000,
+      exact: { salePrice: "950000.00", agentCommission: "19000.0000", transactionProfit: "321000.0000" },
     },
     {
       changePercent: 0,
       salePrice: 1_000_000,
       agentCommission: 20_000,
       transactionProfit: 370_000,
+      exact: { salePrice: "1000000.00", agentCommission: "20000.0000", transactionProfit: "370000.00" },
     },
     {
       changePercent: 5,
       salePrice: 1_050_000,
       agentCommission: 21_000,
       transactionProfit: 419_000,
+      exact: { salePrice: "1050000.00", agentCommission: "21000.0000", transactionProfit: "419000.0000" },
     },
   ]);
 });
@@ -388,6 +567,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     assert.deepEqual(result, {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "targetZeroOrMore",
     });
   }
@@ -397,6 +577,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "completeValidEstimate",
     },
   );
@@ -406,6 +587,7 @@ test("keeps target-profit validation separate from the main estimate", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "targetMaxTrillion",
     },
   );
@@ -417,6 +599,7 @@ test("rejects target profit above the supported safe range", () => {
     {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "targetMaxTrillion",
     },
   );

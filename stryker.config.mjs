@@ -1,6 +1,6 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 const config = {
-  mutate: ["app/calculator.ts", "app/input-format.ts"],
+  mutate: ["app/calculator.ts", "app/input-format.ts", "app/calculator-ui/format.ts"],
   testRunner: "command",
   commandRunner: {
     command:

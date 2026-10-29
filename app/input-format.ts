@@ -5,6 +5,10 @@ type AmountParts = {
   hasDecimalPoint: boolean;
 };
 
+function hasExponentDraft(value: string): boolean {
+  return /[\d.][eE]/.test(value);
+}
+
 function amountParts(value: string): AmountParts {
   const trimmed = value.trimStart();
   const isNegative = trimmed.startsWith("-");
@@ -21,6 +25,7 @@ function amountParts(value: string): AmountParts {
 }
 
 export function normaliseAmountInputDraft(value: string): string {
+  if (hasExponentDraft(value)) return value;
   const { isNegative, wholePart, fractionPart, hasDecimalPoint } =
     amountParts(value);
 
@@ -30,6 +35,7 @@ export function normaliseAmountInputDraft(value: string): string {
 }
 
 export function formatAmountInput(value: string): string {
+  if (hasExponentDraft(value)) return value;
   const { isNegative, wholePart, fractionPart, hasDecimalPoint } =
     amountParts(value);
   const normalizedWhole =
@@ -51,4 +57,11 @@ export function numberFromInput(value: string): number {
 // reach model validation as NaN, rather than silently becoming explicit zero.
 export function numberFromInputForValidation(value: string): number {
   return Number(value.replace(/,/g, ""));
+}
+
+// Money controls support ordinary decimal AUD, not exponent notation. Keep the
+// rejected draft visible so the user can correct it instead of changing its value.
+// Native percentage controls continue to use the general number parser above.
+export function numberFromMoneyInputForValidation(value: string): number {
+  return hasExponentDraft(value) ? Number.NaN : numberFromInputForValidation(value);
 }

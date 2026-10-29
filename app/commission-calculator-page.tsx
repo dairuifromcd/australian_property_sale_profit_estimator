@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { calculateAgentCommission, type CommissionInput } from "./calculator";
 import { AmountField, PercentageField } from "./calculator-ui/fields";
-import { calculationAud } from "./calculator-ui/format";
+import { calculationAud, exactAud } from "./calculator-ui/format";
 import { getMessages } from "./i18n/config";
 import { commissionMessages } from "./i18n/commission-messages";
 import { interpolate } from "./i18n/interpolate";
 import { pathFor, type Locale } from "./i18n/routing";
-import { numberFromInputForValidation } from "./input-format";
+import { numberFromInputForValidation, numberFromMoneyInputForValidation } from "./input-format";
 import { LanguageSwitcher } from "./language-switcher";
 import "./styles/commission.css";
 
@@ -18,7 +18,7 @@ export default function CommissionCalculatorPage({ locale }: { locale: Locale })
   const [salePrice, setSalePrice] = useState("");
   const [rate, setRate] = useState("");
   const input: CommissionInput = {
-    salePrice: numberFromInputForValidation(salePrice),
+    salePrice: numberFromMoneyInputForValidation(salePrice),
     commissionRate: rate.trim() === "" ? Number.NaN : numberFromInputForValidation(rate),
   };
   const result = calculateAgentCommission(input);
@@ -75,12 +75,12 @@ export default function CommissionCalculatorPage({ locale }: { locale: Locale })
           <div aria-live="polite" aria-atomic="true">
             {canShowCommission ? (
               <>
-                <p className="commission-amount" data-testid="commission-amount">{calculationAud.format(result.commission!)}</p>
+                <p className="commission-amount" data-testid="commission-amount">{exactAud(result.exactCommission!, 2)}</p>
                 <h3>{content.formulaTitle}</h3>
                 <p className="commission-equation" data-testid="commission-equation">{interpolate(content.formula, {
                   salePrice: calculationAud.format(input.salePrice),
                   rate: String(input.commissionRate),
-                  commission: calculationAud.format(result.commission!),
+                  commission: exactAud(result.exactCommission!, 2),
                 })}</p>
                 <p>{content.rounding}</p>
               </>

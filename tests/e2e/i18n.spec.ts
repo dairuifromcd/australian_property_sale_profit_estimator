@@ -164,6 +164,22 @@ test("localized link sentences, language names and currency affixes remain intac
           whiteSpace === "nowrap" && height <= 20,
       ),
     ).toBe(true);
+
+    await page.setViewportSize({ width: 320, height: 812 });
+    const reset = page.locator(".section-heading").getByRole("button");
+    await reset.focus();
+    await expect(reset).toBeFocused();
+    await expect(reset).toBeInViewport({ ratio: 1 });
+    const resetTextLines = await reset.evaluate(button => {
+      const text = document.createRange();
+      text.selectNodeContents(button);
+      return new Set(Array.from(text.getClientRects())
+        .filter(rect => rect.width > 0 && rect.height > 0)
+        .map(rect => Math.round(rect.top))).size;
+    });
+    expect(resetTextLines, `${path} reset label should remain one readable line at 320px`).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+    await page.setViewportSize({ width: 375, height: 812 });
   }
 
   await page.goto("/zh-Hans/privacy");
