@@ -32,6 +32,7 @@ export type CommissionInput = Pick<CalculatorInput, "salePrice" | "commissionRat
 
 export interface CommissionResult {
   commission: number | null;
+  exactCommission: string | null;
   validationErrors: CalculatorValidationError[];
 }
 
@@ -40,11 +41,13 @@ export interface SalePriceSensitivityScenario {
   salePrice: number;
   agentCommission: number;
   transactionProfit: number;
+  exact: { salePrice: string; agentCommission: string; transactionProfit: string };
 }
 
 export interface RequiredSalePriceResult {
   requiredSalePrice: number | null;
   differenceFromExpectedSalePrice: number | null;
+  exactDifferenceFromExpectedSalePrice: string | null;
   validationError: ValidationErrorCode | null;
 }
 
@@ -64,6 +67,15 @@ export interface CalculatorResult {
   hasTransactionErrors: boolean;
   hasSupplementaryErrors: boolean;
   hasCalculationErrors: boolean;
+  exact: {
+    agentCommission: string;
+    totalSellingCosts: string;
+    fixedTransactionCosts: string;
+    amountAfterSellingCosts: string;
+    transactionProfit: string;
+    overallPreTaxPropertyResult: string;
+    estimatedCashAfterLoanPayout: string;
+  };
 }
 
 const MAX_MONEY_INPUT = 1_000_000_000_000;
@@ -79,6 +91,53 @@ function nonNegative(value: number): number {
 
 function percentage(value: number): number {
   return nonNegative(value) / 100;
+}
+
+// Finite decimal arithmetic: retain all entered precision until an API number
+// or display string is requested. No intermediate amount is rounded to cents.
+interface Decimal { coefficient: bigint; scale: number }
+
+function decimal(value: number): Decimal {
+  const [coefficient, exponent] = value.toString().toLowerCase().split("e");
+  const [whole, fraction = ""] = coefficient.split(".");
+  return { coefficient: BigInt(`${whole}${fraction}`), scale: fraction.length - Number(exponent ?? 0) };
+}
+
+function addDecimal(left: Decimal, right: Decimal): Decimal {
+  const scale = Math.max(left.scale, right.scale);
+  return {
+    coefficient: left.coefficient * BIGINT_TEN ** BigInt(scale - left.scale) + right.coefficient * BIGINT_TEN ** BigInt(scale - right.scale),
+    scale,
+  };
+}
+
+function subtractDecimal(left: Decimal, right: Decimal): Decimal {
+  return addDecimal(left, { coefficient: -right.coefficient, scale: right.scale });
+}
+
+function multiplyDecimal(left: Decimal, right: Decimal): Decimal {
+  return { coefficient: left.coefficient * right.coefficient, scale: left.scale + right.scale };
+}
+
+function percentageDecimal(amount: Decimal, rate: Decimal): Decimal {
+  const product = multiplyDecimal(amount, rate);
+  return { coefficient: product.coefficient, scale: product.scale + 2 };
+}
+
+function decimalText(value: Decimal): string {
+  if (value.coefficient === BIGINT_ZERO) return "0";
+  if (value.scale <= 0) return `${value.coefficient}${"0".repeat(-value.scale)}`;
+  const negative = value.coefficient.toString().startsWith("-");
+  const digits = (negative ? -value.coefficient : value.coefficient).toString().padStart(value.scale + 1, "0");
+  return `${negative ? "-" : ""}${digits.slice(0, -value.scale)}.${digits.slice(-value.scale)}`;
+}
+
+function decimalNumber(value: Decimal): number {
+  return Number(decimalText(value));
+}
+
+function commissionDecimal(input: CommissionInput): Decimal {
+  return percentageDecimal(decimal(nonNegative(input.salePrice)), decimal(nonNegative(input.commissionRate)));
 }
 
 function positiveMoneyError(value: number): ValidationErrorCode | null {
@@ -100,22 +159,12 @@ export function calculateAgentCommission(input: CommissionInput): CommissionResu
   if (salePriceError) validationErrors.push({ field: "salePrice", code: salePriceError });
   if (rateError) validationErrors.push({ field: "commissionRate", code: rateError });
 
+  const exactCommission = validationErrors.length > 0 ? null : decimalText(commissionDecimal(input));
   return {
-    commission: validationErrors.length > 0
-      ? null
-      : input.salePrice * percentage(input.commissionRate),
+    commission: exactCommission === null ? null : Number(exactCommission),
+    exactCommission,
     validationErrors,
   };
-}
-
-function fixedTransactionCosts(input: CalculatorInput): number {
-  return (
-    nonNegative(input.purchasePrice) +
-    nonNegative(input.purchaseCosts) +
-    nonNegative(input.renovationsAndImprovements) +
-    nonNegative(input.otherSellingCosts) +
-    nonNegative(input.salePreparationCosts)
-  );
 }
 
 function moneyInCents(value: number): bigint {
@@ -259,19 +308,34 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
   // Retain the legacy finite fallback for invalid main-form inputs; neither
   // interface displays a result until its required inputs pass validation.
   const agentCommission = calculateAgentCommission(rawInput).commission ?? salePrice * commissionRate;
-  const totalSellingCosts =
-    agentCommission + otherSellingCosts + salePreparationCosts;
-  const amountAfterSellingCosts = salePrice - totalSellingCosts;
-  const transactionProfit =
-    amountAfterSellingCosts -
-    purchasePrice -
-    purchaseCosts -
-    renovationsAndImprovements;
-  const overallPreTaxPropertyResult =
-    transactionProfit + totalRentalIncome - totalHoldingCosts;
-  const estimatedCashAfterLoanPayout =
-    amountAfterSellingCosts - estimatedLoanPayout;
-  const enteredFixedTransactionCosts = fixedTransactionCosts(rawInput);
+  const exactSalePrice = decimal(salePrice);
+  const exactAgentCommission = commissionDecimal(rawInput);
+  const exactOtherSellingCosts = decimal(otherSellingCosts);
+  const exactSalePreparationCosts = decimal(salePreparationCosts);
+  const exactPurchasePrice = decimal(purchasePrice);
+  const exactPurchaseCosts = decimal(purchaseCosts);
+  const exactRenovations = decimal(renovationsAndImprovements);
+  const exactSellingCosts = addDecimal(addDecimal(exactAgentCommission, exactOtherSellingCosts), exactSalePreparationCosts);
+  const exactAmountAfterSellingCosts = subtractDecimal(exactSalePrice, exactSellingCosts);
+  const exactTransactionProfit = subtractDecimal(subtractDecimal(subtractDecimal(exactAmountAfterSellingCosts, exactPurchasePrice), exactPurchaseCosts), exactRenovations);
+  const exactOverallResult = subtractDecimal(addDecimal(exactTransactionProfit, decimal(totalRentalIncome)), decimal(totalHoldingCosts));
+  const exactCash = subtractDecimal(exactAmountAfterSellingCosts, decimal(estimatedLoanPayout));
+  const exactFixedCosts = addDecimal(addDecimal(addDecimal(addDecimal(exactPurchasePrice, exactPurchaseCosts), exactRenovations), exactOtherSellingCosts), exactSalePreparationCosts);
+  const exact = {
+    agentCommission: decimalText(exactAgentCommission),
+    totalSellingCosts: decimalText(exactSellingCosts),
+    fixedTransactionCosts: decimalText(exactFixedCosts),
+    amountAfterSellingCosts: decimalText(exactAmountAfterSellingCosts),
+    transactionProfit: decimalText(exactTransactionProfit),
+    overallPreTaxPropertyResult: decimalText(exactOverallResult),
+    estimatedCashAfterLoanPayout: decimalText(exactCash),
+  };
+  const totalSellingCosts = Number(exact.totalSellingCosts);
+  const amountAfterSellingCosts = Number(exact.amountAfterSellingCosts);
+  const transactionProfit = Number(exact.transactionProfit);
+  const overallPreTaxPropertyResult = Number(exact.overallPreTaxPropertyResult);
+  const estimatedCashAfterLoanPayout = Number(exact.estimatedCashAfterLoanPayout);
+  const enteredFixedTransactionCosts = Number(exact.fixedTransactionCosts);
   const breakEvenSalePrice = hasTransactionErrors
     ? 0
     : requiredWholeDollarSalePrice(rawInput);
@@ -279,19 +343,18 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     hasTransactionErrors
       ? []
       : ([-5, 0, 5] as const).map((changePercent) => {
-          const scenarioSalePrice = salePrice * (1 + changePercent / 100);
-          const scenarioAgentCommission = scenarioSalePrice * commissionRate;
+          const scenarioSalePrice = percentageDecimal(exactSalePrice, decimal(100 + changePercent));
+          const scenarioAgentCommission = percentageDecimal(scenarioSalePrice, decimal(nonNegative(rawInput.commissionRate)));
+          const scenarioProfit = changePercent === 0
+            ? exactTransactionProfit
+            : subtractDecimal(subtractDecimal(scenarioSalePrice, scenarioAgentCommission), exactFixedCosts);
 
           return {
             changePercent,
-            salePrice: scenarioSalePrice,
-            agentCommission: scenarioAgentCommission,
-            transactionProfit:
-              changePercent === 0
-                ? transactionProfit
-                : scenarioSalePrice -
-                  scenarioAgentCommission -
-                  enteredFixedTransactionCosts,
+            salePrice: decimalNumber(scenarioSalePrice),
+            agentCommission: decimalNumber(scenarioAgentCommission),
+            transactionProfit: decimalNumber(scenarioProfit),
+            exact: { salePrice: decimalText(scenarioSalePrice), agentCommission: decimalText(scenarioAgentCommission), transactionProfit: decimalText(scenarioProfit) },
           };
         });
 
@@ -314,6 +377,7 @@ export function calculateEstimate(rawInput: CalculatorInput): CalculatorResult {
     hasTransactionErrors,
     hasSupplementaryErrors,
     hasCalculationErrors,
+    exact,
   };
 }
 
@@ -325,6 +389,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "completeValidEstimate",
     };
   }
@@ -333,6 +398,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "targetZeroOrMore",
     };
   }
@@ -341,6 +407,7 @@ export function calculateRequiredSalePrice(
     return {
       requiredSalePrice: null,
       differenceFromExpectedSalePrice: null,
+      exactDifferenceFromExpectedSalePrice: null,
       validationError: "targetMaxTrillion",
     };
   }
@@ -350,10 +417,12 @@ export function calculateRequiredSalePrice(
     targetProfit,
   );
 
+  const exactDifference = decimalText(subtractDecimal(decimal(requiredSalePrice), decimal(rawInput.salePrice)));
   return {
     requiredSalePrice,
     differenceFromExpectedSalePrice:
-      requiredSalePrice - rawInput.salePrice,
+      Number(exactDifference),
+    exactDifferenceFromExpectedSalePrice: exactDifference,
     validationError: null,
   };
 }

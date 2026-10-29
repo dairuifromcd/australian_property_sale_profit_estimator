@@ -62,6 +62,11 @@
   text-underline-offset: 4px;
 }
 
+.section-heading .text-button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -175,8 +180,8 @@
 
 .field-help {
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .field-error {

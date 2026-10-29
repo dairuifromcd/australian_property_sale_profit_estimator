@@ -19,7 +19,7 @@ test("guide supports keyboard navigation to explanations and localized calculato
   await expect(page.locator("#sale-price")).toHaveValue("");
 });
 
-test("every guide fits a mobile viewport without storing or transmitting example figures", async ({ page }) => {
+test("every guide fits 320px and 375px viewports without storing or transmitting example figures", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   const sentRequests: string[] = [];
   page.on("request", request => {
@@ -37,8 +37,15 @@ test("every guide fits a mobile viewport without storing or transmitting example
     await expect(page.locator("#prepare-figures li")).toHaveCount(3);
     await expect(page.locator('.guide-method a')).toHaveAttribute("href", "mailto:support@propertysaleprofit.au");
     await expect(page.locator('.guide-method a')).toHaveText("support@propertysaleprofit.au");
+    for (const width of [320, 375]) {
+      await page.setViewportSize({ width, height: 812 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), `${prefix || "en-AU"} at ${width}px`).toBe(false);
+      const bounds = await comparison.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    }
     await captureTranslationReview(page, prefix.slice(1), "guide");
-    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await expect(page.locator(`.guide-footer a[href="${prefix}/privacy"]`)).toHaveAttribute("href", `${prefix}/privacy`);
     await expect(page.locator(`.guide-footer a[href="${prefix}/disclaimer"]`)).toHaveAttribute("href", `${prefix}/disclaimer`);
     const commissionLink = page.locator(`.guide-footer a[href="${prefix}/real-estate-agent-commission-calculator"]`);

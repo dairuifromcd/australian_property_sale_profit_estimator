@@ -430,6 +430,58 @@ test("uses loan payout only for simplified settlement cash and labels a shortfal
   await expect(results.locator(".primary-result")).toContainText("$370,000");
 });
 
+test("exact decimal zero is not labelled as transaction loss or cash shortfall in any language", async ({ page }) => {
+  for (const [path, profit, estimate, loss, shortfall] of [
+    ["/", "PROFIT", "ESTIMATE", "LOSS", "SHORTFALL"],
+    ["/zh-Hans", "盈利", "估算", "亏损", "缺口"],
+    ["/ko", "이익", "예상", "손실", "부족"],
+  ]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("data-client-ready", "true");
+    await fillQuickInputs(page, { salePrice: "1000000.07", purchasePrice: "990000.06", commissionRate: "0", sellingCosts: "10000.01" });
+    await page.locator(".holding-details > summary").click();
+    await page.locator(".loan-details > summary").click();
+    await page.locator("#total-holding-costs").fill("123.45");
+    await page.locator("#total-rental-income").fill("123.45");
+    await page.locator("#estimated-loan-payout").fill("990000.06");
+    const transaction = page.locator(".primary-result");
+    const overall = page.locator('[aria-labelledby="overall-result-title"]');
+    const cash = page.locator('[aria-labelledby="settlement-cash-title"]');
+    await expect(transaction.locator(".outcome-status")).toHaveText(profit);
+    await expect(transaction.locator(":scope > strong")).toHaveText("$0");
+    await expect(overall.locator(".outcome-status")).toHaveText(profit);
+    await expect(overall.locator(".supplementary-total strong")).toHaveText("$0");
+    await expect(cash.locator(".outcome-status")).toHaveText(estimate);
+    await expect(cash.locator(".supplementary-total strong")).toHaveText("$0");
+    await expect(page.locator(".current-scenario strong")).toHaveText("$0");
+    await page.locator("#other-selling-costs").fill("10000.02");
+    await expect(transaction.locator(".outcome-status")).toHaveText(loss);
+    await expect(cash.locator(".outcome-status")).toHaveText(shortfall);
+  }
+});
+
+test("calculation details round exact half cents and high-value results from their decimal values", async ({ page }) => {
+  await fillQuickInputs(page, { salePrice: "1.15", purchasePrice: "1.03", commissionRate: "10", sellingCosts: "0" });
+  const transactionDetails = page.locator(".results-panel > .calculation-details");
+  await transactionDetails.locator("summary").click();
+  await expect(transactionDetails.locator("code")).toContainText("≈ $0.01");
+  await page.locator("#purchase-price").fill("1.04");
+  await expect(transactionDetails.locator("code")).toContainText("≈ -$0.01");
+  await expect(page.locator(".primary-result .outcome-status")).toHaveText("LOSS");
+
+  await fillQuickInputs(page, { salePrice: "509787197923.29", purchasePrice: "344346527243.03", commissionRate: "90.6571", sellingCosts: "873196952743.45" });
+  await page.locator(".details-block > summary").first().click();
+  await page.locator("#sale-preparation-costs").fill("263872644165.53");
+  await page.locator("#purchase-costs").fill("212052843067.80");
+  await page.locator("#renovations-and-improvements").fill("738404131261.63");
+  await expect(transactionDetails.locator("code")).toContainText("≈ -$2,384,244,190,366.66");
+  await page.locator(".loan-details > summary").click();
+  await page.locator("#estimated-loan-payout").fill("171345414128.16");
+  const cash = page.locator('[aria-labelledby="settlement-cash-title"]');
+  await cash.locator("summary").click();
+  await expect(cash.locator("code")).toContainText("≈ -$1,260,786,102,922.36");
+});
+
 test("accepts explicit zero holding, rental and loan amounts", async ({
   page,
 }) => {
@@ -683,12 +735,18 @@ test("keeps maximum supported calculations exact without 320px overflow", async 
   ).toBe(false);
 });
 
-test("shows the first input in the desktop opening viewport", async ({ page }) => {
+test("shows the complete first money control in every language in the desktop opening viewport", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  const bounds = await page.locator("#sale-price").boundingBox();
-  expect(bounds).not.toBeNull();
-  expect(bounds!.y).toBeGreaterThanOrEqual(0);
-  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(720);
+  for (const path of ["/", "/zh-Hans", "/ko"]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("data-client-ready", "true");
+    await page.evaluate(async () => { await document.fonts.ready; });
+    const control = page.locator(".money-input").filter({ has: page.locator("#sale-price") });
+    const bounds = await control.boundingBox();
+    expect(bounds, path).not.toBeNull();
+    expect(bounds!.y, path).toBeGreaterThanOrEqual(0);
+    expect(bounds!.y + bounds!.height, path).toBeLessThanOrEqual(720);
+  }
 });
 
 test("never treats unfinished monetary drafts as explicit zero", async ({ page }) => {
@@ -737,6 +795,72 @@ test("never treats unfinished monetary drafts as explicit zero", async ({ page }
     await expect(page.getByRole("button", { name: "Print or save as PDF" })).toBeDisabled();
     await page.locator("#other-selling-costs").fill("10000");
     await expect(transaction).toHaveText(originalProfit);
+  }
+});
+
+test("all languages preserve exponent money drafts and isolate affected results until correction", async ({ page }) => {
+  for (const path of ["/", "/zh-Hans", "/ko"]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("data-client-ready", "true");
+    await fillQuickInputs(page, { salePrice: "1000000", purchasePrice: "600000", commissionRate: "2", sellingCosts: "10000" });
+    await page.locator(".details-block > summary").first().click();
+    await page.locator(".loan-details > summary").click();
+    await page.locator(".holding-details > summary").click();
+    await page.locator("#estimated-loan-payout").fill("400000");
+    await page.locator("#total-holding-costs").fill("10000");
+    await page.locator("#total-rental-income").fill("0");
+    await page.locator("#target-profit").fill("100000");
+    const transaction = page.locator(".primary-result > strong");
+    const cash = page.locator('[aria-labelledby="settlement-cash-title"]');
+    const overall = page.locator('[aria-labelledby="overall-result-title"]');
+    const target = page.locator(".target-sale-price-result");
+    await expect(transaction).toHaveText("$370,000");
+    await expect(target).toBeVisible();
+
+    for (const [id, original] of [
+      ["sale-price", "1000000"], ["purchase-price", "600000"], ["other-selling-costs", "10000"],
+      ["sale-preparation-costs", "0"], ["purchase-costs", "0"], ["renovations-and-improvements", "0"],
+    ]) {
+      const field = page.locator(`#${id}`);
+      await field.fill("1e6");
+      await expect(transaction).toHaveCount(0);
+      await field.press("Tab");
+      await expect(field).toHaveValue("1e6");
+      await expect(field).toHaveAttribute("aria-invalid", "true");
+      await field.fill(original);
+      await expect(transaction).toHaveText("$370,000");
+    }
+    for (const [id, original, affected, unaffected] of [
+      ["estimated-loan-payout", "400000", cash, overall],
+      ["total-holding-costs", "10000", overall, cash],
+      ["total-rental-income", "0", overall, cash],
+    ] as const) {
+      const field = page.locator(`#${id}`);
+      await field.fill("1E+6");
+      await expect(affected).toHaveCount(0);
+      await field.press("Tab");
+      await expect(field).toHaveValue("1E+6");
+      await expect(field).toHaveAttribute("aria-invalid", "true");
+      await expect(unaffected).toBeVisible();
+      await expect(transaction).toHaveText("$370,000");
+      await expect(target).toBeVisible();
+      await field.fill(original);
+      await expect(affected).toBeVisible();
+    }
+    const targetInput = page.locator("#target-profit");
+    await targetInput.fill("1e-7");
+    await expect(target).toHaveCount(0);
+    await targetInput.press("Tab");
+    await expect(targetInput).toHaveValue("1e-7");
+    await expect(targetInput).toHaveAttribute("aria-invalid", "true");
+    await expect(transaction).toHaveText("$370,000");
+    await expect(cash).toBeVisible();
+    await expect(overall).toBeVisible();
+    await targetInput.fill("100000");
+    await expect(target).toBeVisible();
+    await page.locator("#commission-rate").fill("1e-7");
+    await expect(page.locator("#commission-rate")).not.toHaveAttribute("aria-invalid", "true");
+    await expect(transaction).toBeVisible();
   }
 });
 

@@ -729,7 +729,8 @@ test("commission tools render two required inputs, useful explanation and task-s
   }
 });
 
-test("home exposes one crawlable guide link before the calculator in every locale", async () => {
+test("home exposes localized guide and commission shortcuts before the calculator in every locale", async () => {
+  const { commissionMessages } = await import("../app/i18n/commission-messages.ts");
   for (const prefix of ["", "/zh-Hans", "/ko"]) {
     const html = await (await render(`https://propertysaleprofit.au${prefix || "/"}`)).text();
     const guidePath = `${prefix}/selling-costs-guide`;
@@ -737,6 +738,18 @@ test("home exposes one crawlable guide link before the calculator in every local
     assert.equal(guideLinks.length, 1);
     assert.ok(html.indexOf(`href="${guidePath}"`) < html.indexOf('id="calculator-title"'));
     assert.ok(html.includes('class="hero-guide"'));
+    const locale = prefix.slice(1) || "en-AU";
+    const commissionPath = `${prefix}/real-estate-agent-commission-calculator`;
+    const commissionLinks = tagsWithAttributes(html, "a", { href: commissionPath, target: "_blank", rel: "noopener noreferrer" });
+    assert.equal(commissionLinks.length, 2);
+    assert.ok(html.indexOf(`href="${commissionPath}"`) < html.indexOf('id="calculator-title"'));
+    const beforeCalculator = html.slice(0, html.indexOf('id="calculator-title"'));
+    const earlyCommissionLinks = [...beforeCalculator.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)]
+      .filter(([anchor]) => tagsWithAttributes(anchor, "a", { href: commissionPath, target: "_blank", rel: "noopener noreferrer" }).length === 1);
+    assert.equal(earlyCommissionLinks.length, 1);
+    // React can separate adjacent text nodes with comments in server HTML.
+    const visibleLinkText = earlyCommissionLinks[0][1].replace(/<!--[\s\S]*?-->/g, "").replace(/\s+/g, " ").trim();
+    assert.equal(visibleLinkText, `${commissionMessages[locale].link} ${commissionMessages[locale].newTab}`);
   }
 });
 

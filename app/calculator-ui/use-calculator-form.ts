@@ -7,7 +7,7 @@ import {
   type CalculatorInput,
 } from "../calculator";
 import type { SiteMessages } from "../i18n/messages/types";
-import { numberFromInputForValidation } from "../input-format";
+import { numberFromInputForValidation, numberFromMoneyInputForValidation } from "../input-format";
 
 export type InputState = {
   salePrice: string;
@@ -65,18 +65,18 @@ export function useCalculatorForm(
 
   const calculatorInput = useMemo<CalculatorInput>(
     () => ({
-      salePrice: numberFromInputForValidation(inputs.salePrice),
-      purchasePrice: numberFromInputForValidation(inputs.purchasePrice),
+      salePrice: numberFromMoneyInputForValidation(inputs.salePrice),
+      purchasePrice: numberFromMoneyInputForValidation(inputs.purchasePrice),
       commissionRate: numberFromInputForValidation(inputs.commissionRate),
-      otherSellingCosts: numberFromInputForValidation(inputs.otherSellingCosts),
-      salePreparationCosts: numberFromInputForValidation(inputs.salePreparationCosts),
-      purchaseCosts: numberFromInputForValidation(inputs.purchaseCosts),
-      renovationsAndImprovements: numberFromInputForValidation(
+      otherSellingCosts: numberFromMoneyInputForValidation(inputs.otherSellingCosts),
+      salePreparationCosts: numberFromMoneyInputForValidation(inputs.salePreparationCosts),
+      purchaseCosts: numberFromMoneyInputForValidation(inputs.purchaseCosts),
+      renovationsAndImprovements: numberFromMoneyInputForValidation(
         inputs.renovationsAndImprovements,
       ),
-      estimatedLoanPayout: numberFromInputForValidation(inputs.estimatedLoanPayout),
-      totalHoldingCosts: numberFromInputForValidation(inputs.totalHoldingCosts),
-      totalRentalIncome: numberFromInputForValidation(inputs.totalRentalIncome),
+      estimatedLoanPayout: numberFromMoneyInputForValidation(inputs.estimatedLoanPayout),
+      totalHoldingCosts: numberFromMoneyInputForValidation(inputs.totalHoldingCosts),
+      totalRentalIncome: numberFromMoneyInputForValidation(inputs.totalRentalIncome),
     }),
     [inputs],
   );
@@ -89,7 +89,7 @@ export function useCalculatorForm(
     () =>
       calculateRequiredSalePrice(
         calculatorInput,
-        numberFromInputForValidation(targetProfit),
+        numberFromMoneyInputForValidation(targetProfit),
       ),
     [calculatorInput, targetProfit],
   );
